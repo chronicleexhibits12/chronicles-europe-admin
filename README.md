@@ -1,69 +1,161 @@
-# React + TypeScript + Vite
+# Admin Europe - Exhibition Stand Builder CMS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React-based Content Management System for managing exhibition stand builder website content.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Home Page Management** - Edit hero sections, content blocks, and solutions
+- **About Page Management** - Manage company info, team details, services, and statistics
+- **Rich Text Editor** - WYSIWYG editor for content creation
+- **Image Upload** - Supabase storage integration for media management
+- **Authentication** - Secure admin access with Supabase Auth
+- **Responsive Design** - Mobile-first design with Tailwind CSS
 
-## Expanding the ESLint configuration
+## 🛠 Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS v4
+- **Backend**: Supabase (Database + Auth + Storage)
+- **Rich Text**: TipTap Editor
+- **UI Components**: Radix UI + shadcn/ui
+- **Icons**: Lucide React
+- **Routing**: React Router v7
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📋 Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- Node.js 18+ 
+- npm or yarn
+- Supabase account and project
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🔧 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd admin-europe
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` and add your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Database Setup**
+   - Run the migrations in `src/migrations/` in your Supabase SQL editor
+   - Or use Supabase CLI: `supabase db reset`
+
+## 🚀 Development
+
+```bash
+# Start development server
+npm run dev
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+npm run lint:fix
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🏗 Building for Production
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Build for production
+npm run build
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Preview production build
+npm run preview
+
+# Clean build directory
+npm run clean
 ```
+
+## 📦 Deployment
+
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Netlify
+1. Connect repository to Netlify
+2. Build command: `npm run build`
+3. Publish directory: `dist`
+4. Add environment variables in Netlify dashboard
+
+### Manual Deployment
+1. Run `npm run build`
+2. Upload `dist/` folder to your web server
+3. Configure web server to serve `index.html` for all routes
+
+## 🔐 Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_SUPABASE_URL` | Your Supabase project URL | ✅ |
+| `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous key | ✅ |
+
+## 📁 Project Structure
+
+```
+src/
+├── admin/           # Admin interface components
+├── components/      # Reusable UI components
+├── contexts/        # React contexts (Auth, etc.)
+├── data/           # Data services and types
+├── hooks/          # Custom React hooks
+├── lib/            # Utility libraries
+├── migrations/     # Database migrations
+├── pages/          # Page components
+└── config/         # Configuration files
+```
+
+## 🗃 Database Schema
+
+- **home_page** - Home page content management
+- **about_page** - About page content management
+- **Storage buckets** - Image and media storage
+
+## 🔒 Security
+
+- Environment variables are excluded from version control
+- Supabase RLS (Row Level Security) enabled
+- Authentication required for admin access
+- Image upload restrictions and validation
+
+## 🐛 Troubleshooting
+
+### Build Issues
+- Ensure all TypeScript errors are resolved
+- Check that all dependencies are installed
+- Verify environment variables are set
+
+### Database Issues
+- Ensure migrations are applied
+- Check Supabase connection
+- Verify RLS policies are configured
+
+### Authentication Issues
+- Check Supabase Auth configuration
+- Verify redirect URLs in Supabase dashboard
+- Ensure user has proper permissions
+
+## 📝 License
+
+This project is proprietary and confidential.
+
+## 🤝 Support
+
+For support and questions, contact the development team.

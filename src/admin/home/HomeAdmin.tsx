@@ -1,0 +1,559 @@
+import { useState, useRef, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { HomeAdminSkeleton } from '@/components/HomeAdminSkeleton'
+import { useHomePage } from '@/hooks/useHomeContent'
+import type { HomePage, SolutionItem } from '@/data/homeTypes'
+import { Upload, Save, Loader2, Plus, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
+
+export function HomeAdmin() {
+  const { data: homePage, loading, error, updateHomePage, uploadImage } = useHomePage()
+  const [saving, setSaving] = useState(false)
+  const [uploadingImages, setUploadingImages] = useState<{ [key: string]: boolean }>({})
+  
+  // Form state
+  const [formData, setFormData] = useState<Partial<HomePage>>({})
+  
+  // File input refs
+  const heroImageRef = useRef<HTMLInputElement>(null)
+  const boothImageRef = useRef<HTMLInputElement>(null)
+  const solutionImageRefs = useRef<{ [key: number]: HTMLInputElement | null }>({})
+
+  // Update form data when home page loads
+  useEffect(() => {
+    if (homePage) {
+      setFormData(homePage)
+    }
+  }, [homePage])
+
+  const handleInputChange = (section: keyof HomePage, field: string, value: string) => {
+    setFormData(prev => {
+      const currentSection = (prev[section] as any) || {}
+      return {
+        ...prev,
+        [section]: {
+          ...currentSection,
+          [field]: value
+        }
+      }
+    })
+  }
+
+  const handleImageUpload = async (file: File, section: string, field: string) => {
+    const uploadKey = `${section}-${field}`
+    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }))
+
+    const uploadPromise = uploadImage(file, section)
+    
+    toast.promise(uploadPromise, {
+      loading: 'Uploading image...',
+      success: (result) => {
+        if (result.data) {
+          handleInputChange(section as keyof HomePage, field, result.data)
+          return 'Image uploaded successfully!'
+        } else {
+          throw new Error(result.error || 'Upload failed')
+        }
+      },
+      error: (error) => `Failed to upload image: ${error.message || 'Unknown error'}`
+    })
+
+    try {
+      await uploadPromise
+    } finally {
+      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }))
+    }
+  }
+
+  const handleSolutionItemChange = (index: number, field: keyof SolutionItem, value: string) => {
+    setFormData(prev => {
+      const solutions = { ...prev.solutions }
+      const items = [...(solutions.items || [])]
+      items[index] = { ...items[index], [field]: value }
+      solutions.items = items
+      return { ...prev, solutions }
+    })
+  }
+
+  const handleSolutionItemImageUpload = async (file: File, index: number) => {
+    const uploadKey = `solution-item-${index}`
+    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }))
+
+    const uploadPromise = uploadImage(file, 'solutions')
+    
+    toast.promise(uploadPromise, {
+      loading: 'Uploading solution item image...',
+      success: (result) => {
+        if (result.data) {
+          handleSolutionItemChange(index, 'image', result.data)
+          return 'Solution item image uploaded successfully!'
+        } else {
+          throw new Error(result.error || 'Upload failed')
+        }
+      },
+      error: (error) => `Failed to upload image: ${error.message || 'Unknown error'}`
+    })
+
+    try {
+      await uploadPromise
+    } finally {
+      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }))
+    }
+  }
+
+  const addSolutionItem = () => {
+    setFormData(prev => {
+      const solutions = { ...prev.solutions }
+      const items = [...(solutions.items || [])]
+      items.push({ title: '', description: '', image: '' })
+      solutions.items = items
+      return { ...prev, solutions }
+    })
+  }
+
+  const removeSolutionItem = (index: number) => {
+    setFormData(prev => {
+      const solutions = { ...prev.solutions }
+      const items = [...(solutions.items || [])]
+      items.splice(index, 1)
+      solutions.items = items
+      return { ...prev, solutions }
+    })
+  }
+
+  const handleSave = async () => {
+    if (!homePage?.id) return
+
+    setSaving(true)
+    
+    const savePromise = updateHomePage(homePage.id, formData)
+    
+    toast.promise(savePromise, {
+      loading: 'Saving changes...',
+      success: (result) => {
+        if (result.data) {
+          return 'Home page updated successfully!'
+        } else {
+          throw new Error(result.error || 'Update failed')
+        }
+      },
+      error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
+    })
+
+    try {
+      await savePromise
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return <HomeAdminSkeleton />
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-destructive">
+        <p>Error loading home page: {error}</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-2">Home Page Content</h1>
+        <p className="text-muted-foreground">Edit your home page content and images</p>
+      </div>
+
+      {/* Form */}
+      <form className="space-y-8">
+        {/* Hero Section */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">Hero Section</h2>
+          
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="hero-bg">Background Image</Label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  id="hero-bg"
+                  value={formData.hero?.backgroundImage || ''}
+                  onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
+                  placeholder="Enter image URL"
+                  className="flex-1"
+                />
+                <input
+                  ref={heroImageRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleImageUpload(file, 'hero', 'backgroundImage')
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => heroImageRef.current?.click()}
+                  disabled={uploadingImages['hero-backgroundImage']}
+                >
+                  {uploadingImages['hero-backgroundImage'] ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              {formData.hero?.backgroundImage && (
+                <img
+                  src={formData.hero.backgroundImage}
+                  alt="Hero background"
+                  className="mt-2 w-full h-32 object-cover rounded border"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Section */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">Main Section</h2>
+          
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="main-title">Title</Label>
+              <Input
+                id="main-title"
+                value={formData.mainSection?.title || ''}
+                onChange={(e) => handleInputChange('mainSection', 'title', e.target.value)}
+                placeholder="Enter main title"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="main-subtitle">Subtitle</Label>
+              <Input
+                id="main-subtitle"
+                value={formData.mainSection?.subtitle || ''}
+                onChange={(e) => handleInputChange('mainSection', 'subtitle', e.target.value)}
+                placeholder="Enter subtitle"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label>Content</Label>
+              <RichTextEditor
+                content={formData.mainSection?.htmlContent || ''}
+                onChange={(content) => handleInputChange('mainSection', 'htmlContent', content)}
+                placeholder="Enter main content..."
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Exhibition Europe */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">Exhibition Europe</h2>
+          
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="europe-title">Title</Label>
+              <Input
+                id="europe-title"
+                value={formData.exhibitionEurope?.title || ''}
+                onChange={(e) => handleInputChange('exhibitionEurope', 'title', e.target.value)}
+                placeholder="Enter Europe exhibition title"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="europe-subtitle">Subtitle</Label>
+              <Input
+                id="europe-subtitle"
+                value={formData.exhibitionEurope?.subtitle || ''}
+                onChange={(e) => handleInputChange('exhibitionEurope', 'subtitle', e.target.value)}
+                placeholder="Enter subtitle"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="europe-booth">Booth Image</Label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  id="europe-booth"
+                  value={formData.exhibitionEurope?.boothImage || ''}
+                  onChange={(e) => handleInputChange('exhibitionEurope', 'boothImage', e.target.value)}
+                  placeholder="Enter image URL"
+                  className="flex-1"
+                />
+                <input
+                  ref={boothImageRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleImageUpload(file, 'exhibition', 'boothImage')
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => boothImageRef.current?.click()}
+                  disabled={uploadingImages['exhibition-boothImage']}
+                >
+                  {uploadingImages['exhibition-boothImage'] ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              {formData.exhibitionEurope?.boothImage && (
+                <img
+                  src={formData.exhibitionEurope.boothImage}
+                  alt="Booth"
+                  className="mt-2 w-full h-32 object-cover rounded border"
+                />
+              )}
+            </div>
+            
+            <div>
+              <Label>Content</Label>
+              <RichTextEditor
+                content={formData.exhibitionEurope?.htmlContent || ''}
+                onChange={(content) => handleInputChange('exhibitionEurope', 'htmlContent', content)}
+                placeholder="Enter exhibition content..."
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Exhibition USA */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">Exhibition USA</h2>
+          
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="usa-title">Title</Label>
+              <Input
+                id="usa-title"
+                value={formData.exhibitionUSA?.title || ''}
+                onChange={(e) => handleInputChange('exhibitionUSA', 'title', e.target.value)}
+                placeholder="Enter USA exhibition title"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label>Content</Label>
+              <RichTextEditor
+                content={formData.exhibitionUSA?.htmlContent || ''}
+                onChange={(content) => handleInputChange('exhibitionUSA', 'htmlContent', content)}
+                placeholder="Enter exhibition content..."
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Solutions */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">Solutions</h2>
+          
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="solutions-title">Title</Label>
+              <Input
+                id="solutions-title"
+                value={formData.solutions?.title || ''}
+                onChange={(e) => handleInputChange('solutions', 'title', e.target.value)}
+                placeholder="Enter solutions title"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label>Content</Label>
+              <RichTextEditor
+                content={formData.solutions?.htmlContent || ''}
+                onChange={(content) => handleInputChange('solutions', 'htmlContent', content)}
+                placeholder="Enter solutions content..."
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <Label>Solution Items</Label>
+                <Button type="button" onClick={addSolutionItem} size="sm" variant="outline">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Item
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                {formData.solutions?.items?.map((item, index) => (
+                  <div key={index} className="p-4 border rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Item {index + 1}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSolutionItem(index)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    <div>
+                      <Label>Title</Label>
+                      <Input
+                        value={item.title}
+                        onChange={(e) => handleSolutionItemChange(index, 'title', e.target.value)}
+                        placeholder="Enter item title"
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Description</Label>
+                      <Textarea
+                        value={item.description}
+                        onChange={(e) => handleSolutionItemChange(index, 'description', e.target.value)}
+                        placeholder="Enter item description..."
+                        className="mt-1"
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Image</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          value={item.image}
+                          onChange={(e) => handleSolutionItemChange(index, 'image', e.target.value)}
+                          placeholder="Enter image URL"
+                          className="flex-1"
+                        />
+                        <input
+                          ref={(el) => {
+                            if (el) solutionImageRefs.current[index] = el
+                          }}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleSolutionItemImageUpload(file, index)
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => solutionImageRefs.current[index]?.click()}
+                          disabled={uploadingImages[`solution-item-${index}`]}
+                        >
+                          {uploadingImages[`solution-item-${index}`] ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
+                      {item.image && (
+                        <img
+                          src={item.image}
+                          alt={`Solution ${index + 1}`}
+                          className="mt-2 w-full h-24 object-cover rounded border"
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Why Best */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">Why We're the Best</h2>
+          
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="why-title">Title</Label>
+              <Input
+                id="why-title"
+                value={formData.whyBest?.title || ''}
+                onChange={(e) => handleInputChange('whyBest', 'title', e.target.value)}
+                placeholder="Enter title"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="why-subtitle">Subtitle</Label>
+              <Input
+                id="why-subtitle"
+                value={formData.whyBest?.subtitle || ''}
+                onChange={(e) => handleInputChange('whyBest', 'subtitle', e.target.value)}
+                placeholder="Enter subtitle"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label>Content</Label>
+              <RichTextEditor
+                content={formData.whyBest?.htmlContent || ''}
+                onChange={(content) => handleInputChange('whyBest', 'htmlContent', content)}
+                placeholder="Enter content..."
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="flex justify-end pt-6 border-t">
+          <Button 
+            type="button" 
+            onClick={handleSave} 
+            disabled={saving}
+            size="lg"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}

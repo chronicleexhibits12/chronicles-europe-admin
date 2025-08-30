@@ -69,7 +69,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
   // Update editor content when content prop changes
   React.useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content || '', false)
+      editor.commands.setContent(content || '', { emitUpdate: false })
     }
   }, [editor, content])
 

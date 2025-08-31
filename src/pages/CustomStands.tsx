@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
 import { Loader2 } from 'lucide-react'
 

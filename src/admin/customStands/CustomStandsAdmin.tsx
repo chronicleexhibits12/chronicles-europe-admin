@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { useCustomStandsContent } from '@/hooks/useCustomStandsContent'
 import { CustomStandsPageService } from '@/data/customStandsService'
-import { Loader2, Save, Upload, X, Image as ImageIcon } from 'lucide-react'
+import { Loader2, Save, Upload } from 'lucide-react'
 
 export function CustomStandsAdmin() {
   const { content, loading, error, updateContent } = useCustomStandsContent()

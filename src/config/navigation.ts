@@ -1,4 +1,4 @@
-import { Home, Info, Settings } from 'lucide-react'
+import { Home} from 'lucide-react'
 import type { NavigationItem } from '@/data/commonTypes'
 
 export const navigationItems: NavigationItem[] = [
@@ -7,7 +7,7 @@ export const navigationItems: NavigationItem[] = [
     label: 'Dashboard',
     href: '/',
     icon: Home
-},
+}
   // {
   //   id: 'home-admin',
   //   label: 'Home Admin',

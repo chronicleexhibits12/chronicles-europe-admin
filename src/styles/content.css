@@ -1,0 +1,199 @@
+/* Global Content Styling - Used for Blog, Trade Shows, and Rich HTML Content */
+.rich-content {
+  line-height: 1.6;
+  color: #374151;
+}
+
+.rich-content h1,
+.rich-content h2,
+.rich-content h3,
+.rich-content h4,
+.rich-content h5,
+.rich-content h6 {
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rich-content h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+}
+
+.rich-content h3 {
+  font-size: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.rich-content p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+.rich-content a {
+  color: #143d60;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.rich-content a:hover {
+  color: #0f2a46;
+  text-decoration: underline;
+}
+
+.rich-content strong {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.rich-content em {
+  font-style: italic;
+}
+
+.rich-content ul,
+.rich-content ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.rich-content li {
+  margin-bottom: 0.5rem;
+}
+
+.rich-content ul li {
+  list-style-type: disc;
+}
+
+.rich-content ul li::marker {
+  color: #A5CD39; /* Green color for discs only */
+  font-size: 1.2em; /* Slightly larger disc size */
+}
+
+.rich-content ol li {
+  list-style-type: decimal;
+}
+
+.rich-content ol li::marker {
+  font-size: 1.2em; /* Slightly larger number size */
+}
+
+.rich-content blockquote {
+  border-left: 4px solid #A5CD39;
+  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #6b7280;
+  background-color: #f9fafb;
+  padding: 1rem 1.5rem;
+  border-radius: 0.375rem;
+}
+
+.rich-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+}
+
+.rich-content table th,
+.rich-content table td {
+  border: 1px solid #d1d5db;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.rich-content table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.rich-content table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.rich-content table tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .rich-content table {
+    font-size: 0.75rem;
+  }
+  
+  .rich-content table th,
+  .rich-content table td {
+    padding: 0.5rem;
+  }
+}
+
+/* Very small screens - stack table */
+@media (max-width: 640px) {
+  .rich-content table,
+  .rich-content table thead,
+  .rich-content table tbody,
+  .rich-content table th,
+  .rich-content table td,
+  .rich-content table tr {
+    display: block;
+  }
+  
+  .rich-content table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  
+  .rich-content table tr {
+    border: 1px solid #d1d5db;
+    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+  }
+  
+  .rich-content table td {
+    border: none;
+    position: relative;
+    padding-left: 50% !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .rich-content table td:before {
+    content: attr(data-label) ": ";
+    position: absolute;
+    left: 0.5rem;
+    width: 45%;
+    padding-right: 0.5rem;
+    white-space: nowrap;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 640px) {
+  .rich-content {
+    font-size: 0.875rem;
+  }
+  
+  .rich-content h2 {
+    font-size: 1.25rem;
+  }
+  
+  .rich-content h3 {
+    font-size: 1.125rem;
+  }
+  
+  .rich-content ul,
+  .rich-content ol {
+    padding-left: 1.25rem;
+  }
+  
+  .rich-content blockquote {
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+  }
+}

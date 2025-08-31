@@ -9,12 +9,10 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table'
-import { useHomePage } from '@/hooks/useHomeContent'
-import { useAboutPage } from '@/hooks/useAboutContent'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
-import { Edit, FileText } from 'lucide-react'
+import { Edit, Building } from 'lucide-react'
 
-interface PageInfo {
+interface StandInfo {
   id: string
   name: string
   path: string
@@ -23,42 +21,24 @@ interface PageInfo {
   description: string
 }
 
-export function Dashboard() {
+export function Stands() {
   const navigate = useNavigate()
-  const { data: homePage, loading: homeLoading } = useHomePage()
-  const { data: aboutPage, loading: aboutLoading } = useAboutPage()
   const { data: customStandsPage, loading: customStandsLoading } = useCustomStandsPage()
-  const [pages, setPages] = useState<PageInfo[]>([])
+  const [stands, setStands] = useState<StandInfo[]>([])
 
   useEffect(() => {
-    const pagesData: PageInfo[] = [
-      {
-        id: 'home',
-        name: 'Home Page',
-        path: '/',
-        editPath: '/admin/home',
-        lastUpdated: homePage?.updatedAt ? new Date(homePage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Main landing page with hero section, services, and company information'
-      },
-      {
-        id: 'about',
-        name: 'About Page',
-        path: '/about',
-        editPath: '/admin/about',
-        lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Company information, team details, services, and statistics'
-      },
+    const standsData: StandInfo[] = [
       {
         id: 'custom-stands',
-        name: 'Custom Stands Page',
+        name: 'Custom Exhibition Stands',
         path: '/custom-stands',
         editPath: '/admin/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'
       }
     ]
-    setPages(pagesData)
-  }, [homePage, aboutPage, customStandsPage])
+    setStands(standsData)
+  }, [customStandsPage])
 
   const handleEdit = (editPath: string) => {
     navigate(editPath)
@@ -66,7 +46,7 @@ export function Dashboard() {
 
 
 
-  const loading = homeLoading || aboutLoading || customStandsLoading
+  const loading = customStandsLoading
 
   if (loading) {
     return (
@@ -88,53 +68,51 @@ export function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-foreground">Exhibition Stands</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your website pages and content
+            Manage your exhibition stands content and information
           </p>
         </div>
       </div>
 
-
-
-      {/* Pages Table */}
+      {/* Stands Table */}
       <div className="bg-white rounded-lg border shadow-sm">
         <div className="px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">Website Pages</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Exhibition Stands</h2>
           <p className="text-sm text-gray-600 mt-1">
-            Manage and edit your website content
+            Manage and edit your exhibition stands content
           </p>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Page Name</TableHead>
+              <TableHead>Stand Type</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pages.map((page) => (
-              <TableRow key={page.id}>
+            {stands.map((stand) => (
+              <TableRow key={stand.id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center">
-                    <FileText className="h-4 w-4 text-gray-400 mr-2" />
-                    {page.name}
+                    <Building className="h-4 w-4 text-gray-400 mr-2" />
+                    {stand.name}
                   </div>
                 </TableCell>
                 <TableCell className="text-gray-600 max-w-md">
-                  <p className="truncate">{page.description}</p>
+                  <p className="truncate">{stand.description}</p>
                 </TableCell>
                 <TableCell className="text-gray-600">
-                  {page.lastUpdated}
+                  {stand.lastUpdated}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() => handleEdit(page.editPath)}
+                    onClick={() => handleEdit(stand.editPath)}
                     className="h-8 px-3"
                   >
                     <Edit className="h-4 w-4 mr-1" />
@@ -146,8 +124,6 @@ export function Dashboard() {
           </TableBody>
         </Table>
       </div>
-
-
     </div>
   )
 }

@@ -8,6 +8,7 @@ import { Underline } from '@tiptap/extension-underline'
 import { Image } from '@tiptap/extension-image'
 import { Link } from '@tiptap/extension-link'
 import { Button } from './button'
+import '../../styles/content.css'
 import { 
   Bold, 
   Italic, 
@@ -61,7 +62,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[150px] p-4',
+        class: 'rich-content focus:outline-none min-h-[150px] p-4',
       },
     },
   })

@@ -112,7 +112,7 @@ export function About() {
 
                 {aboutPage.companyInfo.description && (
                   <div
-                    className="text-gray-600 leading-relaxed mb-6"
+                    className="rich-content mb-6"
                     dangerouslySetInnerHTML={{ __html: aboutPage.companyInfo.description }}
                   />
                 )}

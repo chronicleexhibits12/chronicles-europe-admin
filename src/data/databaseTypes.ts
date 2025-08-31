@@ -141,6 +141,107 @@ export interface Database {
           updated_at?: string
         }
       }
+      custom_stands_page: {
+        Row: {
+          id: string
+          meta_title: string | null
+          meta_description: string | null
+          slug: string | null
+          hero_title: string | null
+          hero_subtitle: string | null
+          hero_background_image: string | null
+          benefits_title: string | null
+          benefits_image: string | null
+          benefits_content: string | null
+          stand_project_title: string | null
+          stand_project_highlight: string | null
+          stand_project_description: string | null
+          exhibition_benefits_title: string | null
+          exhibition_benefits_subtitle: string | null
+          exhibition_benefits_content: string | null
+          exhibition_benefits_image: string | null
+          bespoke_title: string | null
+          bespoke_subtitle: string | null
+          bespoke_description: string | null
+          fresh_design_title: string | null
+          fresh_design_subtitle: string | null
+          fresh_design_description: string | null
+          cost_section_title: string | null
+          cost_section_subtitle: string | null
+          cost_section_description: string | null
+          points_table_title: string | null
+          points_table_content: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          slug?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          benefits_title?: string | null
+          benefits_image?: string | null
+          benefits_content?: string | null
+          stand_project_title?: string | null
+          stand_project_highlight?: string | null
+          stand_project_description?: string | null
+          exhibition_benefits_title?: string | null
+          exhibition_benefits_subtitle?: string | null
+          exhibition_benefits_content?: string | null
+          exhibition_benefits_image?: string | null
+          bespoke_title?: string | null
+          bespoke_subtitle?: string | null
+          bespoke_description?: string | null
+          fresh_design_title?: string | null
+          fresh_design_subtitle?: string | null
+          fresh_design_description?: string | null
+          cost_section_title?: string | null
+          cost_section_subtitle?: string | null
+          cost_section_description?: string | null
+          points_table_title?: string | null
+          points_table_content?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          slug?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          benefits_title?: string | null
+          benefits_image?: string | null
+          benefits_content?: string | null
+          stand_project_title?: string | null
+          stand_project_highlight?: string | null
+          stand_project_description?: string | null
+          exhibition_benefits_title?: string | null
+          exhibition_benefits_subtitle?: string | null
+          exhibition_benefits_content?: string | null
+          exhibition_benefits_image?: string | null
+          bespoke_title?: string | null
+          bespoke_subtitle?: string | null
+          bespoke_description?: string | null
+          fresh_design_title?: string | null
+          fresh_design_subtitle?: string | null
+          fresh_design_description?: string | null
+          cost_section_title?: string | null
+          cost_section_subtitle?: string | null
+          cost_section_description?: string | null
+          points_table_title?: string | null
+          points_table_content?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

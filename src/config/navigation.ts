@@ -7,17 +7,17 @@ export const navigationItems: NavigationItem[] = [
     label: 'Dashboard',
     href: '/',
     icon: Home
-  },
-  {
-    id: 'home-admin',
-    label: 'Home Admin',
-    href: '/admin/home',
-    icon: Settings
-  },
-  {
-    id: 'about-admin',
-    label: 'About Admin',
-    href: '/admin/about',
-    icon: Info
-  }
+},
+  // {
+  //   id: 'home-admin',
+  //   label: 'Home Admin',
+  //   href: '/admin/home',
+  //   icon: Settings
+  // },
+  // {
+  //   id: 'about-admin',
+  //   label: 'About Admin',
+  //   href: '/admin/about',
+  //   icon: Info
+  // }
 ]

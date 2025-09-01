@@ -188,7 +188,7 @@ export function AboutAdmin() {
 
       {/* Form */}
       <form className="space-y-8">
-        {/* Meta Section */}
+        {/* SEO Meta Information */}
         <div className="space-y-4">
           <h2 className="text-lg font-semibold border-b pb-2">SEO Meta Information</h2>
           
@@ -229,9 +229,9 @@ export function AboutAdmin() {
           </div>
         </div>
 
-        {/* Hero Section */}
+        {/* Section 1: Hero Section */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Hero Section</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 1 (Hero Section)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -290,9 +290,9 @@ export function AboutAdmin() {
           </div>
         </div>
 
-        {/* Company Info Section */}
+        {/* Section 2: Company Information */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Company Information</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 2 (Company Information)</h2>
           
           <div className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
@@ -376,9 +376,9 @@ export function AboutAdmin() {
           </div>
         </div>
 
-        {/* Facts Section */}
+        {/* Section 3: Facts Section */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Facts Section</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 3 (Facts Section)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -406,9 +406,9 @@ export function AboutAdmin() {
           </div>
         </div>
 
-        {/* Company Stats */}
+        {/* Section 4: Company Statistics */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Company Statistics</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 4 (Company Statistics)</h2>
           
           <div>
             <div className="mb-3">
@@ -479,9 +479,9 @@ export function AboutAdmin() {
           </div>
         </div>
 
-        {/* Team Info */}
+        {/* Section 5: Team Information */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Team Information</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 5 (Team Information)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -552,9 +552,9 @@ export function AboutAdmin() {
           </div>
         </div>
 
-        {/* Services */}
+        {/* Section 6: Services */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Services</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 6 (Services)</h2>
           
           <div>
             <div className="mb-3">

@@ -143,10 +143,10 @@ export function CustomStandsAdmin() {
         </CardContent>
       </Card>
 
-      {/* Hero Section */}
+      {/* Section 1: Hero Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Hero Section</CardTitle>
+          <CardTitle>Section 1 (Hero Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -220,10 +220,10 @@ export function CustomStandsAdmin() {
         </CardContent>
       </Card>
 
-      {/* Benefits Section */}
+      {/* Section 2: Benefits Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Benefits Section</CardTitle>
+          <CardTitle>Section 2 (Benefits Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -294,11 +294,40 @@ export function CustomStandsAdmin() {
             />
           </div>
         </CardContent>
-      </Card>      {/* 
-Stand Project Text Section */}
+      </Card>      {/* Section 3: Points Table Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Stand Project Text Section</CardTitle>
+          <CardTitle>Section 3 (Points Table Section)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="points-table-title">Title</Label>
+            <Input
+              id="points-table-title"
+              value={content.pointsTable?.title || ''}
+              onChange={(e) => updateContent({
+                ...content,
+                pointsTable: { ...content.pointsTable, title: e.target.value }
+              })}
+            />
+          </div>
+          <div>
+            <Label>Points Table Content (Rich Text)</Label>
+            <RichTextEditor
+              content={content.pointsTable?.content || ''}
+              onChange={(newContent) => updateContent({
+                ...content,
+                pointsTable: { ...content.pointsTable, content: newContent }
+              })}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section 4: Stand Project Text Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Section 4 (Stand Project Text Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -338,10 +367,10 @@ Stand Project Text Section */}
         </CardContent>
       </Card>
 
-      {/* Exhibition Benefits Section */}
+      {/* Section 5: Exhibition Benefits Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Exhibition Benefits Section</CardTitle>
+          <CardTitle>Section 5 (Exhibition Benefits Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -425,10 +454,10 @@ Stand Project Text Section */}
         </CardContent>
       </Card>
 
-      {/* Bespoke Section */}
+      {/* Section 6: Bespoke Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Bespoke Section</CardTitle>
+          <CardTitle>Section 6 (Bespoke Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -468,10 +497,10 @@ Stand Project Text Section */}
         </CardContent>
       </Card>
 
-      {/* Fresh Design Section */}
+      {/* Section 7: Fresh Design Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Fresh Design Section</CardTitle>
+          <CardTitle>Section 7 (Fresh Design Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -511,10 +540,10 @@ Stand Project Text Section */}
         </CardContent>
       </Card>
 
-      {/* Cost Section */}
+      {/* Section 8: Cost Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Cost Section</CardTitle>
+          <CardTitle>Section 8 (Cost Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -549,36 +578,6 @@ Stand Project Text Section */}
                 costSection: { ...content.costSection, description: e.target.value }
               })}
               rows={6}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Points Table Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Points Table Section</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="points-table-title">Title</Label>
-            <Input
-              id="points-table-title"
-              value={content.pointsTable?.title || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                pointsTable: { ...content.pointsTable, title: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label>Points Table Content (Rich Text)</Label>
-            <RichTextEditor
-              content={content.pointsTable?.content || ''}
-              onChange={(newContent) => updateContent({
-                ...content,
-                pointsTable: { ...content.pointsTable, content: newContent }
-              })}
             />
           </div>
         </CardContent>

@@ -173,9 +173,9 @@ export function HomeAdmin() {
 
       {/* Form */}
       <form className="space-y-8">
-        {/* Hero Section */}
+        {/* Section 1: Hero */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Hero Section</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 1 (Hero)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -223,48 +223,9 @@ export function HomeAdmin() {
           </div>
         </div>
 
-        {/* Main Section */}
+        {/* Section 2: Exhibition Europe */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Main Section</h2>
-          
-          <div className="grid gap-4">
-            <div>
-              <Label htmlFor="main-title">Title</Label>
-              <Input
-                id="main-title"
-                value={formData.mainSection?.title || ''}
-                onChange={(e) => handleInputChange('mainSection', 'title', e.target.value)}
-                placeholder="Enter main title"
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="main-subtitle">Subtitle</Label>
-              <Input
-                id="main-subtitle"
-                value={formData.mainSection?.subtitle || ''}
-                onChange={(e) => handleInputChange('mainSection', 'subtitle', e.target.value)}
-                placeholder="Enter subtitle"
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label>Content</Label>
-              <RichTextEditor
-                content={formData.mainSection?.htmlContent || ''}
-                onChange={(content) => handleInputChange('mainSection', 'htmlContent', content)}
-                placeholder="Enter main content..."
-                className="mt-1"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Exhibition Europe */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Exhibition Europe</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 2 (Exhibition Europe)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -344,9 +305,9 @@ export function HomeAdmin() {
           </div>
         </div>
 
-        {/* Exhibition USA */}
+        {/* Section 3: Exhibition USA */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Exhibition USA</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 3 (Exhibition USA)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -372,9 +333,9 @@ export function HomeAdmin() {
           </div>
         </div>
 
-        {/* Solutions */}
+        {/* Section 4: Solutions */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Solutions</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 4 (Solutions)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -493,9 +454,48 @@ export function HomeAdmin() {
           </div>
         </div>
 
-        {/* Why Best */}
+        {/* Section 5: Main Section */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Why We're the Best</h2>
+          <h2 className="text-lg font-semibold border-b pb-2">Section 5 (Main Section)</h2>
+          
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="main-title">Title</Label>
+              <Input
+                id="main-title"
+                value={formData.mainSection?.title || ''}
+                onChange={(e) => handleInputChange('mainSection', 'title', e.target.value)}
+                placeholder="Enter main title"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="main-subtitle">Subtitle</Label>
+              <Input
+                id="main-subtitle"
+                value={formData.mainSection?.subtitle || ''}
+                onChange={(e) => handleInputChange('mainSection', 'subtitle', e.target.value)}
+                placeholder="Enter subtitle"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label>Content</Label>
+              <RichTextEditor
+                content={formData.mainSection?.htmlContent || ''}
+                onChange={(content) => handleInputChange('mainSection', 'htmlContent', content)}
+                placeholder="Enter main content..."
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section 6: Why We're the Best */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2">Section 6 (Why We're the Best)</h2>
           
           <div className="grid gap-4">
             <div>

@@ -1,5 +1,5 @@
 import { usePavilionStandsContent } from '@/hooks/usePavilionStandsContent'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from '@dr.pogodin/react-helmet'
 
 export function PavilionStands() {
   const { content: data, loading, error } = usePavilionStandsContent()

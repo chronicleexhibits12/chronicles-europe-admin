@@ -25,7 +25,11 @@ export function PavilionStandsAdmin() {
     
     toast.promise(savePromise, {
       loading: 'Saving changes...',
-      success: 'Pavilion stands page updated successfully!',
+      success: async () => {
+        // Trigger revalidation after successful save
+        await PavilionStandsPageService.triggerRevalidation()
+        return 'Pavilion stands page updated successfully!'
+      },
       error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
     })
 
@@ -45,7 +49,7 @@ export function PavilionStandsAdmin() {
     
     toast.promise(uploadPromise, {
       loading: 'Uploading image...',
-      success: (result) => {
+      success: async (result) => {
         if (result.data) {
           // Update the appropriate field based on the field parameter
           let updatedContent = { ...content }
@@ -71,7 +75,9 @@ export function PavilionStandsAdmin() {
               break
           }
           
-          updateContent(updatedContent)
+          await updateContent(updatedContent)
+          // Trigger revalidation after successful image upload
+          await PavilionStandsPageService.triggerRevalidation()
           return 'Image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')

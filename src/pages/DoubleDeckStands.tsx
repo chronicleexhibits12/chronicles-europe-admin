@@ -1,4 +1,3 @@
-import React from 'react'
 import { useDoubleDeckStandsContent } from '../hooks/useDoubleDeckStandsContent'
 import { Loader2 } from 'lucide-react'
 
@@ -65,7 +64,7 @@ export function DoubleDeckStands() {
                 </h2>
                 <div 
                   className="prose prose-lg max-w-none text-gray-600"
-                  dangerouslySetInnerHTML={{ __html: content.benefits.content }}
+                  dangerouslySetInnerHTML={{ __html: content.benefits.content || '' }}
                 />
               </div>
               {content.benefits.image && (
@@ -92,7 +91,7 @@ export function DoubleDeckStands() {
             <div className="max-w-4xl mx-auto">
               <div 
                 className="prose prose-lg max-w-none text-gray-600"
-                dangerouslySetInnerHTML={{ __html: content.pointsTable.content }}
+                dangerouslySetInnerHTML={{ __html: content.pointsTable.content || '' }}
               />
             </div>
           </div>
@@ -112,7 +111,7 @@ export function DoubleDeckStands() {
             <div className="max-w-4xl mx-auto">
               <div 
                 className="prose prose-lg max-w-none text-gray-600"
-                dangerouslySetInnerHTML={{ __html: content.standProjectText.description }}
+                dangerouslySetInnerHTML={{ __html: content.standProjectText.description || '' }}
               />
             </div>
           </div>
@@ -142,7 +141,7 @@ export function DoubleDeckStands() {
                 </p>
                 <div 
                   className="prose prose-lg max-w-none text-gray-600"
-                  dangerouslySetInnerHTML={{ __html: content.exhibitionBenefits.content }}
+                  dangerouslySetInnerHTML={{ __html: content.exhibitionBenefits.content || '' }}
                 />
               </div>
             </div>
@@ -163,7 +162,7 @@ export function DoubleDeckStands() {
             <div className="max-w-4xl mx-auto">
               <div 
                 className="prose prose-lg max-w-none text-white prose-invert"
-                dangerouslySetInnerHTML={{ __html: content.boothPartner.description }}
+                dangerouslySetInnerHTML={{ __html: content.boothPartner.description || '' }}
               />
             </div>
           </div>
@@ -183,7 +182,7 @@ export function DoubleDeckStands() {
             <div className="max-w-4xl mx-auto">
               <div 
                 className="prose prose-lg max-w-none text-gray-300 prose-invert"
-                dangerouslySetInnerHTML={{ __html: content.boldStatement.description }}
+                dangerouslySetInnerHTML={{ __html: content.boldStatement.description || '' }}
               />
             </div>
           </div>

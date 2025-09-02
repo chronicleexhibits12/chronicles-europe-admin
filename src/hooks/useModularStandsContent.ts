@@ -24,23 +24,58 @@ export function useModularStandsContent() {
     }
   }
 
-  const updateContent = async (newContent: ModularStandsPage) => {
+  const updateContent = async (newContent: Partial<ModularStandsPage>) => {
     try {
       setError(null)
-      if (!newContent.id) {
+      if (!content?.id) {
         throw new Error('Content ID is required for update')
       }
       
-      const { data, error: updateError } = await ModularStandsPageService.updateModularStandsPage(newContent.id, newContent)
+      const { data, error: updateError } = await ModularStandsPageService.updateModularStandsPage(content.id, newContent)
       if (updateError) {
         setError(updateError)
         throw new Error(updateError)
       } else if (data) {
         setContent(data)
       }
+      return { data, error: updateError }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update content')
       throw err
+    }
+  }
+
+  const uploadImage = async (file: File, folder: string = 'modular-stands') => {
+    try {
+      const { data, error: uploadError } = await ModularStandsPageService.uploadImage(file, folder)
+      
+      if (uploadError) {
+        setError(uploadError)
+        return { data: null, error: uploadError }
+      }
+      
+      return { data, error: null }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to upload image'
+      setError(errorMessage)
+      return { data: null, error: errorMessage }
+    }
+  }
+
+  const deleteImage = async (url: string) => {
+    try {
+      const { error: deleteError } = await ModularStandsPageService.deleteImage(url)
+      
+      if (deleteError) {
+        setError(deleteError)
+        return { data: false, error: deleteError }
+      }
+      
+      return { data: true, error: null }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete image'
+      setError(errorMessage)
+      return { data: false, error: errorMessage }
     }
   }
 
@@ -53,6 +88,8 @@ export function useModularStandsContent() {
     loading,
     error,
     updateContent,
+    uploadImage,
+    deleteImage,
     refetch: fetchContent
   }
 }

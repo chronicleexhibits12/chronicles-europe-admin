@@ -9,6 +9,7 @@ import { useHomePage } from '@/hooks/useHomeContent'
 import type { HomePage, SolutionItem } from '@/data/homeTypes'
 import { Upload, Save, Loader2, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { HomePageService } from '@/data/homeService'
 
 export function HomeAdmin() {
   const { data: homePage, loading, error, updateHomePage, uploadImage } = useHomePage()
@@ -54,6 +55,8 @@ export function HomeAdmin() {
       success: (result) => {
         if (result.data) {
           handleInputChange(section as keyof HomePage, field, result.data)
+          // Trigger revalidation after successful image upload
+          HomePageService.triggerRevalidation()
           return 'Image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')
@@ -90,6 +93,8 @@ export function HomeAdmin() {
       success: (result) => {
         if (result.data) {
           handleSolutionItemChange(index, 'image', result.data)
+          // Trigger revalidation after successful image upload
+          HomePageService.triggerRevalidation()
           return 'Solution item image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')
@@ -146,6 +151,8 @@ export function HomeAdmin() {
 
     try {
       await savePromise
+      // Trigger revalidation after successful save
+      await HomePageService.triggerRevalidation()
     } finally {
       setSaving(false)
     }

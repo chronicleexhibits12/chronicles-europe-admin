@@ -31,6 +31,8 @@ export function CustomStandsAdmin() {
 
     try {
       await savePromise
+      // Trigger revalidation after successful save
+      await CustomStandsPageService.triggerRevalidation()
     } finally {
       setSaving(false)
     }
@@ -72,6 +74,8 @@ export function CustomStandsAdmin() {
           }
           
           updateContent(updatedContent)
+          // Trigger revalidation after successful image upload
+          CustomStandsPageService.triggerRevalidation()
           return 'Image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')

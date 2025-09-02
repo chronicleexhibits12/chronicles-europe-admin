@@ -31,6 +31,8 @@ export function ModularStandsAdmin() {
 
     try {
       await savePromise
+      // Trigger revalidation after successful save
+      await ModularStandsPageService.triggerRevalidation()
     } finally {
       setSaving(false)
     }
@@ -72,6 +74,8 @@ export function ModularStandsAdmin() {
           }
           
           updateContent(updatedContent)
+          // Trigger revalidation after successful image upload
+          ModularStandsPageService.triggerRevalidation()
           return 'Image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')

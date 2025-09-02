@@ -325,6 +325,199 @@ export interface Database {
           updated_at?: string
         }
       }
+      modular_stands_page: {
+        Row: {
+          id: string
+          slug: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+          meta_title: string | null
+          meta_description: string | null
+          hero_title: string | null
+          hero_subtitle: string | null
+          hero_background_image: string | null
+          benefits_title: string | null
+          benefits_image: string | null
+          benefits_content: string | null
+          points_table_title: string | null
+          points_table_content: string | null
+          stand_project_title: string | null
+          stand_project_highlight: string | null
+          stand_project_description: string | null
+          exhibition_benefits_title: string | null
+          exhibition_benefits_subtitle: string | null
+          exhibition_benefits_content: string | null
+          exhibition_benefits_image: string | null
+          modular_diversity_title: string | null
+          modular_diversity_subtitle: string | null
+          modular_diversity_content: string | null
+          fastest_construction_title: string | null
+          fastest_construction_subtitle: string | null
+          fastest_construction_description: string | null
+          experts_title: string | null
+          experts_subtitle: string | null
+          experts_description: string | null
+        }
+        Insert: {
+          id?: string
+          slug?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          benefits_title?: string | null
+          benefits_image?: string | null
+          benefits_content?: string | null
+          points_table_title?: string | null
+          points_table_content?: string | null
+          stand_project_title?: string | null
+          stand_project_highlight?: string | null
+          stand_project_description?: string | null
+          exhibition_benefits_title?: string | null
+          exhibition_benefits_subtitle?: string | null
+          exhibition_benefits_content?: string | null
+          exhibition_benefits_image?: string | null
+          modular_diversity_title?: string | null
+          modular_diversity_subtitle?: string | null
+          modular_diversity_content?: string | null
+          fastest_construction_title?: string | null
+          fastest_construction_subtitle?: string | null
+          fastest_construction_description?: string | null
+          experts_title?: string | null
+          experts_subtitle?: string | null
+          experts_description?: string | null
+        }
+        Update: {
+          id?: string
+          slug?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          benefits_title?: string | null
+          benefits_image?: string | null
+          benefits_content?: string | null
+          points_table_title?: string | null
+          points_table_content?: string | null
+          stand_project_title?: string | null
+          stand_project_highlight?: string | null
+          stand_project_description?: string | null
+          exhibition_benefits_title?: string | null
+          exhibition_benefits_subtitle?: string | null
+          exhibition_benefits_content?: string | null
+          exhibition_benefits_image?: string | null
+          modular_diversity_title?: string | null
+          modular_diversity_subtitle?: string | null
+          modular_diversity_content?: string | null
+          fastest_construction_title?: string | null
+          fastest_construction_subtitle?: string | null
+          fastest_construction_description?: string | null
+          experts_title?: string | null
+          experts_subtitle?: string | null
+          experts_description?: string | null
+        }
+      }
+      double_decker_stands_page: {
+        Row: {
+          id: string
+          slug: string | null
+          meta_title: string | null
+          meta_description: string | null
+          hero_title: string | null
+          hero_subtitle: string | null
+          hero_background_image: string | null
+          benefits_title: string | null
+          benefits_image: string | null
+          benefits_content: string | null
+          points_table_title: string | null
+          points_table_content: string | null
+          stand_project_title: string | null
+          stand_project_highlight: string | null
+          stand_project_description: string | null
+          exhibition_benefits_title: string | null
+          exhibition_benefits_subtitle: string | null
+          exhibition_benefits_content: string | null
+          exhibition_benefits_image: string | null
+          booth_partner_title: string | null
+          booth_partner_subtitle: string | null
+          booth_partner_description: string | null
+          bold_statement_title: string | null
+          bold_statement_subtitle: string | null
+          bold_statement_description: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug?: string | null
+          meta_title?: string | null
+          meta_description?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          benefits_title?: string | null
+          benefits_image?: string | null
+          benefits_content?: string | null
+          points_table_title?: string | null
+          points_table_content?: string | null
+          stand_project_title?: string | null
+          stand_project_highlight?: string | null
+          stand_project_description?: string | null
+          exhibition_benefits_title?: string | null
+          exhibition_benefits_subtitle?: string | null
+          exhibition_benefits_content?: string | null
+          exhibition_benefits_image?: string | null
+          booth_partner_title?: string | null
+          booth_partner_subtitle?: string | null
+          booth_partner_description?: string | null
+          bold_statement_title?: string | null
+          bold_statement_subtitle?: string | null
+          bold_statement_description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string | null
+          meta_title?: string | null
+          meta_description?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          benefits_title?: string | null
+          benefits_image?: string | null
+          benefits_content?: string | null
+          points_table_title?: string | null
+          points_table_content?: string | null
+          stand_project_title?: string | null
+          stand_project_highlight?: string | null
+          stand_project_description?: string | null
+          exhibition_benefits_title?: string | null
+          exhibition_benefits_subtitle?: string | null
+          exhibition_benefits_content?: string | null
+          exhibition_benefits_image?: string | null
+          booth_partner_title?: string | null
+          booth_partner_subtitle?: string | null
+          booth_partner_description?: string | null
+          bold_statement_title?: string | null
+          bold_statement_subtitle?: string | null
+          bold_statement_description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

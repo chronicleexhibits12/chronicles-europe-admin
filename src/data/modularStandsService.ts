@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
-import type { ModularStandsPage, ModularStandsPageData } from './modularStandsTypes'
+import type { ModularStandsPage } from './modularStandsTypes'
+import type { Database } from './databaseTypes'
 
 export class ModularStandsPageService {
   // Default data when table doesn't exist
@@ -60,77 +61,77 @@ export class ModularStandsPageService {
   // Get modular stands page data
   static async getModularStandsPage(): Promise<{ data: ModularStandsPage | null; error: string | null }> {
     try {
-      const response = await supabase
+      const { data: response, error } = await supabase
         .from('modular_stands_page')
         .select('*')
         .eq('is_active', true)
-        .single()
+        .single<Database['public']['Tables']['modular_stands_page']['Row']>()
 
-      if (response.error) {
+      if (error) {
         // If table doesn't exist, return default data
-        if (response.error.code === 'PGRST116' || response.error.message.includes('relation') || response.error.message.includes('does not exist')) {
+        if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
           return { 
             data: this.getDefaultModularStandsPage(), 
             error: null 
           }
         }
-        return { data: null, error: response.error.message }
+        return { data: null, error: error.message }
       }
 
-      if (!response.data) {
+      if (!response) {
         return { data: null, error: 'No data found' }
       }
 
       // Transform database format to frontend format
       const transformedData: ModularStandsPage = {
-        id: response.data.id,
-        slug: response.data.slug || 'modular-stands',
-        isActive: response.data.is_active,
-        createdAt: response.data.created_at,
-        updatedAt: response.data.updated_at,
+        id: response.id,
+        slug: response.slug || 'modular-stands',
+        isActive: response.is_active,
+        createdAt: response.created_at,
+        updatedAt: response.updated_at,
         meta: {
-          title: response.data.meta_title || '',
-          description: response.data.meta_description || ''
+          title: response.meta_title || '',
+          description: response.meta_description || ''
         },
         hero: {
-          title: response.data.hero_title || '',
-          subtitle: response.data.hero_subtitle || '',
-          backgroundImage: response.data.hero_background_image || ''
+          title: response.hero_title || '',
+          subtitle: response.hero_subtitle || '',
+          backgroundImage: response.hero_background_image || ''
         },
         benefits: {
-          title: response.data.benefits_title || '',
-          image: response.data.benefits_image || '',
-          content: response.data.benefits_content || ''
+          title: response.benefits_title || '',
+          image: response.benefits_image || '',
+          content: response.benefits_content || ''
         },
         pointsTable: {
-          title: response.data.points_table_title || '',
-          content: response.data.points_table_content || ''
+          title: response.points_table_title || '',
+          content: response.points_table_content || ''
         },
         standProjectText: {
-          title: response.data.stand_project_title || '',
-          highlight: response.data.stand_project_highlight || '',
-          description: response.data.stand_project_description || ''
+          title: response.stand_project_title || '',
+          highlight: response.stand_project_highlight || '',
+          description: response.stand_project_description || ''
         },
         exhibitionBenefits: {
-          title: response.data.exhibition_benefits_title || '',
-          subtitle: response.data.exhibition_benefits_subtitle || '',
-          content: response.data.exhibition_benefits_content || '',
-          image: response.data.exhibition_benefits_image || ''
+          title: response.exhibition_benefits_title || '',
+          subtitle: response.exhibition_benefits_subtitle || '',
+          content: response.exhibition_benefits_content || '',
+          image: response.exhibition_benefits_image || ''
         },
         modularDiversity: {
-          title: response.data.modular_diversity_title || '',
-          subtitle: response.data.modular_diversity_subtitle || '',
-          content: response.data.modular_diversity_content || ''
+          title: response.modular_diversity_title || '',
+          subtitle: response.modular_diversity_subtitle || '',
+          content: response.modular_diversity_content || ''
         },
         fastestConstruction: {
-          title: response.data.fastest_construction_title || '',
-          subtitle: response.data.fastest_construction_subtitle || '',
-          description: response.data.fastest_construction_description || ''
+          title: response.fastest_construction_title || '',
+          subtitle: response.fastest_construction_subtitle || '',
+          description: response.fastest_construction_description || ''
         },
         experts: {
-          title: response.data.experts_title || '',
-          subtitle: response.data.experts_subtitle || '',
-          description: response.data.experts_description || ''
+          title: response.experts_title || '',
+          subtitle: response.experts_subtitle || '',
+          description: response.experts_description || ''
         }
       }
 
@@ -142,81 +143,115 @@ export class ModularStandsPageService {
   }
 
   // Update modular stands page data
-  static async updateModularStandsPage(id: string, content: ModularStandsPage): Promise<{ data: ModularStandsPage | null; error: string | null }> {
+  static async updateModularStandsPage(id: string, data: Partial<ModularStandsPage>): Promise<{ data: ModularStandsPage | null; error: string | null }> {
     try {
       // Transform frontend format to database format
-      const updateData: Partial<ModularStandsPageData> = {}
+      const updateData: Partial<Database['public']['Tables']['modular_stands_page']['Update']> = {}
 
-      if (content.meta) {
-        updateData.meta_title = content.meta.title
-        updateData.meta_description = content.meta.description
+      if (data.meta?.title !== undefined) {
+        updateData.meta_title = data.meta.title
+      }
+      if (data.meta?.description !== undefined) {
+        updateData.meta_description = data.meta.description
       }
 
-      if (content.hero) {
-        updateData.hero_title = content.hero.title
-        updateData.hero_subtitle = content.hero.subtitle
-        updateData.hero_background_image = content.hero.backgroundImage
+      if (data.hero?.title !== undefined) {
+        updateData.hero_title = data.hero.title
+      }
+      if (data.hero?.subtitle !== undefined) {
+        updateData.hero_subtitle = data.hero.subtitle
+      }
+      if (data.hero?.backgroundImage !== undefined) {
+        updateData.hero_background_image = data.hero.backgroundImage
       }
 
-      if (content.benefits) {
-        updateData.benefits_title = content.benefits.title
-        updateData.benefits_image = content.benefits.image
-        updateData.benefits_content = content.benefits.content
+      if (data.benefits?.title !== undefined) {
+        updateData.benefits_title = data.benefits.title
+      }
+      if (data.benefits?.image !== undefined) {
+        updateData.benefits_image = data.benefits.image
+      }
+      if (data.benefits?.content !== undefined) {
+        updateData.benefits_content = data.benefits.content
       }
 
-      if (content.pointsTable) {
-        updateData.points_table_title = content.pointsTable.title
-        updateData.points_table_content = content.pointsTable.content
+      if (data.pointsTable?.title !== undefined) {
+        updateData.points_table_title = data.pointsTable.title
+      }
+      if (data.pointsTable?.content !== undefined) {
+        updateData.points_table_content = data.pointsTable.content
       }
 
-      if (content.standProjectText) {
-        updateData.stand_project_title = content.standProjectText.title
-        updateData.stand_project_highlight = content.standProjectText.highlight
-        updateData.stand_project_description = content.standProjectText.description
+      if (data.standProjectText?.title !== undefined) {
+        updateData.stand_project_title = data.standProjectText.title
+      }
+      if (data.standProjectText?.highlight !== undefined) {
+        updateData.stand_project_highlight = data.standProjectText.highlight
+      }
+      if (data.standProjectText?.description !== undefined) {
+        updateData.stand_project_description = data.standProjectText.description
       }
 
-      if (content.exhibitionBenefits) {
-        updateData.exhibition_benefits_title = content.exhibitionBenefits.title
-        updateData.exhibition_benefits_subtitle = content.exhibitionBenefits.subtitle
-        updateData.exhibition_benefits_content = content.exhibitionBenefits.content
-        updateData.exhibition_benefits_image = content.exhibitionBenefits.image
+      if (data.exhibitionBenefits?.title !== undefined) {
+        updateData.exhibition_benefits_title = data.exhibitionBenefits.title
+      }
+      if (data.exhibitionBenefits?.subtitle !== undefined) {
+        updateData.exhibition_benefits_subtitle = data.exhibitionBenefits.subtitle
+      }
+      if (data.exhibitionBenefits?.content !== undefined) {
+        updateData.exhibition_benefits_content = data.exhibitionBenefits.content
+      }
+      if (data.exhibitionBenefits?.image !== undefined) {
+        updateData.exhibition_benefits_image = data.exhibitionBenefits.image
       }
 
-      if (content.modularDiversity) {
-        updateData.modular_diversity_title = content.modularDiversity.title
-        updateData.modular_diversity_subtitle = content.modularDiversity.subtitle
-        updateData.modular_diversity_content = content.modularDiversity.content
+      if (data.modularDiversity?.title !== undefined) {
+        updateData.modular_diversity_title = data.modularDiversity.title
+      }
+      if (data.modularDiversity?.subtitle !== undefined) {
+        updateData.modular_diversity_subtitle = data.modularDiversity.subtitle
+      }
+      if (data.modularDiversity?.content !== undefined) {
+        updateData.modular_diversity_content = data.modularDiversity.content
       }
 
-      if (content.fastestConstruction) {
-        updateData.fastest_construction_title = content.fastestConstruction.title
-        updateData.fastest_construction_subtitle = content.fastestConstruction.subtitle
-        updateData.fastest_construction_description = content.fastestConstruction.description
+      if (data.fastestConstruction?.title !== undefined) {
+        updateData.fastest_construction_title = data.fastestConstruction.title
+      }
+      if (data.fastestConstruction?.subtitle !== undefined) {
+        updateData.fastest_construction_subtitle = data.fastestConstruction.subtitle
+      }
+      if (data.fastestConstruction?.description !== undefined) {
+        updateData.fastest_construction_description = data.fastestConstruction.description
       }
 
-      if (content.experts) {
-        updateData.experts_title = content.experts.title
-        updateData.experts_subtitle = content.experts.subtitle
-        updateData.experts_description = content.experts.description
+      if (data.experts?.title !== undefined) {
+        updateData.experts_title = data.experts.title
+      }
+      if (data.experts?.subtitle !== undefined) {
+        updateData.experts_subtitle = data.experts.subtitle
+      }
+      if (data.experts?.description !== undefined) {
+        updateData.experts_description = data.experts.description
       }
 
-      const { error } = await (supabase as any)
+      const { error: updateError } = await (supabase as any)
         .from('modular_stands_page')
         .update(updateData)
         .eq('id', id)
         .select()
         .single()
 
-      if (error) {
+      if (updateError) {
         // If table doesn't exist, return error message
-        if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        if (updateError.code === 'PGRST116' || updateError.message.includes('relation') || updateError.message.includes('does not exist')) {
           return { data: null, error: 'Database table not found. Please run the migration first.' }
         }
-        return { data: null, error: error.message }
+        return { data: null, error: updateError.message }
       }
 
-      // Return updated data
-      return { data: content, error: null }
+      // Return updated data by fetching the latest data
+      return this.getModularStandsPage()
     } catch (error) {
       console.error('Error in updateModularStandsPage:', error)
       return { data: null, error: error instanceof Error ? error.message : 'Unknown error' }
@@ -224,11 +259,10 @@ export class ModularStandsPageService {
   }
 
   // Upload image to storage
-  static async uploadImage(file: File, path: string): Promise<{ data: string | null; error: string | null }> {
+  static async uploadImage(file: File, folder: string = 'modular-stands'): Promise<{ data: string | null; error: string | null }> {
     try {
       const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `${path}/${fileName}`
+      const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
 
       const { data, error } = await supabase.storage
         .from('modular-stands-images')
@@ -245,14 +279,79 @@ export class ModularStandsPageService {
         return { data: null, error: error.message }
       }
 
+      // Get public URL
       const { data: publicUrlData } = supabase.storage
         .from('modular-stands-images')
-        .getPublicUrl(fileName)
+        .getPublicUrl(data.path)
 
       return { data: publicUrlData.publicUrl, error: null }
     } catch (error) {
       console.error('Error in uploadImage:', error)
       return { data: null, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  }
+
+  // Delete image from storage
+  static async deleteImage(url: string): Promise<{ data: boolean; error: string | null }> {
+    try {
+      // Extract file path from URL
+      const urlParts = url.split('/storage/v1/object/public/modular-stands-images/')
+      if (urlParts.length < 2) {
+        return { data: false, error: 'Invalid image URL' }
+      }
+
+      const filePath = urlParts[1]
+
+      const { error } = await supabase.storage
+        .from('modular-stands-images')
+        .remove([filePath])
+
+      if (error) {
+        return { data: false, error: error.message }
+      }
+
+      return { data: true, error: null }
+    } catch (error) {
+      console.error('Error deleting image:', error)
+      return { data: false, error: 'Failed to delete image' }
+    }
+  }
+
+  // Trigger revalidation in Next.js website
+  static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
+    try {
+      // Get the revalidation endpoint from environment variables
+      const revalidateEndpoint = import.meta.env.VITE_NEXTJS_REVALIDATE_ENDPOINT;
+      const revalidateToken = import.meta.env.VITE_NEXTJS_REVALIDATE_TOKEN;
+
+      // If no endpoint is configured, skip revalidation
+      if (!revalidateEndpoint) {
+        console.log('No revalidation endpoint configured, skipping revalidation');
+        return { success: true, error: null };
+      }
+
+      // Call the revalidation endpoint
+      const response = await fetch(revalidateEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(revalidateToken && { 'Authorization': `Bearer ${revalidateToken}` })
+        },
+        body: JSON.stringify({
+          path: '/modular-stands', // Path to revalidate
+          // You can add more paths here if needed
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Revalidation failed with status ${response.status}: ${errorText}`);
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error triggering revalidation:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 }

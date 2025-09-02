@@ -31,6 +31,8 @@ export function DoubleDeckStandsAdmin() {
 
     try {
       await savePromise
+      // Trigger revalidation after successful save
+      await DoubleDeckStandsPageService.triggerRevalidation()
     } finally {
       setSaving(false)
     }
@@ -72,6 +74,8 @@ export function DoubleDeckStandsAdmin() {
           }
           
           updateContent(updatedContent)
+          // Trigger revalidation after successful image upload
+          DoubleDeckStandsPageService.triggerRevalidation()
           return 'Image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')

@@ -2,7 +2,7 @@ import { usePavilionStandsContent } from '@/hooks/usePavilionStandsContent'
 import { Helmet } from 'react-helmet-async'
 
 export function PavilionStands() {
-  const { data, loading, error } = usePavilionStandsContent()
+  const { content: data, loading, error } = usePavilionStandsContent()
 
   if (loading) {
     return (
@@ -60,13 +60,13 @@ export function PavilionStands() {
                   </h2>
                   <div 
                     className="prose prose-lg max-w-none"
-                    dangerouslySetInnerHTML={{ __html: data.benefits.content }}
+                    dangerouslySetInnerHTML={{ __html: data.benefits.content || '' }}
                   />
                 </div>
                 {data.benefits.image && (
                   <div>
-                    <img
-                      src={data.benefits.image}
+                    <img 
+                      src={data.benefits.image} 
                       alt="Benefits"
                       className="w-full h-auto rounded-lg shadow-lg"
                     />
@@ -77,63 +77,45 @@ export function PavilionStands() {
           </section>
         )}
 
-        {/* Points Table Section */}
-        {data.pointsTable && (
-          <section className="py-16 px-4 bg-gray-50">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-8">
-                {data.pointsTable.title}
-              </h2>
-              <div 
-                className="prose prose-lg max-w-none mx-auto"
-                dangerouslySetInnerHTML={{ __html: data.pointsTable.content }}
-              />
-            </div>
-          </section>
-        )}
-
         {/* Stand Project Text Section */}
-        {data.StandProjectText && (
+        {data.standProjectText && (
           <section className="py-16 px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl font-bold mb-2">
-                {data.StandProjectText.title}
+                {data.standProjectText.title}
               </h2>
               <h3 className="text-2xl font-semibold text-primary mb-8">
-                {data.StandProjectText.highlight}
+                {data.standProjectText.highlight}
               </h3>
               <div 
                 className="prose prose-lg max-w-none mx-auto"
-                dangerouslySetInnerHTML={{ __html: data.StandProjectText.description }}
+                dangerouslySetInnerHTML={{ __html: data.standProjectText.description || '' }}
               />
             </div>
           </section>
         )}
 
-        {/* Exhibition Benefits Section */}
-        {data.exhibitionBenefits && (
+        {/* Advantages Section */}
+        {data.advantages && (
           <section className="py-16 px-4 bg-gray-50">
             <div className="max-w-6xl mx-auto">
               <div className="grid md:grid-cols-2 gap-12 items-center">
-                {data.exhibitionBenefits.image && (
+                {data.advantages.image && (
                   <div>
-                    <img
-                      src={data.exhibitionBenefits.image}
-                      alt="Exhibition Benefits"
+                    <img 
+                      src={data.advantages.image} 
+                      alt="Advantages"
                       className="w-full h-auto rounded-lg shadow-lg"
                     />
                   </div>
                 )}
                 <div>
                   <h2 className="text-3xl font-bold mb-4">
-                    {data.exhibitionBenefits.title}
+                    {data.advantages.title}
                   </h2>
-                  <p className="text-xl text-muted-foreground mb-6">
-                    {data.exhibitionBenefits.subtitle}
-                  </p>
                   <div 
                     className="prose prose-lg max-w-none"
-                    dangerouslySetInnerHTML={{ __html: data.exhibitionBenefits.content }}
+                    dangerouslySetInnerHTML={{ __html: data.advantages.content || '' }}
                   />
                 </div>
               </div>
@@ -141,36 +123,32 @@ export function PavilionStands() {
           </section>
         )}
 
-        {/* Booth Partner Section */}
-        {data.boothPartner && (
+        {/* Our Expertise Section */}
+        {data.ourExpertise && (
           <section className="py-16 px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-2">
-                {data.boothPartner.title}
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold mb-8 text-center">
+                {data.ourExpertise.title}
               </h2>
-              <h3 className="text-2xl font-semibold text-primary mb-8">
-                {data.boothPartner.subtitle}
-              </h3>
-              <p className="text-lg text-muted-foreground">
-                {data.boothPartner.description}
-              </p>
+              <div 
+                className="prose prose-lg max-w-none mx-auto"
+                dangerouslySetInnerHTML={{ __html: data.ourExpertise.content || '' }}
+              />
             </div>
           </section>
         )}
 
-        {/* Bold Statement Section */}
-        {data.boldStatement && (
-          <section className="py-16 px-4 bg-primary text-white">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-2">
-                {data.boldStatement.title}
+        {/* Company Info Section */}
+        {data.companyInfo && (
+          <section className="py-16 px-4 bg-gray-50">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold mb-8 text-center">
+                {data.companyInfo.title}
               </h2>
-              <h3 className="text-2xl font-semibold mb-8">
-                {data.boldStatement.subtitle}
-              </h3>
-              <p className="text-lg">
-                {data.boldStatement.description}
-              </p>
+              <div 
+                className="prose prose-lg max-w-none mx-auto"
+                dangerouslySetInnerHTML={{ __html: data.companyInfo.content || '' }}
+              />
             </div>
           </section>
         )}

@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { useAboutPage } from '@/hooks/useAboutContent'
 import type { AboutPage, AboutCompanyStat, AboutService } from '@/data/aboutTypes'
+import { AboutPageService } from '@/data/aboutService'
 import { Upload, Save, Loader2, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -53,6 +54,8 @@ export function AboutAdmin() {
       success: (result) => {
         if (result.data) {
           handleInputChange(section as keyof AboutPage, field, result.data)
+          // Trigger revalidation after successful image upload
+          AboutPageService.triggerRevalidation()
           return 'Image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')
@@ -105,6 +108,8 @@ export function AboutAdmin() {
       success: (result) => {
         if (result.data) {
           handleServiceChange(index, 'image', result.data)
+          // Trigger revalidation after successful image upload
+          AboutPageService.triggerRevalidation()
           return 'Service image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')
@@ -151,6 +156,8 @@ export function AboutAdmin() {
 
     try {
       await savePromise
+      // Trigger revalidation after successful save
+      await AboutPageService.triggerRevalidation()
     } finally {
       setSaving(false)
     }

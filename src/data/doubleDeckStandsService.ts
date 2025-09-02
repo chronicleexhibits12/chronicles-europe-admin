@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
-import type { DoubleDeckStandsPage, DoubleDeckStandsPageData } from './doubleDeckStandsTypes'
+import type { DoubleDeckStandsPage } from './doubleDeckStandsTypes'
+import type { Database } from './databaseTypes'
 
 export class DoubleDeckStandsPageService {
   // Default data when table doesn't exist
@@ -55,72 +56,72 @@ export class DoubleDeckStandsPageService {
   // Get double decker stands page data
   static async getDoubleDeckStandsPage(): Promise<{ data: DoubleDeckStandsPage | null; error: string | null }> {
     try {
-      const response = await supabase
+      const { data: response, error } = await supabase
         .from('double_decker_stands_page')
         .select('*')
         .eq('is_active', true)
-        .single()
+        .single<Database['public']['Tables']['double_decker_stands_page']['Row']>()
 
-      if (response.error) {
+      if (error) {
         // If table doesn't exist, return default data
-        if (response.error.code === 'PGRST116' || response.error.message.includes('relation') || response.error.message.includes('does not exist')) {
+        if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
           return { 
             data: this.getDefaultDoubleDeckStandsPage(), 
             error: null 
           }
         }
-        return { data: null, error: response.error.message }
+        return { data: null, error: error.message }
       }
 
-      if (!response.data) {
+      if (!response) {
         return { data: null, error: 'No data found' }
       }
 
       // Transform database format to frontend format
       const transformedData: DoubleDeckStandsPage = {
-        id: response.data.id,
-        slug: response.data.slug || 'double-decker-stands',
-        isActive: response.data.is_active,
-        createdAt: response.data.created_at,
-        updatedAt: response.data.updated_at,
+        id: response.id,
+        slug: response.slug || 'double-decker-stands',
+        isActive: response.is_active,
+        createdAt: response.created_at,
+        updatedAt: response.updated_at,
         meta: {
-          title: response.data.meta_title || '',
-          description: response.data.meta_description || ''
+          title: response.meta_title || '',
+          description: response.meta_description || ''
         },
         hero: {
-          title: response.data.hero_title || '',
-          subtitle: response.data.hero_subtitle || '',
-          backgroundImage: response.data.hero_background_image || ''
+          title: response.hero_title || '',
+          subtitle: response.hero_subtitle || '',
+          backgroundImage: response.hero_background_image || ''
         },
         benefits: {
-          title: response.data.benefits_title || '',
-          image: response.data.benefits_image || '',
-          content: response.data.benefits_content || ''
+          title: response.benefits_title || '',
+          image: response.benefits_image || '',
+          content: response.benefits_content || ''
         },
         pointsTable: {
-          title: response.data.points_table_title || '',
-          content: response.data.points_table_content || ''
+          title: response.points_table_title || '',
+          content: response.points_table_content || ''
         },
         standProjectText: {
-          title: response.data.stand_project_title || '',
-          highlight: response.data.stand_project_highlight || '',
-          description: response.data.stand_project_description || ''
+          title: response.stand_project_title || '',
+          highlight: response.stand_project_highlight || '',
+          description: response.stand_project_description || ''
         },
         exhibitionBenefits: {
-          title: response.data.exhibition_benefits_title || '',
-          subtitle: response.data.exhibition_benefits_subtitle || '',
-          content: response.data.exhibition_benefits_content || '',
-          image: response.data.exhibition_benefits_image || ''
+          title: response.exhibition_benefits_title || '',
+          subtitle: response.exhibition_benefits_subtitle || '',
+          content: response.exhibition_benefits_content || '',
+          image: response.exhibition_benefits_image || ''
         },
         boothPartner: {
-          title: response.data.booth_partner_title || '',
-          subtitle: response.data.booth_partner_subtitle || '',
-          description: response.data.booth_partner_description || ''
+          title: response.booth_partner_title || '',
+          subtitle: response.booth_partner_subtitle || '',
+          description: response.booth_partner_description || ''
         },
         boldStatement: {
-          title: response.data.bold_statement_title || '',
-          subtitle: response.data.bold_statement_subtitle || '',
-          description: response.data.bold_statement_description || ''
+          title: response.bold_statement_title || '',
+          subtitle: response.bold_statement_subtitle || '',
+          description: response.bold_statement_description || ''
         }
       }
 
@@ -132,75 +133,105 @@ export class DoubleDeckStandsPageService {
   }
 
   // Update double decker stands page data
-  static async updateDoubleDeckStandsPage(id: string, content: DoubleDeckStandsPage): Promise<{ data: DoubleDeckStandsPage | null; error: string | null }> {
+  static async updateDoubleDeckStandsPage(id: string, data: Partial<DoubleDeckStandsPage>): Promise<{ data: DoubleDeckStandsPage | null; error: string | null }> {
     try {
       // Transform frontend format to database format
-      const updateData: Partial<DoubleDeckStandsPageData> = {}
+      const updateData: Partial<Database['public']['Tables']['double_decker_stands_page']['Update']> = {}
 
-      if (content.meta) {
-        updateData.meta_title = content.meta.title
-        updateData.meta_description = content.meta.description
+      if (data.meta?.title !== undefined) {
+        updateData.meta_title = data.meta.title
+      }
+      if (data.meta?.description !== undefined) {
+        updateData.meta_description = data.meta.description
       }
 
-      if (content.hero) {
-        updateData.hero_title = content.hero.title
-        updateData.hero_subtitle = content.hero.subtitle
-        updateData.hero_background_image = content.hero.backgroundImage
+      if (data.hero?.title !== undefined) {
+        updateData.hero_title = data.hero.title
+      }
+      if (data.hero?.subtitle !== undefined) {
+        updateData.hero_subtitle = data.hero.subtitle
+      }
+      if (data.hero?.backgroundImage !== undefined) {
+        updateData.hero_background_image = data.hero.backgroundImage
       }
 
-      if (content.benefits) {
-        updateData.benefits_title = content.benefits.title
-        updateData.benefits_image = content.benefits.image
-        updateData.benefits_content = content.benefits.content
+      if (data.benefits?.title !== undefined) {
+        updateData.benefits_title = data.benefits.title
+      }
+      if (data.benefits?.image !== undefined) {
+        updateData.benefits_image = data.benefits.image
+      }
+      if (data.benefits?.content !== undefined) {
+        updateData.benefits_content = data.benefits.content
       }
 
-      if (content.pointsTable) {
-        updateData.points_table_title = content.pointsTable.title
-        updateData.points_table_content = content.pointsTable.content
+      if (data.pointsTable?.title !== undefined) {
+        updateData.points_table_title = data.pointsTable.title
+      }
+      if (data.pointsTable?.content !== undefined) {
+        updateData.points_table_content = data.pointsTable.content
       }
 
-      if (content.standProjectText) {
-        updateData.stand_project_title = content.standProjectText.title
-        updateData.stand_project_highlight = content.standProjectText.highlight
-        updateData.stand_project_description = content.standProjectText.description
+      if (data.standProjectText?.title !== undefined) {
+        updateData.stand_project_title = data.standProjectText.title
+      }
+      if (data.standProjectText?.highlight !== undefined) {
+        updateData.stand_project_highlight = data.standProjectText.highlight
+      }
+      if (data.standProjectText?.description !== undefined) {
+        updateData.stand_project_description = data.standProjectText.description
       }
 
-      if (content.exhibitionBenefits) {
-        updateData.exhibition_benefits_title = content.exhibitionBenefits.title
-        updateData.exhibition_benefits_subtitle = content.exhibitionBenefits.subtitle
-        updateData.exhibition_benefits_content = content.exhibitionBenefits.content
-        updateData.exhibition_benefits_image = content.exhibitionBenefits.image
+      if (data.exhibitionBenefits?.title !== undefined) {
+        updateData.exhibition_benefits_title = data.exhibitionBenefits.title
+      }
+      if (data.exhibitionBenefits?.subtitle !== undefined) {
+        updateData.exhibition_benefits_subtitle = data.exhibitionBenefits.subtitle
+      }
+      if (data.exhibitionBenefits?.content !== undefined) {
+        updateData.exhibition_benefits_content = data.exhibitionBenefits.content
+      }
+      if (data.exhibitionBenefits?.image !== undefined) {
+        updateData.exhibition_benefits_image = data.exhibitionBenefits.image
       }
 
-      if (content.boothPartner) {
-        updateData.booth_partner_title = content.boothPartner.title
-        updateData.booth_partner_subtitle = content.boothPartner.subtitle
-        updateData.booth_partner_description = content.boothPartner.description
+      if (data.boothPartner?.title !== undefined) {
+        updateData.booth_partner_title = data.boothPartner.title
+      }
+      if (data.boothPartner?.subtitle !== undefined) {
+        updateData.booth_partner_subtitle = data.boothPartner.subtitle
+      }
+      if (data.boothPartner?.description !== undefined) {
+        updateData.booth_partner_description = data.boothPartner.description
       }
 
-      if (content.boldStatement) {
-        updateData.bold_statement_title = content.boldStatement.title
-        updateData.bold_statement_subtitle = content.boldStatement.subtitle
-        updateData.bold_statement_description = content.boldStatement.description
+      if (data.boldStatement?.title !== undefined) {
+        updateData.bold_statement_title = data.boldStatement.title
+      }
+      if (data.boldStatement?.subtitle !== undefined) {
+        updateData.bold_statement_subtitle = data.boldStatement.subtitle
+      }
+      if (data.boldStatement?.description !== undefined) {
+        updateData.bold_statement_description = data.boldStatement.description
       }
 
-      const { error } = await (supabase as any)
+      const { error: updateError } = await (supabase as any)
         .from('double_decker_stands_page')
         .update(updateData)
         .eq('id', id)
         .select()
         .single()
 
-      if (error) {
+      if (updateError) {
         // If table doesn't exist, return error message
-        if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        if (updateError.code === 'PGRST116' || updateError.message.includes('relation') || updateError.message.includes('does not exist')) {
           return { data: null, error: 'Database table not found. Please run the migration first.' }
         }
-        return { data: null, error: error.message }
+        return { data: null, error: updateError.message }
       }
 
-      // Return updated data
-      return { data: content, error: null }
+      // Return updated data by fetching the latest data
+      return this.getDoubleDeckStandsPage()
     } catch (error) {
       console.error('Error in updateDoubleDeckStandsPage:', error)
       return { data: null, error: error instanceof Error ? error.message : 'Unknown error' }
@@ -208,11 +239,10 @@ export class DoubleDeckStandsPageService {
   }
 
   // Upload image to storage
-  static async uploadImage(file: File, path: string): Promise<{ data: string | null; error: string | null }> {
+  static async uploadImage(file: File, folder: string = 'double-decker-stands'): Promise<{ data: string | null; error: string | null }> {
     try {
       const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `${path}/${fileName}`
+      const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
 
       const { data, error } = await supabase.storage
         .from('double-decker-stands-images')
@@ -229,14 +259,79 @@ export class DoubleDeckStandsPageService {
         return { data: null, error: error.message }
       }
 
+      // Get public URL
       const { data: publicUrlData } = supabase.storage
         .from('double-decker-stands-images')
-        .getPublicUrl(fileName)
+        .getPublicUrl(data.path)
 
       return { data: publicUrlData.publicUrl, error: null }
     } catch (error) {
       console.error('Error in uploadImage:', error)
       return { data: null, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  }
+
+  // Delete image from storage
+  static async deleteImage(url: string): Promise<{ data: boolean; error: string | null }> {
+    try {
+      // Extract file path from URL
+      const urlParts = url.split('/storage/v1/object/public/double-decker-stands-images/')
+      if (urlParts.length < 2) {
+        return { data: false, error: 'Invalid image URL' }
+      }
+
+      const filePath = urlParts[1]
+
+      const { error } = await supabase.storage
+        .from('double-decker-stands-images')
+        .remove([filePath])
+
+      if (error) {
+        return { data: false, error: error.message }
+      }
+
+      return { data: true, error: null }
+    } catch (error) {
+      console.error('Error deleting image:', error)
+      return { data: false, error: 'Failed to delete image' }
+    }
+  }
+
+  // Trigger revalidation in Next.js website
+  static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
+    try {
+      // Get the revalidation endpoint from environment variables
+      const revalidateEndpoint = import.meta.env.VITE_NEXTJS_REVALIDATE_ENDPOINT;
+      const revalidateToken = import.meta.env.VITE_NEXTJS_REVALIDATE_TOKEN;
+
+      // If no endpoint is configured, skip revalidation
+      if (!revalidateEndpoint) {
+        console.log('No revalidation endpoint configured, skipping revalidation');
+        return { success: true, error: null };
+      }
+
+      // Call the revalidation endpoint
+      const response = await fetch(revalidateEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(revalidateToken && { 'Authorization': `Bearer ${revalidateToken}` })
+        },
+        body: JSON.stringify({
+          path: '/double-decker-stands', // Path to revalidate
+          // You can add more paths here if needed
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Revalidation failed with status ${response.status}: ${errorText}`);
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error triggering revalidation:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 }

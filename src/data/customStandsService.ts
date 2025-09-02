@@ -267,7 +267,7 @@ export class CustomStandsPageService {
   }
 
   // Upload image to Supabase storage
-  static async uploadImage(file: File, folder: string = 'general'): Promise<{ data: string | null; error: string | null }> {
+  static async uploadImage(file: File, folder: string = 'custom-stands'): Promise<{ data: string | null; error: string | null }> {
     try {
       const fileExt = file.name.split('.').pop()
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
@@ -322,6 +322,44 @@ export class CustomStandsPageService {
     } catch (error) {
       console.error('Error deleting image:', error)
       return { data: false, error: 'Failed to delete image' }
+    }
+  }
+
+  // Trigger revalidation in Next.js website
+  static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
+    try {
+      // Get the revalidation endpoint from environment variables
+      const revalidateEndpoint = import.meta.env.VITE_NEXTJS_REVALIDATE_ENDPOINT;
+      const revalidateToken = import.meta.env.VITE_NEXTJS_REVALIDATE_TOKEN;
+
+      // If no endpoint is configured, skip revalidation
+      if (!revalidateEndpoint) {
+        console.log('No revalidation endpoint configured, skipping revalidation');
+        return { success: true, error: null };
+      }
+
+      // Call the revalidation endpoint
+      const response = await fetch(revalidateEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(revalidateToken && { 'Authorization': `Bearer ${revalidateToken}` })
+        },
+        body: JSON.stringify({
+          path: '/custom-stands', // Path to revalidate
+          // You can add more paths here if needed
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Revalidation failed with status ${response.status}: ${errorText}`);
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error triggering revalidation:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 }

@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import type { ModularStandsPage } from './modularStandsTypes'
 import type { Database } from './databaseTypes'
+import { basicRevalidate } from './simpleRevalidation'
 
 export class ModularStandsPageService {
   // Default data when table doesn't exist
@@ -317,42 +318,10 @@ export class ModularStandsPageService {
     }
   }
 
-  // Trigger revalidation in Next.js website
+  // Trigger revalidation in Next.js website - simplified version
   static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
-    try {
-      // Get the revalidation endpoint from environment variables
-      const revalidateEndpoint = import.meta.env.VITE_NEXTJS_REVALIDATE_ENDPOINT;
-      const revalidateToken = import.meta.env.VITE_NEXTJS_REVALIDATE_TOKEN;
-
-      // If no endpoint is configured, skip revalidation
-      if (!revalidateEndpoint) {
-        console.log('No revalidation endpoint configured, skipping revalidation');
-        return { success: true, error: null };
-      }
-
-      // Call the revalidation endpoint
-      const response = await fetch(revalidateEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(revalidateToken && { 'Authorization': `Bearer ${revalidateToken}` })
-        },
-        body: JSON.stringify({
-          path: '/modular-stands', // Path to revalidate
-          // You can add more paths here if needed
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Revalidation failed with status ${response.status}: ${errorText}`);
-      }
-
-      return { success: true, error: null };
-    } catch (error) {
-      console.error('Error triggering revalidation:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
+    // Use the simple revalidation approach
+    return basicRevalidate('/modular-stands');
   }
 }
 

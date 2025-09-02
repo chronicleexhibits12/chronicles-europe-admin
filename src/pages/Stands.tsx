@@ -10,6 +10,9 @@ import {
   TableRow 
 } from '@/components/ui/table'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
+import { useDoubleDeckStandsContent } from '@/hooks/useDoubleDeckStandsContent'
+import { useModularStandsContent } from '@/hooks/useModularStandsContent'
+import { usePavilionStandsPage } from '@/hooks/usePavilionStandsContent'
 import { Edit, Building } from 'lucide-react'
 
 interface StandInfo {
@@ -24,6 +27,9 @@ interface StandInfo {
 export function Stands() {
   const navigate = useNavigate()
   const { data: customStandsPage, loading: customStandsLoading } = useCustomStandsPage()
+  const { content: doubleDeckStandsPage, loading: doubleDeckStandsLoading } = useDoubleDeckStandsContent()
+  const { content: modularStandsPage, loading: modularStandsLoading } = useModularStandsContent()
+  const { data: pavilionStandsPage, loading: pavilionStandsLoading } = usePavilionStandsPage()
   const [stands, setStands] = useState<StandInfo[]>([])
 
   useEffect(() => {
@@ -35,10 +41,34 @@ export function Stands() {
         editPath: '/admin/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'
+      },
+      {
+        id: 'double-decker-stands',
+        name: 'Double Decker Exhibition Stands',
+        path: '/double-decker-stands',
+        editPath: '/admin/double-decker-stands',
+        lastUpdated: doubleDeckStandsPage?.updatedAt ? new Date(doubleDeckStandsPage.updatedAt).toLocaleDateString() : 'Never',
+        description: 'Double decker exhibition stands design and build services information'
+      },
+      {
+        id: 'modular-stands',
+        name: 'Modular Exhibition Stands',
+        path: '/modular-stands',
+        editPath: '/admin/modular-stands',
+        lastUpdated: modularStandsPage?.updatedAt ? new Date(modularStandsPage.updatedAt).toLocaleDateString() : 'Never',
+        description: 'Modular exhibition stands design and build services information'
+      },
+      {
+        id: 'pavilion-stands',
+        name: 'Pavilion Exhibition Stands',
+        path: '/pavilion-stands',
+        editPath: '/admin/pavilion-stands',
+        lastUpdated: pavilionStandsPage?.updatedAt ? new Date(pavilionStandsPage.updatedAt).toLocaleDateString() : 'Never',
+        description: 'Pavilion exhibition stands design and build services information'
       }
     ]
     setStands(standsData)
-  }, [customStandsPage])
+  }, [customStandsPage, doubleDeckStandsPage, modularStandsPage, pavilionStandsPage])
 
   const handleEdit = (editPath: string) => {
     navigate(editPath)
@@ -46,7 +76,7 @@ export function Stands() {
 
 
 
-  const loading = customStandsLoading
+  const loading = customStandsLoading || doubleDeckStandsLoading || modularStandsLoading || pavilionStandsLoading
 
   if (loading) {
     return (

@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
-import { CustomStandsAdminSkeleton } from '@/components/CustomStandsAdminSkeleton'
-import { useCustomStandsContent } from '@/hooks/useCustomStandsContent'
-import { CustomStandsPageService } from '@/data/customStandsService'
+import { DoubleDeckStandsAdminSkeleton } from '@/components/DoubleDeckStandsAdminSkeleton'
+import { useDoubleDeckStandsContent } from '@/hooks/useDoubleDeckStandsContent'
+import { DoubleDeckStandsPageService } from '@/data/doubleDeckStandsService'
 import { Loader2, Save, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 
-export function CustomStandsAdmin() {
-  const { content, loading, error, updateContent } = useCustomStandsContent()
+export function DoubleDeckStandsAdmin() {
+  const { content, loading, error, updateContent } = useDoubleDeckStandsContent()
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
 
@@ -25,7 +25,7 @@ export function CustomStandsAdmin() {
     
     toast.promise(savePromise, {
       loading: 'Saving changes...',
-      success: 'Custom stands page updated successfully!',
+      success: 'Double decker stands page updated successfully!',
       error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
     })
 
@@ -41,7 +41,7 @@ export function CustomStandsAdmin() {
     
     setUploading(field)
     
-    const uploadPromise = CustomStandsPageService.uploadImage(file, field)
+    const uploadPromise = DoubleDeckStandsPageService.uploadImage(file, field)
     
     toast.promise(uploadPromise, {
       loading: 'Uploading image...',
@@ -88,7 +88,7 @@ export function CustomStandsAdmin() {
   }
 
   if (loading) {
-    return <CustomStandsAdminSkeleton />
+    return <DoubleDeckStandsAdminSkeleton />
   }
 
   if (error) {
@@ -110,7 +110,7 @@ export function CustomStandsAdmin() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Custom Stands Admin</h1>
+        <h1 className="text-3xl font-bold">Double Decker Stands Admin</h1>
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
@@ -160,7 +160,7 @@ export function CustomStandsAdmin() {
       {/* Section 1: Hero Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 1 (Hero Section)</CardTitle>
+          <CardTitle>Section 1 [Hero Section]</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -237,7 +237,7 @@ export function CustomStandsAdmin() {
       {/* Section 2: Benefits Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 2 (Benefits Section)</CardTitle>
+          <CardTitle>Section 2 [Benefits Section]</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -308,10 +308,12 @@ export function CustomStandsAdmin() {
             />
           </div>
         </CardContent>
-      </Card>      {/* Section 3: Points Table Section */}
+      </Card>
+
+      {/* Section 3: Points Table Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 3 (Points Table Section)</CardTitle>
+          <CardTitle>Section 3 [Points Table Section]</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -341,7 +343,7 @@ export function CustomStandsAdmin() {
       {/* Section 4: Stand Project Text Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 4 (Stand Project Text Section)</CardTitle>
+          <CardTitle>Section 4 [Stand Project Text Section]</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -367,15 +369,13 @@ export function CustomStandsAdmin() {
             />
           </div>
           <div>
-            <Label htmlFor="stand-project-description">Description</Label>
-            <Textarea
-              id="stand-project-description"
-              value={content.standProjectText?.description || ''}
-              onChange={(e) => updateContent({
+            <Label>Description (Rich Text)</Label>
+            <RichTextEditor
+              content={content.standProjectText?.description || ''}
+              onChange={(newContent) => updateContent({
                 ...content,
-                standProjectText: { ...content.standProjectText, description: e.target.value }
+                standProjectText: { ...content.standProjectText, description: newContent }
               })}
-              rows={4}
             />
           </div>
         </CardContent>
@@ -384,7 +384,7 @@ export function CustomStandsAdmin() {
       {/* Section 5: Exhibition Benefits Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 5 (Exhibition Benefits Section)</CardTitle>
+          <CardTitle>Section 5 [Exhibition Benefits Section]</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -468,42 +468,42 @@ export function CustomStandsAdmin() {
         </CardContent>
       </Card>
 
-      {/* Section 6: Bespoke Section */}
+      {/* Section 6: Booth Partner Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 6 (Bespoke Section)</CardTitle>
+          <CardTitle>Section 6 [Booth Partner Section]</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="bespoke-title">Title</Label>
+            <Label htmlFor="booth-partner-title">Title</Label>
             <Input
-              id="bespoke-title"
-              value={content.bespoke?.title || ''}
+              id="booth-partner-title"
+              value={content.boothPartner?.title || ''}
               onChange={(e) => updateContent({
                 ...content,
-                bespoke: { ...content.bespoke, title: e.target.value }
+                boothPartner: { ...content.boothPartner, title: e.target.value }
               })}
             />
           </div>
           <div>
-            <Label htmlFor="bespoke-subtitle">Subtitle</Label>
+            <Label htmlFor="booth-partner-subtitle">Subtitle</Label>
             <Input
-              id="bespoke-subtitle"
-              value={content.bespoke?.subtitle || ''}
+              id="booth-partner-subtitle"
+              value={content.boothPartner?.subtitle || ''}
               onChange={(e) => updateContent({
                 ...content,
-                bespoke: { ...content.bespoke, subtitle: e.target.value }
+                boothPartner: { ...content.boothPartner, subtitle: e.target.value }
               })}
             />
           </div>
           <div>
-            <Label htmlFor="bespoke-description">Description</Label>
+            <Label htmlFor="booth-partner-description">Description</Label>
             <Textarea
-              id="bespoke-description"
-              value={content.bespoke?.description || ''}
+              id="booth-partner-description"
+              value={content.boothPartner?.description || ''}
               onChange={(e) => updateContent({
                 ...content,
-                bespoke: { ...content.bespoke, description: e.target.value }
+                boothPartner: { ...content.boothPartner, description: e.target.value }
               })}
               rows={6}
             />
@@ -511,87 +511,44 @@ export function CustomStandsAdmin() {
         </CardContent>
       </Card>
 
-      {/* Section 7: Fresh Design Section */}
+      {/* Section 7: Bold Statement Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 7 (Fresh Design Section)</CardTitle>
+          <CardTitle>Section 7 [Bold Statement Section]</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="fresh-design-title">Title</Label>
+            <Label htmlFor="bold-statement-title">Title</Label>
             <Input
-              id="fresh-design-title"
-              value={content.freshDesign?.title || ''}
+              id="bold-statement-title"
+              value={content.boldStatement?.title || ''}
               onChange={(e) => updateContent({
                 ...content,
-                freshDesign: { ...content.freshDesign, title: e.target.value }
+                boldStatement: { ...content.boldStatement, title: e.target.value }
               })}
             />
           </div>
           <div>
-            <Label htmlFor="fresh-design-subtitle">Subtitle</Label>
+            <Label htmlFor="bold-statement-subtitle">Subtitle</Label>
             <Input
-              id="fresh-design-subtitle"
-              value={content.freshDesign?.subtitle || ''}
+              id="bold-statement-subtitle"
+              value={content.boldStatement?.subtitle || ''}
               onChange={(e) => updateContent({
                 ...content,
-                freshDesign: { ...content.freshDesign, subtitle: e.target.value }
+                boldStatement: { ...content.boldStatement, subtitle: e.target.value }
               })}
             />
           </div>
           <div>
-            <Label htmlFor="fresh-design-description">Description</Label>
+            <Label htmlFor="bold-statement-description">Description</Label>
             <Textarea
-              id="fresh-design-description"
-              value={content.freshDesign?.description || ''}
+              id="bold-statement-description"
+              value={content.boldStatement?.description || ''}
               onChange={(e) => updateContent({
                 ...content,
-                freshDesign: { ...content.freshDesign, description: e.target.value }
+                boldStatement: { ...content.boldStatement, description: e.target.value }
               })}
-              rows={6}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Section 8: Cost Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Section 8 (Cost Section)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="cost-section-title">Title</Label>
-            <Input
-              id="cost-section-title"
-              value={content.costSection?.title || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                costSection: { ...content.costSection, title: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="cost-section-subtitle">Subtitle</Label>
-            <Input
-              id="cost-section-subtitle"
-              value={content.costSection?.subtitle || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                costSection: { ...content.costSection, subtitle: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="cost-section-description">Description</Label>
-            <Textarea
-              id="cost-section-description"
-              value={content.costSection?.description || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                costSection: { ...content.costSection, description: e.target.value }
-              })}
-              rows={6}
+              rows={4}
             />
           </div>
         </CardContent>

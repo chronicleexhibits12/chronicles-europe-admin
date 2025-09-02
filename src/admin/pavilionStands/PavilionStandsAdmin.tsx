@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
-import { CustomStandsAdminSkeleton } from '@/components/CustomStandsAdminSkeleton'
-import { useCustomStandsContent } from '@/hooks/useCustomStandsContent'
-import { CustomStandsPageService } from '@/data/customStandsService'
+import { PavilionStandsAdminSkeleton } from '../../components/PavilionStandsAdminSkeleton'
+import { usePavilionStandsContent } from '../../hooks/usePavilionStandsContent'
+import { PavilionStandsPageService } from '../../data/pavilionStandsService'
 import { Loader2, Save, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 
-export function CustomStandsAdmin() {
-  const { content, loading, error, updateContent } = useCustomStandsContent()
+export function PavilionStandsAdmin() {
+  const { content, loading, error, updateContent } = usePavilionStandsContent()
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
 
@@ -25,7 +25,7 @@ export function CustomStandsAdmin() {
     
     toast.promise(savePromise, {
       loading: 'Saving changes...',
-      success: 'Custom stands page updated successfully!',
+      success: 'Pavilion stands page updated successfully!',
       error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
     })
 
@@ -41,7 +41,7 @@ export function CustomStandsAdmin() {
     
     setUploading(field)
     
-    const uploadPromise = CustomStandsPageService.uploadImage(file, field)
+    const uploadPromise = PavilionStandsPageService.uploadImage(file, field)
     
     toast.promise(uploadPromise, {
       loading: 'Uploading image...',
@@ -63,10 +63,10 @@ export function CustomStandsAdmin() {
                 benefits: { ...content.benefits, image: result.data }
               }
               break
-            case 'exhibition-benefits-img':
+            case 'advantages-img':
               updatedContent = {
                 ...content,
-                exhibitionBenefits: { ...content.exhibitionBenefits, image: result.data }
+                advantages: { ...content.advantages, image: result.data }
               }
               break
           }
@@ -88,7 +88,7 @@ export function CustomStandsAdmin() {
   }
 
   if (loading) {
-    return <CustomStandsAdminSkeleton />
+    return <PavilionStandsAdminSkeleton />
   }
 
   if (error) {
@@ -110,7 +110,7 @@ export function CustomStandsAdmin() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Custom Stands Admin</h1>
+        <h1 className="text-3xl font-bold">Pavilion Stands Admin</h1>
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
@@ -234,10 +234,40 @@ export function CustomStandsAdmin() {
         </CardContent>
       </Card>
 
-      {/* Section 2: Benefits Section */}
+      {/* Section 2: Why Choose Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 2 (Benefits Section)</CardTitle>
+          <CardTitle>Section 2 (Why Choose Section)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="why-choose-title">Title</Label>
+            <Input
+              id="why-choose-title"
+              value={content.whyChoose?.title || ''}
+              onChange={(e) => updateContent({
+                ...content,
+                whyChoose: { ...content.whyChoose, title: e.target.value }
+              })}
+            />
+          </div>
+          <div>
+            <Label>Content (Rich Text)</Label>
+            <RichTextEditor
+              content={content.whyChoose?.content || ''}
+              onChange={(newContent) => updateContent({
+                ...content,
+                whyChoose: { ...content.whyChoose, content: newContent }
+              })}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section 3: Benefits Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Section 3 (Benefits Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -308,34 +338,6 @@ export function CustomStandsAdmin() {
             />
           </div>
         </CardContent>
-      </Card>      {/* Section 3: Points Table Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Section 3 (Points Table Section)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="points-table-title">Title</Label>
-            <Input
-              id="points-table-title"
-              value={content.pointsTable?.title || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                pointsTable: { ...content.pointsTable, title: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label>Points Table Content (Rich Text)</Label>
-            <RichTextEditor
-              content={content.pointsTable?.content || ''}
-              onChange={(newContent) => updateContent({
-                ...content,
-                pointsTable: { ...content.pointsTable, content: newContent }
-              })}
-            />
-          </div>
-        </CardContent>
       </Card>
 
       {/* Section 4: Stand Project Text Section */}
@@ -367,231 +369,149 @@ export function CustomStandsAdmin() {
             />
           </div>
           <div>
-            <Label htmlFor="stand-project-description">Description</Label>
-            <Textarea
-              id="stand-project-description"
-              value={content.standProjectText?.description || ''}
-              onChange={(e) => updateContent({
+            <Label>Description (Rich Text)</Label>
+            <RichTextEditor
+              content={content.standProjectText?.description || ''}
+              onChange={(newContent) => updateContent({
                 ...content,
-                standProjectText: { ...content.standProjectText, description: e.target.value }
+                standProjectText: { ...content.standProjectText, description: newContent }
               })}
-              rows={4}
             />
           </div>
         </CardContent>
       </Card>
 
-      {/* Section 5: Exhibition Benefits Section */}
+      {/* Section 5: Advantages Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 5 (Exhibition Benefits Section)</CardTitle>
+          <CardTitle>Section 5 (Advantages Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="exhibition-benefits-title">Title</Label>
+            <Label htmlFor="advantages-title">Title</Label>
             <Input
-              id="exhibition-benefits-title"
-              value={content.exhibitionBenefits?.title || ''}
+              id="advantages-title"
+              value={content.advantages?.title || ''}
               onChange={(e) => updateContent({
                 ...content,
-                exhibitionBenefits: { ...content.exhibitionBenefits, title: e.target.value }
+                advantages: { ...content.advantages, title: e.target.value }
               })}
             />
           </div>
           <div>
-            <Label htmlFor="exhibition-benefits-subtitle">Subtitle</Label>
-            <Input
-              id="exhibition-benefits-subtitle"
-              value={content.exhibitionBenefits?.subtitle || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                exhibitionBenefits: { ...content.exhibitionBenefits, subtitle: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="exhibition-benefits-image">Image</Label>
+            <Label htmlFor="advantages-image">Image</Label>
             <div className="space-y-2">
               <div className="flex gap-2">
                 <Input
-                  id="exhibition-benefits-image"
-                  value={content.exhibitionBenefits?.image || ''}
+                  id="advantages-image"
+                  value={content.advantages?.image || ''}
                   onChange={(e) => updateContent({
                     ...content,
-                    exhibitionBenefits: { ...content.exhibitionBenefits, image: e.target.value }
+                    advantages: { ...content.advantages, image: e.target.value }
                   })}
                   placeholder="Image URL or upload below"
                 />
                 <Button
                   variant="outline"
-                  onClick={() => document.getElementById('exhibition-benefits-img-upload')?.click()}
-                  disabled={uploading === 'exhibition-benefits-img'}
+                  onClick={() => document.getElementById('advantages-img-upload')?.click()}
+                  disabled={uploading === 'advantages-img'}
                 >
-                  {uploading === 'exhibition-benefits-img' ? (
+                  {uploading === 'advantages-img' ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Upload className="h-4 w-4" />
                   )}
                 </Button>
               </div>
-              {content.exhibitionBenefits?.image && (
+              {content.advantages?.image && (
                 <div className="relative inline-block">
                   <img 
-                    src={content.exhibitionBenefits.image} 
-                    alt="Exhibition benefits preview" 
+                    src={content.advantages.image} 
+                    alt="Advantages preview" 
                     className="h-20 w-32 object-cover rounded border"
                   />
                 </div>
               )}
               <input
-                id="exhibition-benefits-img-upload"
+                id="advantages-img-upload"
                 type="file"
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0]
-                  if (file) handleImageUpload(file, 'exhibition-benefits-img')
+                  if (file) handleImageUpload(file, 'advantages-img')
                 }}
               />
             </div>
           </div>
           <div>
-            <Label>Exhibition Benefits Content (Rich Text)</Label>
+            <Label>Advantages Content (Rich Text)</Label>
             <RichTextEditor
-              content={content.exhibitionBenefits?.content || ''}
+              content={content.advantages?.content || ''}
               onChange={(newContent) => updateContent({
                 ...content,
-                exhibitionBenefits: { ...content.exhibitionBenefits, content: newContent }
+                advantages: { ...content.advantages, content: newContent }
               })}
             />
           </div>
         </CardContent>
       </Card>
 
-      {/* Section 6: Bespoke Section */}
+      {/* Section 6: Our Expertise Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 6 (Bespoke Section)</CardTitle>
+          <CardTitle>Section 6 (Our Expertise Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="bespoke-title">Title</Label>
+            <Label htmlFor="our-expertise-title">Title</Label>
             <Input
-              id="bespoke-title"
-              value={content.bespoke?.title || ''}
+              id="our-expertise-title"
+              value={content.ourExpertise?.title || ''}
               onChange={(e) => updateContent({
                 ...content,
-                bespoke: { ...content.bespoke, title: e.target.value }
+                ourExpertise: { ...content.ourExpertise, title: e.target.value }
               })}
             />
           </div>
           <div>
-            <Label htmlFor="bespoke-subtitle">Subtitle</Label>
-            <Input
-              id="bespoke-subtitle"
-              value={content.bespoke?.subtitle || ''}
-              onChange={(e) => updateContent({
+            <Label>Content (Rich Text)</Label>
+            <RichTextEditor
+              content={content.ourExpertise?.content || ''}
+              onChange={(newContent) => updateContent({
                 ...content,
-                bespoke: { ...content.bespoke, subtitle: e.target.value }
+                ourExpertise: { ...content.ourExpertise, content: newContent }
               })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="bespoke-description">Description</Label>
-            <Textarea
-              id="bespoke-description"
-              value={content.bespoke?.description || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                bespoke: { ...content.bespoke, description: e.target.value }
-              })}
-              rows={6}
             />
           </div>
         </CardContent>
       </Card>
 
-      {/* Section 7: Fresh Design Section */}
+      {/* Section 7: Company Info Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Section 7 (Fresh Design Section)</CardTitle>
+          <CardTitle>Section 7 (Company Info Section)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="fresh-design-title">Title</Label>
+            <Label htmlFor="company-info-title">Title</Label>
             <Input
-              id="fresh-design-title"
-              value={content.freshDesign?.title || ''}
+              id="company-info-title"
+              value={content.companyInfo?.title || ''}
               onChange={(e) => updateContent({
                 ...content,
-                freshDesign: { ...content.freshDesign, title: e.target.value }
+                companyInfo: { ...content.companyInfo, title: e.target.value }
               })}
             />
           </div>
           <div>
-            <Label htmlFor="fresh-design-subtitle">Subtitle</Label>
-            <Input
-              id="fresh-design-subtitle"
-              value={content.freshDesign?.subtitle || ''}
-              onChange={(e) => updateContent({
+            <Label>Content (Rich Text)</Label>
+            <RichTextEditor
+              content={content.companyInfo?.content || ''}
+              onChange={(newContent) => updateContent({
                 ...content,
-                freshDesign: { ...content.freshDesign, subtitle: e.target.value }
+                companyInfo: { ...content.companyInfo, content: newContent }
               })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="fresh-design-description">Description</Label>
-            <Textarea
-              id="fresh-design-description"
-              value={content.freshDesign?.description || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                freshDesign: { ...content.freshDesign, description: e.target.value }
-              })}
-              rows={6}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Section 8: Cost Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Section 8 (Cost Section)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="cost-section-title">Title</Label>
-            <Input
-              id="cost-section-title"
-              value={content.costSection?.title || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                costSection: { ...content.costSection, title: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="cost-section-subtitle">Subtitle</Label>
-            <Input
-              id="cost-section-subtitle"
-              value={content.costSection?.subtitle || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                costSection: { ...content.costSection, subtitle: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="cost-section-description">Description</Label>
-            <Textarea
-              id="cost-section-description"
-              value={content.costSection?.description || ''}
-              onChange={(e) => updateContent({
-                ...content,
-                costSection: { ...content.costSection, description: e.target.value }
-              })}
-              rows={6}
             />
           </div>
         </CardContent>

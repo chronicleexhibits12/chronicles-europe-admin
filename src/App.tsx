@@ -5,11 +5,7 @@ import { Layout } from '@/components/Layout'
 import { Login } from '@/pages/Login'
 import { Dashboard } from '@/pages/Dashboard'
 import { Stands } from '@/pages/Stands'
-import { About } from '@/pages/About'
-import { CustomStands } from '@/pages/CustomStands'
-import { DoubleDeckStands } from '@/pages/DoubleDeckStands'
-import { ModularStands } from '@/pages/ModularStands'
-import { PavilionStands } from '@/pages/PavilionStands'
+import { Pages } from '@/pages/Pages'
 import { HomeAdmin } from '@/admin/home/HomeAdmin'
 import { AboutAdmin } from '@/admin/about/AboutAdmin'
 import { CustomStandsAdmin } from '@/admin/customStands/CustomStandsAdmin'
@@ -26,13 +22,6 @@ function App() {
           {/* Public login route */}
           <Route path="/login" element={<Login />} />
           
-          {/* Public routes */}
-          <Route path="/about" element={<About />} />
-          <Route path="/custom-stands" element={<CustomStands />} />
-          <Route path="/double-decker-stands" element={<DoubleDeckStands />} />
-          <Route path="/modular-stands" element={<ModularStands />} />
-          <Route path="/pavilion-stands" element={<PavilionStands />} />
-          
           {/* Protected admin routes */}
           <Route path="/" element={
             <ProtectedRoute>
@@ -40,6 +29,7 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<Dashboard />} />
+            <Route path="pages" element={<Pages />} />
             <Route path="stands" element={<Stands />} />
             <Route path="admin/home" element={<HomeAdmin />} />
             <Route path="admin/about" element={<AboutAdmin />} />

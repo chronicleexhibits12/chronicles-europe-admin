@@ -12,7 +12,7 @@ import {
 import { useHomePage } from '@/hooks/useHomeContent'
 import { useAboutPage } from '@/hooks/useAboutContent'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
-import { Edit, FileText } from 'lucide-react'
+import { Edit, FileText, Eye, Calendar } from 'lucide-react'
 
 interface PageInfo {
   id: string
@@ -64,7 +64,13 @@ export function Dashboard() {
     navigate(editPath)
   }
 
+  const handleViewPage = (path: string) => {
+    window.open(`https://chronicleseurope.vercel.app${path}`, '_blank')
+  }
 
+  // Calculate statistics
+  const totalPages = pages.length
+  const recentlyUpdatedCount = pages.filter(page => page.lastUpdated !== 'Never').length
 
   const loading = homeLoading || aboutLoading || customStandsLoading
 
@@ -90,64 +96,57 @@ export function Dashboard() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your website pages and content
+            Welcome to your content management system
           </p>
         </div>
       </div>
 
-
-
-      {/* Pages Table */}
-      <div className="bg-white rounded-lg border shadow-sm">
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">Website Pages</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Manage and edit your website content
-          </p>
+      {/* Overview Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <FileText className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Total Pages</p>
+              <p className="text-2xl font-bold text-gray-900">{totalPages}</p>
+            </div>
+          </div>
         </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Page Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Last Updated</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pages.map((page) => (
-              <TableRow key={page.id}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center">
-                    <FileText className="h-4 w-4 text-gray-400 mr-2" />
-                    {page.name}
-                  </div>
-                </TableCell>
-                <TableCell className="text-gray-600 max-w-md">
-                  <p className="truncate">{page.description}</p>
-                </TableCell>
-                <TableCell className="text-gray-600">
-                  {page.lastUpdated}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleEdit(page.editPath)}
-                    className="h-8 px-3"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <Calendar className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Recently Updated</p>
+              <p className="text-2xl font-bold text-gray-900">{recentlyUpdatedCount}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-
+      {/* Welcome Message */}
+      <div className="bg-white rounded-lg border shadow-sm p-6">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome to Your Admin Panel</h2>
+          <p className="text-gray-600 mb-4">
+            Use the navigation menu to manage your website content. You can edit pages, update stands information, and more.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Button onClick={() => navigate('/pages')}>
+              <FileText className="h-4 w-4 mr-2" />
+              Manage Pages
+            </Button>
+            <Button variant="outline" onClick={() => window.open('https://chronicleseurope.vercel.app', '_blank')}>
+              <Eye className="h-4 w-4 mr-2" />
+              View Website
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Home, Building } from 'lucide-react'
+import { Home, Building, FileText } from 'lucide-react'
 import type { NavigationItem } from '@/data/commonTypes'
 
 export const navigationItems: NavigationItem[] = [
@@ -7,6 +7,12 @@ export const navigationItems: NavigationItem[] = [
     label: 'Dashboard',
     href: '/',
     icon: Home
+  },
+  {
+    id: 'pages',
+    label: 'Pages',
+    href: '/pages',
+    icon: FileText
   },
   {
     id: 'stands',

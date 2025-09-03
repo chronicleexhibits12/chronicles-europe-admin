@@ -181,8 +181,8 @@ export function HomeAdmin() {
       {/* Form */}
       <form className="space-y-8">
         {/* Section 1: Hero */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 1 (Hero)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 1 (Hero)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -220,19 +220,21 @@ export function HomeAdmin() {
                 </Button>
               </div>
               {formData.hero?.backgroundImage && (
-                <img
-                  src={formData.hero.backgroundImage}
-                  alt="Hero background"
-                  className="mt-2 w-full h-32 object-cover rounded border"
-                />
+                <div className="relative inline-block">
+                  <img
+                    src={formData.hero.backgroundImage}
+                    alt="Hero background"
+                    className="h-20 w-32 object-cover rounded border"
+                  />
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Section 2: Exhibition Europe */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 2 (Exhibition Europe)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2 (Exhibition Europe)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -292,11 +294,13 @@ export function HomeAdmin() {
                 </Button>
               </div>
               {formData.exhibitionEurope?.boothImage && (
-                <img
-                  src={formData.exhibitionEurope.boothImage}
-                  alt="Booth"
-                  className="mt-2 w-full h-32 object-cover rounded border"
-                />
+                <div className="relative inline-block">
+                  <img
+                    src={formData.exhibitionEurope.boothImage}
+                    alt="Booth"
+                    className="h-20 w-32 object-cover rounded border"
+                  />
+                </div>
               )}
             </div>
             
@@ -313,8 +317,8 @@ export function HomeAdmin() {
         </div>
 
         {/* Section 3: Exhibition USA */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 3 (Exhibition USA)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Exhibition USA)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -341,8 +345,8 @@ export function HomeAdmin() {
         </div>
 
         {/* Section 4: Solutions */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 4 (Solutions)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Solutions)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -447,11 +451,13 @@ export function HomeAdmin() {
                         </Button>
                       </div>
                       {item.image && (
-                        <img
-                          src={item.image}
-                          alt={`Solution ${index + 1}`}
-                          className="mt-2 w-full h-24 object-cover rounded border"
-                        />
+                        <div className="relative inline-block">
+                          <img
+                            src={item.image}
+                            alt={`Solution ${index + 1}`}
+                            className="h-20 w-32 object-cover rounded border"
+                          />
+                        </div>
                       )}
                     </div>
                   </div>
@@ -462,8 +468,8 @@ export function HomeAdmin() {
         </div>
 
         {/* Section 5: Main Section */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 5 (Main Section)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Main Section)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -501,8 +507,8 @@ export function HomeAdmin() {
         </div>
 
         {/* Section 6: Why We're the Best */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 6 (Why We're the Best)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Why We're the Best)</h2>
           
           <div className="grid gap-4">
             <div>

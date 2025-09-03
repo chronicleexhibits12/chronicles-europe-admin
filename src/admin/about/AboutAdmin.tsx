@@ -195,50 +195,9 @@ export function AboutAdmin() {
 
       {/* Form */}
       <form className="space-y-8">
-        {/* SEO Meta Information */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">SEO Meta Information</h2>
-          
-          <div className="grid gap-4">
-            <div>
-              <Label htmlFor="meta-title">Meta Title</Label>
-              <Input
-                id="meta-title"
-                value={formData.meta?.title || ''}
-                onChange={(e) => handleInputChange('meta', 'title', e.target.value)}
-                placeholder="Enter meta title"
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="meta-description">Meta Description</Label>
-              <Textarea
-                id="meta-description"
-                value={formData.meta?.description || ''}
-                onChange={(e) => handleInputChange('meta', 'description', e.target.value)}
-                placeholder="Enter meta description"
-                className="mt-1"
-                rows={3}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="meta-keywords">Meta Keywords</Label>
-              <Input
-                id="meta-keywords"
-                value={formData.meta?.keywords || ''}
-                onChange={(e) => handleInputChange('meta', 'keywords', e.target.value)}
-                placeholder="Enter meta keywords (comma separated)"
-                className="mt-1"
-              />
-            </div>
-          </div>
-        </div>
-
         {/* Section 1: Hero Section */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 1 (Hero Section)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 1 (Hero Section)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -287,19 +246,21 @@ export function AboutAdmin() {
                 </Button>
               </div>
               {formData.hero?.backgroundImage && (
-                <img
-                  src={formData.hero.backgroundImage}
-                  alt="Hero background"
-                  className="mt-2 w-full h-32 object-cover rounded border"
-                />
+                <div className="relative inline-block">
+                  <img
+                    src={formData.hero.backgroundImage}
+                    alt="Hero background"
+                    className="h-20 w-32 object-cover rounded border"
+                  />
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Section 2: Company Information */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 2 (Company Information)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2 (Company Information)</h2>
           
           <div className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
@@ -384,8 +345,8 @@ export function AboutAdmin() {
         </div>
 
         {/* Section 3: Facts Section */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 3 (Facts Section)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Facts Section)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -414,8 +375,8 @@ export function AboutAdmin() {
         </div>
 
         {/* Section 4: Company Statistics */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 4 (Company Statistics)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Company Statistics)</h2>
           
           <div>
             <div className="mb-3">
@@ -487,8 +448,8 @@ export function AboutAdmin() {
         </div>
 
         {/* Section 5: Team Information */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 5 (Team Information)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Team Information)</h2>
           
           <div className="grid gap-4">
             <div>
@@ -549,19 +510,21 @@ export function AboutAdmin() {
                 </Button>
               </div>
               {formData.teamInfo?.teamImage && (
-                <img
-                  src={formData.teamInfo.teamImage}
-                  alt="Team"
-                  className="mt-2 w-full h-32 object-cover rounded border"
-                />
+                <div className="relative inline-block">
+                  <img
+                    src={formData.teamInfo.teamImage}
+                    alt="Team"
+                    className="h-20 w-32 object-cover rounded border"
+                  />
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Section 6: Services */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Section 6 (Services)</h2>
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Services)</h2>
           
           <div>
             <div className="mb-3">
@@ -641,17 +604,58 @@ export function AboutAdmin() {
                       </Button>
                     </div>
                     {service.image && (
-                      <img
-                        src={service.image}
-                        alt={`Service ${index + 1}`}
-                        className="mt-2 w-full h-24 object-cover rounded border"
-                      />
+                      <div className="relative inline-block">
+                        <img
+                          src={service.image}
+                          alt={`Service ${index + 1}`}
+                          className="h-20 w-32 object-cover rounded border"
+                        />
+                      </div>
                     )}
                   </div>
-                  
-
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+
+        {/* SEO Meta Information - Moved to the end with proper spacing */}
+        <div className="admin-section mt-12 pt-8 border-t border-gray-200">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Meta Information</h2>
+          
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="meta-title">Meta Title</Label>
+              <Input
+                id="meta-title"
+                value={formData.meta?.title || ''}
+                onChange={(e) => handleInputChange('meta', 'title', e.target.value)}
+                placeholder="Enter meta title"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="meta-description">Meta Description</Label>
+              <Textarea
+                id="meta-description"
+                value={formData.meta?.description || ''}
+                onChange={(e) => handleInputChange('meta', 'description', e.target.value)}
+                placeholder="Enter meta description"
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="meta-keywords">Meta Keywords</Label>
+              <Input
+                id="meta-keywords"
+                value={formData.meta?.keywords || ''}
+                onChange={(e) => handleInputChange('meta', 'keywords', e.target.value)}
+                placeholder="Enter meta keywords (comma separated)"
+                className="mt-1"
+              />
             </div>
           </div>
         </div>

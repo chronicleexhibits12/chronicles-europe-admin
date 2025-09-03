@@ -1,18 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table'
 import { useHomePage } from '@/hooks/useHomeContent'
 import { useAboutPage } from '@/hooks/useAboutContent'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
-import { Edit, FileText, Eye, Calendar } from 'lucide-react'
+import { FileText, Eye, Calendar } from 'lucide-react'
 
 interface PageInfo {
   id: string
@@ -59,14 +51,6 @@ export function Dashboard() {
     ]
     setPages(pagesData)
   }, [homePage, aboutPage, customStandsPage])
-
-  const handleEdit = (editPath: string) => {
-    navigate(editPath)
-  }
-
-  const handleViewPage = (path: string) => {
-    window.open(`https://chronicleseurope.vercel.app${path}`, '_blank')
-  }
 
   // Calculate statistics
   const totalPages = pages.length

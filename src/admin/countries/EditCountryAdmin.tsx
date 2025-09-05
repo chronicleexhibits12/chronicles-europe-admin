@@ -662,7 +662,7 @@ export function EditCountryAdmin() {
         {/* Hero Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Hero Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="hero_title">Hero Title</Label>
               <Input
@@ -681,7 +681,7 @@ export function EditCountryAdmin() {
                 placeholder="e.g., FRANCE"
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <Label htmlFor="hero_background_image_url">Background Image</Label>
               <div className="flex items-start space-x-4">
                 <Input
@@ -788,7 +788,7 @@ export function EditCountryAdmin() {
         {/* Why Choose Us Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Why Choose Us Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="why_choose_us_title">Title</Label>
               <Input
@@ -807,7 +807,7 @@ export function EditCountryAdmin() {
                 placeholder="e.g., France?"
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <Label htmlFor="why_choose_us_main_image_url">Main Image</Label>
               <div className="flex items-start space-x-4">
                 <Input
@@ -908,7 +908,7 @@ export function EditCountryAdmin() {
                 </div>
               )}
             </div>
-            <div>
+            <div className="md:col-span-2">
               <Label>Benefits HTML Content</Label>
               <RichTextEditor
                 content={formData.why_choose_us_benefits_html || ''}
@@ -921,7 +921,7 @@ export function EditCountryAdmin() {
         {/* What We Do Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">What We Do Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="what_we_do_title">Title</Label>
               <Input
@@ -940,7 +940,7 @@ export function EditCountryAdmin() {
                 placeholder="e.g., WE DO?"
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <Label>Description HTML Content</Label>
               <RichTextEditor
                 content={formData.what_we_do_description_html || ''}
@@ -976,7 +976,7 @@ export function EditCountryAdmin() {
         {/* Best Company Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Best Company Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="best_company_title">Title</Label>
               <Input
@@ -995,7 +995,7 @@ export function EditCountryAdmin() {
                 placeholder="e.g., EXCEPTIONAL EXPERIENCE"
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <Label>Content HTML</Label>
               <RichTextEditor
                 content={formData.best_company_content_html || ''}
@@ -1027,23 +1027,25 @@ export function EditCountryAdmin() {
                       <h3 className="font-medium">Step {index + 1}</h3>
                       {/* Remove button removed to make steps non-removable */}
                     </div>
-                    <div>
-                      <Label htmlFor={`step-icon-${index}`}>Icon</Label>
-                      <Input
-                        id={`step-icon-${index}`}
-                        value={step.icon}
-                        onChange={(e) => updateProcessStep(index, 'icon', e.target.value)}
-                        placeholder="e.g., 💡"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`step-title-${index}`}>Title</Label>
-                      <Input
-                        id={`step-title-${index}`}
-                        value={step.title}
-                        onChange={(e) => updateProcessStep(index, 'title', e.target.value)}
-                        placeholder="Step title"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`step-icon-${index}`}>Icon</Label>
+                        <Input
+                          id={`step-icon-${index}`}
+                          value={step.icon}
+                          onChange={(e) => updateProcessStep(index, 'icon', e.target.value)}
+                          placeholder="e.g., 💡"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`step-title-${index}`}>Title</Label>
+                        <Input
+                          id={`step-title-${index}`}
+                          value={step.title}
+                          onChange={(e) => updateProcessStep(index, 'title', e.target.value)}
+                          placeholder="Step title"
+                        />
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor={`step-description-${index}`}>Description</Label>
@@ -1066,7 +1068,7 @@ export function EditCountryAdmin() {
         {/* Cities Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Cities Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="cities_section_title">Title</Label>
               <Input
@@ -1085,95 +1087,96 @@ export function EditCountryAdmin() {
                 placeholder="e.g., FRANCE"
               />
             </div>
-            
-            {/* City Selection */}
-            <div>
-              <Label>Select Cities</Label>
-              <p className="text-sm text-muted-foreground mb-2">
-                Select cities to be displayed on this country's page
-              </p>
-              
-              {loadingCities ? (
-                <div className="flex items-center justify-center p-4">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="ml-2">Loading cities...</span>
-                </div>
-              ) : (
-                <div className="border rounded-md">
-                  {/* Search Input */}
-                  <div className="p-3 border-b">
-                    <Input
-                      placeholder="Search cities..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full"
-                    />
+            <div className="md:col-span-2">
+              {/* City Selection */}
+              <div>
+                <Label>Select Cities</Label>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Select cities to be displayed on this country's page
+                </p>
+                
+                {loadingCities ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="ml-2">Loading cities...</span>
                   </div>
-                  
-                  {/* Cities List */}
-                  <div className="max-h-60 overflow-y-auto">
-                    {availableCities.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-4">
-                        No cities available. Create some cities first.
-                      </p>
-                    ) : filteredCities.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-4">
-                        No cities match your search.
-                      </p>
-                    ) : (
-                      <div className="space-y-1 p-2">
-                        {filteredCities.map((city) => (
-                          <div 
-                            key={city.id} 
-                            className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded"
-                          >
-                            <input
-                              type="checkbox"
-                              id={`city-${city.id}`}
-                              checked={formData.selected_cities.includes(city.city_slug)}
-                              onChange={() => toggleCitySelection(city.city_slug)}
-                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                            />
-                            <label 
-                              htmlFor={`city-${city.id}`} 
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1"
+                ) : (
+                  <div className="border rounded-md">
+                    {/* Search Input */}
+                    <div className="p-3 border-b">
+                      <Input
+                        placeholder="Search cities..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    {/* Cities List */}
+                    <div className="max-h-60 overflow-y-auto">
+                      {availableCities.length === 0 ? (
+                        <p className="text-muted-foreground text-center py-4">
+                          No cities available. Create some cities first.
+                        </p>
+                      ) : filteredCities.length === 0 ? (
+                        <p className="text-muted-foreground text-center py-4">
+                          No cities match your search.
+                        </p>
+                      ) : (
+                        <div className="space-y-1 p-2">
+                          {filteredCities.map((city) => (
+                            <div 
+                              key={city.id} 
+                              className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded"
                             >
-                              <div className="font-medium">{city.name}</div>
-                              <div className="text-xs text-muted-foreground">{city.city_slug}</div>
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                              <input
+                                type="checkbox"
+                                id={`city-${city.id}`}
+                                checked={formData.selected_cities.includes(city.city_slug)}
+                                onChange={() => toggleCitySelection(city.city_slug)}
+                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                              <label 
+                                htmlFor={`city-${city.id}`} 
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1"
+                              >
+                                <div className="font-medium">{city.name}</div>
+                                <div className="text-xs text-muted-foreground">{city.city_slug}</div>
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              {formData.selected_cities.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-sm font-medium mb-2">Selected cities:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.selected_cities.map((citySlug) => {
-                      const city = availableCities.find(c => c.city_slug === citySlug)
-                      return (
-                        <span 
-                          key={citySlug} 
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                        >
-                          {city ? city.name : citySlug}
-                          <button
-                            type="button"
-                            className="ml-2 inline-flex items-center rounded-full hover:bg-blue-200"
-                            onClick={() => toggleCitySelection(citySlug)}
+                )}
+                
+                {formData.selected_cities.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-sm font-medium mb-2">Selected cities:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.selected_cities.map((citySlug) => {
+                        const city = availableCities.find(c => c.city_slug === citySlug)
+                        return (
+                          <span 
+                            key={citySlug} 
+                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
                           >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </span>
-                      )
-                    })}
+                            {city ? city.name : citySlug}
+                            <button
+                              type="button"
+                              className="ml-2 inline-flex items-center rounded-full hover:bg-blue-200"
+                              onClick={() => toggleCitySelection(citySlug)}
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </span>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1181,7 +1184,7 @@ export function EditCountryAdmin() {
         {/* SEO Metadata Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Metadata</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="seo_title">SEO Title</Label>
               <Input
@@ -1201,7 +1204,7 @@ export function EditCountryAdmin() {
                 rows={3}
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <Label htmlFor="seo_keywords">SEO Keywords</Label>
               <TagInput
                 tags={getKeywordsArray()}

@@ -36,7 +36,7 @@ export function Dashboard() {
         id: 'about',
         name: 'About Page',
         path: '/about',
-        editPath: '/admin/about',
+        editPath: '/about-us',
         lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Company information, team details, services, and statistics'
       },

@@ -512,7 +512,7 @@ export function EditCityAdmin() {
         {/* Section 2: Hero Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2: Hero Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="hero_title">Hero Title</Label>
               <Input
@@ -531,7 +531,7 @@ export function EditCityAdmin() {
                 placeholder="Hero subtitle"
               />
             </div>
-            <div>
+            <div className="col-span-full">
               <Label htmlFor="hero_background_image_url">Background Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -601,7 +601,7 @@ export function EditCityAdmin() {
         {/* Section 3: Why Choose Us Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3: Why Choose Us Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="why_choose_us_title">Title</Label>
               <Input
@@ -620,7 +620,7 @@ export function EditCityAdmin() {
                 placeholder="Subtitle"
               />
             </div>
-            <div>
+            <div className="col-span-full">
               <Label htmlFor="why_choose_us_main_image_url">Main Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -684,7 +684,7 @@ export function EditCityAdmin() {
                 />
               </div>
             </div>
-            <div>
+            <div className="col-span-full">
               <Label>Benefits Content (Rich Text)</Label>
               <RichTextEditor
                 content={formData.why_choose_us_benefits_html}
@@ -697,7 +697,7 @@ export function EditCityAdmin() {
         {/* Section 4: What We Do Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4: What We Do Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="what_we_do_title">Title</Label>
               <Input
@@ -716,7 +716,7 @@ export function EditCityAdmin() {
                 placeholder="Subtitle"
               />
             </div>
-            <div>
+            <div className="col-span-full">
               <Label>Description (Rich Text)</Label>
               <RichTextEditor
                 content={formData.what_we_do_description_html}
@@ -729,7 +729,7 @@ export function EditCityAdmin() {
         {/* Section 5: Portfolio Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5: Portfolio Section</h2>
-          <div className="space-y-4">
+          <div className="w-full">
             <div>
               <Label htmlFor="portfolio_title_template">Portfolio Title Template</Label>
               <Input
@@ -745,7 +745,7 @@ export function EditCityAdmin() {
         {/* Section 6: Exhibiting Experience Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6: Exhibiting Experience Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="exhibiting_experience_title">Title</Label>
               <Input
@@ -764,7 +764,7 @@ export function EditCityAdmin() {
                 placeholder="Subtitle"
               />
             </div>
-            <div>
+            <div className="col-span-full">
               <Label>Benefits Content (Rich Text)</Label>
               <RichTextEditor
                 content={formData.exhibiting_experience_benefits_html}
@@ -777,7 +777,7 @@ export function EditCityAdmin() {
         {/* Section 7: Excellence Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7: Excellence Section</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="exhibiting_experience_excellence_title">Excellence Title</Label>
               <Input
@@ -796,7 +796,7 @@ export function EditCityAdmin() {
                 placeholder="EXCELLENCE!"
               />
             </div>
-            <div>
+            <div className="col-span-full">
               <Label>Excellence Points (Rich Text)</Label>
               <RichTextEditor
                 content={formData.exhibiting_experience_excellence_points_html}
@@ -809,7 +809,7 @@ export function EditCityAdmin() {
         {/* SEO Metadata */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Metadata</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="seo_title">SEO Title</Label>
               <Input
@@ -819,7 +819,7 @@ export function EditCityAdmin() {
                 placeholder="SEO title for the city page"
               />
             </div>
-            <div>
+            <div className="col-span-full">
               <Label htmlFor="seo_description">SEO Description</Label>
               <Textarea
                 id="seo_description"
@@ -829,7 +829,7 @@ export function EditCityAdmin() {
                 rows={3}
               />
             </div>
-            <div>
+            <div className="col-span-full">
               <Label htmlFor="seo_keywords">SEO Keywords</Label>
               <TagInput
                 tags={getKeywordsArray()}

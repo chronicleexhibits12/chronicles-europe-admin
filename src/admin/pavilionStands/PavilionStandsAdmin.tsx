@@ -126,29 +126,31 @@ export function PavilionStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 1 (Hero Section)</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="hero-title">Hero Title</Label>
-              <Input
-                id="hero-title"
-                value={content.hero?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  hero: { ...content.hero, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="hero-title">Hero Title</Label>
+                <Input
+                  id="hero-title"
+                  value={content.hero?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    hero: { ...content.hero, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="hero-subtitle">Hero Subtitle</Label>
+                <Input
+                  id="hero-subtitle"
+                  value={content.hero?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    hero: { ...content.hero, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="hero-subtitle">Hero Subtitle</Label>
-              <Input
-                id="hero-subtitle"
-                value={content.hero?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  hero: { ...content.hero, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="hero-background">Background Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -201,7 +203,7 @@ export function PavilionStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2 (Why Choose Section)</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="why-choose-title">Title</Label>
               <Input
                 id="why-choose-title"
@@ -212,7 +214,7 @@ export function PavilionStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label>Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.whyChoose?.content || ''}
@@ -229,7 +231,7 @@ export function PavilionStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Benefits Section)</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="benefits-title">Benefits Title</Label>
               <Input
                 id="benefits-title"
@@ -240,7 +242,7 @@ export function PavilionStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -286,7 +288,7 @@ export function PavilionStandsAdmin() {
                 />
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <Label>Benefits Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.benefits?.content || ''}
@@ -303,29 +305,31 @@ export function PavilionStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Stand Project Text Section)</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="stand-project-title">Title</Label>
-              <Input
-                id="stand-project-title"
-                value={content.standProjectText?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  standProjectText: { ...content.standProjectText, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="stand-project-title">Title</Label>
+                <Input
+                  id="stand-project-title"
+                  value={content.standProjectText?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    standProjectText: { ...content.standProjectText, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="stand-project-highlight">Highlight Text</Label>
+                <Input
+                  id="stand-project-highlight"
+                  value={content.standProjectText?.highlight || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    standProjectText: { ...content.standProjectText, highlight: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="stand-project-highlight">Highlight Text</Label>
-              <Input
-                id="stand-project-highlight"
-                value={content.standProjectText?.highlight || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  standProjectText: { ...content.standProjectText, highlight: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label>Description (Rich Text)</Label>
               <RichTextEditor
                 content={content.standProjectText?.description || ''}
@@ -342,7 +346,7 @@ export function PavilionStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Advantages Section)</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="advantages-title">Title</Label>
               <Input
                 id="advantages-title"
@@ -353,7 +357,7 @@ export function PavilionStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="advantages-image">Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -399,7 +403,7 @@ export function PavilionStandsAdmin() {
                 />
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <Label>Advantages Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.advantages?.content || ''}
@@ -416,7 +420,7 @@ export function PavilionStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Our Expertise Section)</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="our-expertise-title">Title</Label>
               <Input
                 id="our-expertise-title"
@@ -427,7 +431,7 @@ export function PavilionStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label>Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.ourExpertise?.content || ''}
@@ -444,7 +448,7 @@ export function PavilionStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7 (Company Info Section)</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="company-info-title">Title</Label>
               <Input
                 id="company-info-title"
@@ -455,7 +459,7 @@ export function PavilionStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label>Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.companyInfo?.content || ''}

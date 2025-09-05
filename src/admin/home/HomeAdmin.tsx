@@ -2,12 +2,11 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { HomeAdminSkeleton } from '@/components/HomeAdminSkeleton'
 import { useHomePage } from '@/hooks/useHomeContent'
 import type { HomePage, SolutionItem } from '@/data/homeTypes'
-import { Upload, Save, Loader2, Plus, Trash2 } from 'lucide-react'
+import { Upload, Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { HomePageService } from '@/data/homeService'
 
@@ -110,25 +109,7 @@ export function HomeAdmin() {
     }
   }
 
-  const addSolutionItem = () => {
-    setFormData(prev => {
-      const solutions = { ...prev.solutions }
-      const items = [...(solutions.items || [])]
-      items.push({ title: '', description: '', image: '' })
-      solutions.items = items
-      return { ...prev, solutions }
-    })
-  }
 
-  const removeSolutionItem = (index: number) => {
-    setFormData(prev => {
-      const solutions = { ...prev.solutions }
-      const items = [...(solutions.items || [])]
-      items.splice(index, 1)
-      solutions.items = items
-      return { ...prev, solutions }
-    })
-  }
 
   const handleSave = async () => {
     if (!homePage?.id) return
@@ -185,7 +166,7 @@ export function HomeAdmin() {
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 1 (Hero)</h2>
           
           <div className="grid gap-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="hero-bg">Background Image</Label>
               <div className="flex gap-2 mt-1">
                 <Input
@@ -237,29 +218,31 @@ export function HomeAdmin() {
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2 (Exhibition Europe)</h2>
           
           <div className="grid gap-4">
-            <div>
-              <Label htmlFor="europe-title">Title</Label>
-              <Input
-                id="europe-title"
-                value={formData.exhibitionEurope?.title || ''}
-                onChange={(e) => handleInputChange('exhibitionEurope', 'title', e.target.value)}
-                placeholder="Enter Europe exhibition title"
-                className="mt-1"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="europe-title">Title</Label>
+                <Input
+                  id="europe-title"
+                  value={formData.exhibitionEurope?.title || ''}
+                  onChange={(e) => handleInputChange('exhibitionEurope', 'title', e.target.value)}
+                  placeholder="Enter Europe exhibition title"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="europe-subtitle">Subtitle</Label>
+                <Input
+                  id="europe-subtitle"
+                  value={formData.exhibitionEurope?.subtitle || ''}
+                  onChange={(e) => handleInputChange('exhibitionEurope', 'subtitle', e.target.value)}
+                  placeholder="Enter subtitle"
+                  className="mt-1"
+                />
+              </div>
             </div>
             
-            <div>
-              <Label htmlFor="europe-subtitle">Subtitle</Label>
-              <Input
-                id="europe-subtitle"
-                value={formData.exhibitionEurope?.subtitle || ''}
-                onChange={(e) => handleInputChange('exhibitionEurope', 'subtitle', e.target.value)}
-                placeholder="Enter subtitle"
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
+            <div className="w-full">
               <Label htmlFor="europe-booth">Booth Image</Label>
               <div className="flex gap-2 mt-1">
                 <Input
@@ -304,7 +287,7 @@ export function HomeAdmin() {
               )}
             </div>
             
-            <div>
+            <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
                 content={formData.exhibitionEurope?.htmlContent || ''}
@@ -321,7 +304,7 @@ export function HomeAdmin() {
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Exhibition USA)</h2>
           
           <div className="grid gap-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="usa-title">Title</Label>
               <Input
                 id="usa-title"
@@ -332,7 +315,7 @@ export function HomeAdmin() {
               />
             </div>
             
-            <div>
+            <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
                 content={formData.exhibitionUSA?.htmlContent || ''}
@@ -349,7 +332,7 @@ export function HomeAdmin() {
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Solutions)</h2>
           
           <div className="grid gap-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="solutions-title">Title</Label>
               <Input
                 id="solutions-title"
@@ -360,7 +343,7 @@ export function HomeAdmin() {
               />
             </div>
             
-            <div>
+            <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
                 content={formData.solutions?.htmlContent || ''}
@@ -370,52 +353,37 @@ export function HomeAdmin() {
               />
             </div>
             
-            <div>
+            <div className="w-full">
               <div className="flex items-center justify-between mb-3">
                 <Label>Solution Items</Label>
-                <Button type="button" onClick={addSolutionItem} size="sm" variant="outline">
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Item
-                </Button>
               </div>
               
               <div className="space-y-4">
                 {formData.solutions?.items?.map((item, index) => (
                   <div key={index} className="p-4 border rounded-lg space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Item {index + 1}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeSolutionItem(index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Title</Label>
+                        <Input
+                          value={item.title}
+                          onChange={(e) => handleSolutionItemChange(index, 'title', e.target.value)}
+                          placeholder="Enter item title"
+                          className="mt-1"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label>Description</Label>
+                        <Input
+                          value={item.description}
+                          onChange={(e) => handleSolutionItemChange(index, 'description', e.target.value)}
+                          placeholder="Enter item description"
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
                     
-                    <div>
-                      <Label>Title</Label>
-                      <Input
-                        value={item.title}
-                        onChange={(e) => handleSolutionItemChange(index, 'title', e.target.value)}
-                        placeholder="Enter item title"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label>Description</Label>
-                      <Textarea
-                        value={item.description}
-                        onChange={(e) => handleSolutionItemChange(index, 'description', e.target.value)}
-                        placeholder="Enter item description..."
-                        className="mt-1"
-                        rows={3}
-                      />
-                    </div>
-                    
-                    <div>
+                    <div className="w-full">
                       <Label>Image</Label>
                       <div className="flex gap-2 mt-1">
                         <Input
@@ -472,29 +440,31 @@ export function HomeAdmin() {
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Main Section)</h2>
           
           <div className="grid gap-4">
-            <div>
-              <Label htmlFor="main-title">Title</Label>
-              <Input
-                id="main-title"
-                value={formData.mainSection?.title || ''}
-                onChange={(e) => handleInputChange('mainSection', 'title', e.target.value)}
-                placeholder="Enter main title"
-                className="mt-1"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="main-title">Title</Label>
+                <Input
+                  id="main-title"
+                  value={formData.mainSection?.title || ''}
+                  onChange={(e) => handleInputChange('mainSection', 'title', e.target.value)}
+                  placeholder="Enter main title"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="main-subtitle">Subtitle</Label>
+                <Input
+                  id="main-subtitle"
+                  value={formData.mainSection?.subtitle || ''}
+                  onChange={(e) => handleInputChange('mainSection', 'subtitle', e.target.value)}
+                  placeholder="Enter subtitle"
+                  className="mt-1"
+                />
+              </div>
             </div>
             
-            <div>
-              <Label htmlFor="main-subtitle">Subtitle</Label>
-              <Input
-                id="main-subtitle"
-                value={formData.mainSection?.subtitle || ''}
-                onChange={(e) => handleInputChange('mainSection', 'subtitle', e.target.value)}
-                placeholder="Enter subtitle"
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
+            <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
                 content={formData.mainSection?.htmlContent || ''}
@@ -511,29 +481,31 @@ export function HomeAdmin() {
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Why We're the Best)</h2>
           
           <div className="grid gap-4">
-            <div>
-              <Label htmlFor="why-title">Title</Label>
-              <Input
-                id="why-title"
-                value={formData.whyBest?.title || ''}
-                onChange={(e) => handleInputChange('whyBest', 'title', e.target.value)}
-                placeholder="Enter title"
-                className="mt-1"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="why-title">Title</Label>
+                <Input
+                  id="why-title"
+                  value={formData.whyBest?.title || ''}
+                  onChange={(e) => handleInputChange('whyBest', 'title', e.target.value)}
+                  placeholder="Enter title"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="why-subtitle">Subtitle</Label>
+                <Input
+                  id="why-subtitle"
+                  value={formData.whyBest?.subtitle || ''}
+                  onChange={(e) => handleInputChange('whyBest', 'subtitle', e.target.value)}
+                  placeholder="Enter subtitle"
+                  className="mt-1"
+                />
+              </div>
             </div>
             
-            <div>
-              <Label htmlFor="why-subtitle">Subtitle</Label>
-              <Input
-                id="why-subtitle"
-                value={formData.whyBest?.subtitle || ''}
-                onChange={(e) => handleInputChange('whyBest', 'subtitle', e.target.value)}
-                placeholder="Enter subtitle"
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
+            <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
                 content={formData.whyBest?.htmlContent || ''}

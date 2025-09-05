@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { LogOut, User } from 'lucide-react'
+import logo from '@/assets/logo.svg'
 
 export function Sidebar() {
   const location = useLocation()
@@ -16,9 +17,13 @@ export function Sidebar() {
   return (
     <div className="w-64 bg-sidebar border-r border-sidebar-border h-screen fixed left-0 top-0 flex flex-col">
       <div className="p-6">
-        <h1 className="text-xl font-bold text-sidebar-foreground">
-          Admin Panel
-        </h1>
+        <div className="flex items-center">
+          <img 
+            src={logo} 
+            alt="Logo" 
+            className="h-14 w-auto"
+          />
+        </div>
       </div>
       
       <nav className="px-4 flex-1">

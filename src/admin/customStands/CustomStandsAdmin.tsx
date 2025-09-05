@@ -124,29 +124,31 @@ export function CustomStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 1 (Hero Section)</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="hero-title">Hero Title</Label>
-              <Input
-                id="hero-title"
-                value={content.hero?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  hero: { ...content.hero, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="hero-title">Hero Title</Label>
+                <Input
+                  id="hero-title"
+                  value={content.hero?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    hero: { ...content.hero, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="hero-subtitle">Hero Subtitle</Label>
+                <Input
+                  id="hero-subtitle"
+                  value={content.hero?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    hero: { ...content.hero, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="hero-subtitle">Hero Subtitle</Label>
-              <Input
-                id="hero-subtitle"
-                value={content.hero?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  hero: { ...content.hero, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="hero-background">Background Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -199,7 +201,7 @@ export function CustomStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2 (Benefits Section)</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="benefits-title">Benefits Title</Label>
               <Input
                 id="benefits-title"
@@ -210,7 +212,7 @@ export function CustomStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -256,7 +258,7 @@ export function CustomStandsAdmin() {
                 />
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <Label>Benefits Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.benefits?.content || ''}
@@ -273,7 +275,7 @@ export function CustomStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Points Table Section)</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="points-table-title">Title</Label>
               <Input
                 id="points-table-title"
@@ -284,7 +286,7 @@ export function CustomStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label>Points Table Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.pointsTable?.content || ''}
@@ -301,38 +303,38 @@ export function CustomStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Stand Project Text Section)</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="stand-project-title">Title</Label>
-              <Input
-                id="stand-project-title"
-                value={content.standProjectText?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  standProjectText: { ...content.standProjectText, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="stand-project-title">Title</Label>
+                <Input
+                  id="stand-project-title"
+                  value={content.standProjectText?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    standProjectText: { ...content.standProjectText, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="stand-project-highlight">Highlight Text</Label>
+                <Input
+                  id="stand-project-highlight"
+                  value={content.standProjectText?.highlight || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    standProjectText: { ...content.standProjectText, highlight: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="stand-project-highlight">Highlight Text</Label>
-              <Input
-                id="stand-project-highlight"
-                value={content.standProjectText?.highlight || ''}
-                onChange={(e) => updateContent({
+            <div className="w-full">
+              <Label>Description (Rich Text)</Label>
+              <RichTextEditor
+                content={content.standProjectText?.description || ''}
+                onChange={(newContent) => updateContent({
                   ...content,
-                  standProjectText: { ...content.standProjectText, highlight: e.target.value }
+                  standProjectText: { ...content.standProjectText, description: newContent }
                 })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="stand-project-description">Description</Label>
-              <Textarea
-                id="stand-project-description"
-                value={content.standProjectText?.description || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  standProjectText: { ...content.standProjectText, description: e.target.value }
-                })}
-                rows={4}
               />
             </div>
           </div>
@@ -342,29 +344,31 @@ export function CustomStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Exhibition Benefits Section)</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="exhibition-benefits-title">Title</Label>
-              <Input
-                id="exhibition-benefits-title"
-                value={content.exhibitionBenefits?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  exhibitionBenefits: { ...content.exhibitionBenefits, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="exhibition-benefits-title">Title</Label>
+                <Input
+                  id="exhibition-benefits-title"
+                  value={content.exhibitionBenefits?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    exhibitionBenefits: { ...content.exhibitionBenefits, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="exhibition-benefits-subtitle">Subtitle</Label>
+                <Input
+                  id="exhibition-benefits-subtitle"
+                  value={content.exhibitionBenefits?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    exhibitionBenefits: { ...content.exhibitionBenefits, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="exhibition-benefits-subtitle">Subtitle</Label>
-              <Input
-                id="exhibition-benefits-subtitle"
-                value={content.exhibitionBenefits?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  exhibitionBenefits: { ...content.exhibitionBenefits, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="exhibition-benefits-image">Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -410,7 +414,7 @@ export function CustomStandsAdmin() {
                 />
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <Label>Exhibition Benefits Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.exhibitionBenefits?.content || ''}
@@ -427,29 +431,31 @@ export function CustomStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Bespoke Section)</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="bespoke-title">Title</Label>
-              <Input
-                id="bespoke-title"
-                value={content.bespoke?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  bespoke: { ...content.bespoke, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="bespoke-title">Title</Label>
+                <Input
+                  id="bespoke-title"
+                  value={content.bespoke?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    bespoke: { ...content.bespoke, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="bespoke-subtitle">Subtitle</Label>
+                <Input
+                  id="bespoke-subtitle"
+                  value={content.bespoke?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    bespoke: { ...content.bespoke, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="bespoke-subtitle">Subtitle</Label>
-              <Input
-                id="bespoke-subtitle"
-                value={content.bespoke?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  bespoke: { ...content.bespoke, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="bespoke-description">Description</Label>
               <Textarea
                 id="bespoke-description"
@@ -468,29 +474,31 @@ export function CustomStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7 (Fresh Design Section)</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="fresh-design-title">Title</Label>
-              <Input
-                id="fresh-design-title"
-                value={content.freshDesign?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  freshDesign: { ...content.freshDesign, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="fresh-design-title">Title</Label>
+                <Input
+                  id="fresh-design-title"
+                  value={content.freshDesign?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    freshDesign: { ...content.freshDesign, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="fresh-design-subtitle">Subtitle</Label>
+                <Input
+                  id="fresh-design-subtitle"
+                  value={content.freshDesign?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    freshDesign: { ...content.freshDesign, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="fresh-design-subtitle">Subtitle</Label>
-              <Input
-                id="fresh-design-subtitle"
-                value={content.freshDesign?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  freshDesign: { ...content.freshDesign, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="fresh-design-description">Description</Label>
               <Textarea
                 id="fresh-design-description"
@@ -509,29 +517,31 @@ export function CustomStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 8 (Cost Section)</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="cost-section-title">Title</Label>
-              <Input
-                id="cost-section-title"
-                value={content.costSection?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  costSection: { ...content.costSection, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="cost-section-title">Title</Label>
+                <Input
+                  id="cost-section-title"
+                  value={content.costSection?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    costSection: { ...content.costSection, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="cost-section-subtitle">Subtitle</Label>
+                <Input
+                  id="cost-section-subtitle"
+                  value={content.costSection?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    costSection: { ...content.costSection, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="cost-section-subtitle">Subtitle</Label>
-              <Input
-                id="cost-section-subtitle"
-                value={content.costSection?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  costSection: { ...content.costSection, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="cost-section-description">Description</Label>
               <Textarea
                 id="cost-section-description"

@@ -354,25 +354,27 @@ export function AboutAdmin() {
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Facts Section)</h2>
           
           <div className="grid gap-4">
-            <div>
-              <Label htmlFor="facts-title">Facts Title</Label>
-              <Input
-                id="facts-title"
-                value={formData.factsSection?.title || ''}
-                onChange={(e) => handleInputChange('factsSection', 'title', e.target.value)}
-                placeholder="Enter facts title"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="facts-description">Facts Description</Label>
-              <Textarea
-                id="facts-description"
-                value={formData.factsSection?.description || ''}
-                onChange={(e) => handleInputChange('factsSection', 'description', e.target.value)}
-                placeholder="Enter facts description"
-                rows={3}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="facts-title">Facts Title</Label>
+                <Input
+                  id="facts-title"
+                  value={formData.factsSection?.title || ''}
+                  onChange={(e) => handleInputChange('factsSection', 'title', e.target.value)}
+                  placeholder="Enter facts title"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="facts-description">Facts Description</Label>
+                <Textarea
+                  id="facts-description"
+                  value={formData.factsSection?.description || ''}
+                  onChange={(e) => handleInputChange('factsSection', 'description', e.target.value)}
+                  placeholder="Enter facts description"
+                  rows={3}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -423,23 +425,26 @@ export function AboutAdmin() {
                     </div>
                   </div>
                   
-                  <div>
-                    <Label>Label</Label>
-                    <Input
-                      value={stat.label}
-                      onChange={(e) => handleStatChange(index, 'label', e.target.value)}
-                      placeholder="Enter label"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Label</Label>
+                      <Input
+                        value={stat.label}
+                        onChange={(e) => handleStatChange(index, 'label', e.target.value)}
+                        placeholder="Enter label"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Description</Label>
+                      <Input
+                        value={stat.description}
+                        onChange={(e) => handleStatChange(index, 'description', e.target.value)}
+                        placeholder="Enter description"
+                      />
+                    </div>
                   </div>
-                  
-                  <div>
-                    <Label>Description</Label>
-                    <Input
-                      value={stat.description}
-                      onChange={(e) => handleStatChange(index, 'description', e.target.value)}
-                      placeholder="Enter description"
-                    />
-                  </div>
+
                 </div>
               ))}
             </div>
@@ -451,25 +456,27 @@ export function AboutAdmin() {
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Team Information)</h2>
           
           <div className="grid gap-4">
-            <div>
-              <Label htmlFor="team-title">Team Title</Label>
-              <Input
-                id="team-title"
-                value={formData.teamInfo?.title || ''}
-                onChange={(e) => handleInputChange('teamInfo', 'title', e.target.value)}
-                placeholder="Enter team title"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="team-description">Team Description</Label>
-              <Textarea
-                id="team-description"
-                value={formData.teamInfo?.description || ''}
-                onChange={(e) => handleInputChange('teamInfo', 'description', e.target.value)}
-                placeholder="Enter team description"
-                rows={3}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="team-title">Team Title</Label>
+                <Input
+                  id="team-title"
+                  value={formData.teamInfo?.title || ''}
+                  onChange={(e) => handleInputChange('teamInfo', 'title', e.target.value)}
+                  placeholder="Enter team title"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="team-description">Team Description</Label>
+                <Textarea
+                  id="team-description"
+                  value={formData.teamInfo?.description || ''}
+                  onChange={(e) => handleInputChange('teamInfo', 'description', e.target.value)}
+                  placeholder="Enter team description"
+                  rows={3}
+                />
+              </div>
             </div>
             
             <div>
@@ -544,23 +551,25 @@ export function AboutAdmin() {
                     </Button>
                   </div>
                   
-                  <div>
-                    <Label>Title</Label>
-                    <Input
-                      value={service.title}
-                      onChange={(e) => handleServiceChange(index, 'title', e.target.value)}
-                      placeholder="Enter service title"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label>Description</Label>
-                    <Textarea
-                      value={service.description}
-                      onChange={(e) => handleServiceChange(index, 'description', e.target.value)}
-                      placeholder="Enter service description"
-                      rows={3}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Title</Label>
+                      <Input
+                        value={service.title}
+                        onChange={(e) => handleServiceChange(index, 'title', e.target.value)}
+                        placeholder="Enter service title"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Description</Label>
+                      <Textarea
+                        value={service.description}
+                        onChange={(e) => handleServiceChange(index, 'description', e.target.value)}
+                        placeholder="Enter service description"
+                        rows={3}
+                      />
+                    </div>
                   </div>
                   
                   <div>

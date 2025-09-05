@@ -124,29 +124,31 @@ export function DoubleDeckStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 1 [Hero Section]</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="hero-title">Hero Title</Label>
-              <Input
-                id="hero-title"
-                value={content.hero?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  hero: { ...content.hero, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="hero-title">Hero Title</Label>
+                <Input
+                  id="hero-title"
+                  value={content.hero?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    hero: { ...content.hero, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="hero-subtitle">Hero Subtitle</Label>
+                <Input
+                  id="hero-subtitle"
+                  value={content.hero?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    hero: { ...content.hero, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="hero-subtitle">Hero Subtitle</Label>
-              <Input
-                id="hero-subtitle"
-                value={content.hero?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  hero: { ...content.hero, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="hero-background">Background Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -199,7 +201,7 @@ export function DoubleDeckStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2 [Benefits Section]</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="benefits-title">Benefits Title</Label>
               <Input
                 id="benefits-title"
@@ -210,7 +212,7 @@ export function DoubleDeckStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -256,7 +258,7 @@ export function DoubleDeckStandsAdmin() {
                 />
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <Label>Benefits Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.benefits?.content || ''}
@@ -273,7 +275,7 @@ export function DoubleDeckStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 [Points Table Section]</h2>
           <div className="space-y-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="points-table-title">Title</Label>
               <Input
                 id="points-table-title"
@@ -284,7 +286,7 @@ export function DoubleDeckStandsAdmin() {
                 })}
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label>Points Table Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.pointsTable?.content || ''}
@@ -301,29 +303,31 @@ export function DoubleDeckStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 [Stand Project Text Section]</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="stand-project-title">Title</Label>
-              <Input
-                id="stand-project-title"
-                value={content.standProjectText?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  standProjectText: { ...content.standProjectText, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="stand-project-title">Title</Label>
+                <Input
+                  id="stand-project-title"
+                  value={content.standProjectText?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    standProjectText: { ...content.standProjectText, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="stand-project-highlight">Highlight Text</Label>
+                <Input
+                  id="stand-project-highlight"
+                  value={content.standProjectText?.highlight || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    standProjectText: { ...content.standProjectText, highlight: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="stand-project-highlight">Highlight Text</Label>
-              <Input
-                id="stand-project-highlight"
-                value={content.standProjectText?.highlight || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  standProjectText: { ...content.standProjectText, highlight: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label>Description (Rich Text)</Label>
               <RichTextEditor
                 content={content.standProjectText?.description || ''}
@@ -340,29 +344,31 @@ export function DoubleDeckStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 [Exhibition Benefits Section]</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="exhibition-benefits-title">Title</Label>
-              <Input
-                id="exhibition-benefits-title"
-                value={content.exhibitionBenefits?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  exhibitionBenefits: { ...content.exhibitionBenefits, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="exhibition-benefits-title">Title</Label>
+                <Input
+                  id="exhibition-benefits-title"
+                  value={content.exhibitionBenefits?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    exhibitionBenefits: { ...content.exhibitionBenefits, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="exhibition-benefits-subtitle">Subtitle</Label>
+                <Input
+                  id="exhibition-benefits-subtitle"
+                  value={content.exhibitionBenefits?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    exhibitionBenefits: { ...content.exhibitionBenefits, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="exhibition-benefits-subtitle">Subtitle</Label>
-              <Input
-                id="exhibition-benefits-subtitle"
-                value={content.exhibitionBenefits?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  exhibitionBenefits: { ...content.exhibitionBenefits, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="exhibition-benefits-image">Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -408,7 +414,7 @@ export function DoubleDeckStandsAdmin() {
                 />
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <Label>Exhibition Benefits Content (Rich Text)</Label>
               <RichTextEditor
                 content={content.exhibitionBenefits?.content || ''}
@@ -425,29 +431,31 @@ export function DoubleDeckStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 [Booth Partner Section]</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="booth-partner-title">Title</Label>
-              <Input
-                id="booth-partner-title"
-                value={content.boothPartner?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  boothPartner: { ...content.boothPartner, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="booth-partner-title">Title</Label>
+                <Input
+                  id="booth-partner-title"
+                  value={content.boothPartner?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    boothPartner: { ...content.boothPartner, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="booth-partner-subtitle">Subtitle</Label>
+                <Input
+                  id="booth-partner-subtitle"
+                  value={content.boothPartner?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    boothPartner: { ...content.boothPartner, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="booth-partner-subtitle">Subtitle</Label>
-              <Input
-                id="booth-partner-subtitle"
-                value={content.boothPartner?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  boothPartner: { ...content.boothPartner, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="booth-partner-description">Description</Label>
               <Textarea
                 id="booth-partner-description"
@@ -466,29 +474,31 @@ export function DoubleDeckStandsAdmin() {
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7 [Bold Statement Section]</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="bold-statement-title">Title</Label>
-              <Input
-                id="bold-statement-title"
-                value={content.boldStatement?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  boldStatement: { ...content.boldStatement, title: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="bold-statement-title">Title</Label>
+                <Input
+                  id="bold-statement-title"
+                  value={content.boldStatement?.title || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    boldStatement: { ...content.boldStatement, title: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="bold-statement-subtitle">Subtitle</Label>
+                <Input
+                  id="bold-statement-subtitle"
+                  value={content.boldStatement?.subtitle || ''}
+                  onChange={(e) => updateContent({
+                    ...content,
+                    boldStatement: { ...content.boldStatement, subtitle: e.target.value }
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="bold-statement-subtitle">Subtitle</Label>
-              <Input
-                id="bold-statement-subtitle"
-                value={content.boldStatement?.subtitle || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  boldStatement: { ...content.boldStatement, subtitle: e.target.value }
-                })}
-              />
-            </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="bold-statement-description">Description</Label>
               <Textarea
                 id="bold-statement-description"

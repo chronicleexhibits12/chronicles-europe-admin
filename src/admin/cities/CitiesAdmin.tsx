@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2 } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCities } from '@/hooks/useCitiesContent'
 import { CitiesService } from '@/data/citiesService'
@@ -150,6 +150,13 @@ export function CitiesAdmin() {
                   {city.updated_at ? new Date(city.updated_at).toLocaleDateString() : 'Never'}
                 </TableCell>
                 <TableCell className="text-right space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`/countries/${city.country_slug}/${city.city_slug}`, '_blank')}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

@@ -12,7 +12,7 @@ import {
 import { useHomePage } from '@/hooks/useHomeContent'
 import { useAboutPage } from '@/hooks/useAboutContent'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
-import { Edit, FileText } from 'lucide-react'
+import { Edit, FileText, Eye } from 'lucide-react'
 
 interface PageInfo {
   id: string
@@ -43,8 +43,8 @@ export function Pages() {
       {
         id: 'about',
         name: 'About Page',
-        path: '/about',
-        editPath: '/admin/about',
+        path: '/about-us',
+        editPath: '/about-us',
         lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Company information, team details, services, and statistics'
       }
@@ -54,6 +54,11 @@ export function Pages() {
 
   const handleEdit = (editPath: string) => {
     navigate(editPath)
+  }
+
+  const handleView = (path: string) => {
+    // Open the website page in a new tab
+    window.open(`https://chronicleseurope.vercel.app${path}`, '_blank')
   }
 
   const loading = homeLoading || aboutLoading || customStandsLoading
@@ -119,15 +124,26 @@ export function Pages() {
                   {page.lastUpdated}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleEdit(page.editPath)}
-                    className="h-8 px-3"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleView(page.path)}
+                      className="h-8 px-3"
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleEdit(page.editPath)}
+                      className="h-8 px-3"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

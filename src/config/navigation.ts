@@ -21,6 +21,12 @@ export const navigationItems: NavigationItem[] = [
     icon: Building
   },
   {
+    id: 'about',
+    label: 'About Us',
+    href: '/about-us',
+    icon: FileText
+  },
+  {
     id: 'cities',
     label: 'Cities',
     href: '/admin/cities',

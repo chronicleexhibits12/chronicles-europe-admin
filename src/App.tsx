@@ -38,7 +38,7 @@ function App() {
             <Route path="pages" element={<Pages />} />
             <Route path="stands" element={<Stands />} />
             <Route path="admin/home" element={<HomeAdmin />} />
-            <Route path="admin/about" element={<AboutAdmin />} />
+            <Route path="about-us" element={<AboutAdmin />} />
             <Route path="admin/custom-stands" element={<CustomStandsAdmin />} />
             <Route path="admin/double-decker-stands" element={<DoubleDeckStandsAdmin />} />
             <Route path="admin/modular-stands" element={<ModularStandsAdmin />} />

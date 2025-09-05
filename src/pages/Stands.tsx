@@ -13,7 +13,7 @@ import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
 import { useDoubleDeckStandsContent } from '@/hooks/useDoubleDeckStandsContent'
 import { useModularStandsContent } from '@/hooks/useModularStandsContent'
 import { usePavilionStandsPage } from '@/hooks/usePavilionStandsContent'
-import { Edit, Building } from 'lucide-react'
+import { Edit, Building, Eye } from 'lucide-react'
 
 interface StandInfo {
   id: string
@@ -37,7 +37,7 @@ export function Stands() {
       {
         id: 'custom-stands',
         name: 'Custom Exhibition Stands',
-        path: '/custom-stands',
+        path: 'https://chronicleseurope.vercel.app/custom-stands',
         editPath: '/admin/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'
@@ -45,7 +45,7 @@ export function Stands() {
       {
         id: 'double-decker-stands',
         name: 'Double Decker Exhibition Stands',
-        path: '/double-decker-stands',
+        path: 'https://chronicleseurope.vercel.app/double-decker-stands',
         editPath: '/admin/double-decker-stands',
         lastUpdated: doubleDeckStandsPage?.updatedAt ? new Date(doubleDeckStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Double decker exhibition stands design and build services information'
@@ -53,7 +53,7 @@ export function Stands() {
       {
         id: 'modular-stands',
         name: 'Modular Exhibition Stands',
-        path: '/modular-stands',
+        path: 'https://chronicleseurope.vercel.app/modular-stands',
         editPath: '/admin/modular-stands',
         lastUpdated: modularStandsPage?.updatedAt ? new Date(modularStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Modular exhibition stands design and build services information'
@@ -61,7 +61,7 @@ export function Stands() {
       {
         id: 'pavilion-stands',
         name: 'Pavilion Exhibition Stands',
-        path: '/pavilion-stands',
+        path: 'https://chronicleseurope.vercel.app/pavilion-design',
         editPath: '/admin/pavilion-stands',
         lastUpdated: pavilionStandsPage?.updatedAt ? new Date(pavilionStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Pavilion exhibition stands design and build services information'
@@ -74,7 +74,10 @@ export function Stands() {
     navigate(editPath)
   }
 
-
+  const handleView = (path: string) => {
+    // Open the page in a new tab
+    window.open(path, '_blank')
+  }
 
   const loading = customStandsLoading || doubleDeckStandsLoading || modularStandsLoading || pavilionStandsLoading
 
@@ -139,15 +142,26 @@ export function Stands() {
                   {stand.lastUpdated}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleEdit(stand.editPath)}
-                    className="h-8 px-3"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleView(stand.path)}
+                      className="h-8 px-3"
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleEdit(stand.editPath)}
+                      className="h-8 px-3"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

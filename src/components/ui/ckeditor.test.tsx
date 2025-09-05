@@ -16,7 +16,7 @@ export function CKEditorTest() {
       </div>
       <div className="mt-4">
         <h2 className="text-xl font-semibold">Output:</h2>
-        <div dangerouslySetInnerHTML={{ __html: content }} />
+        <div className="rich-content" dangerouslySetInnerHTML={{ __html: content }} />
       </div>
     </div>
   );

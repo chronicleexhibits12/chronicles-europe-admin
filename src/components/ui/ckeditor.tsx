@@ -1,4 +1,3 @@
-
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import '../../styles/content.css';
@@ -56,6 +55,14 @@ export function CKEditorComponent({ content, onChange, placeholder, className }:
               { model: 'heading5', view: 'h5', title: 'Heading 5', class: 'ck-heading_heading5' },
               { model: 'heading6', view: 'h6', title: 'Heading 6', class: 'ck-heading_heading6' }
             ]
+          }
+        }}
+        // Apply rich-content styling to the editor content
+        onReady={(editor) => {
+          // Add the rich-content class to the editor content element
+          const editableElement = editor.ui.view.editable.element;
+          if (editableElement) {
+            editableElement.classList.add('rich-content');
           }
         }}
       />

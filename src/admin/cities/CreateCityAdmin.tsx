@@ -9,6 +9,7 @@ import { TagInput } from '@/components/ui/tag-input'
 import { Loader2, Save, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { CitiesService } from '@/data/citiesService'
+import { slugify } from '@/utils/slugify'
 
 export function CreateCityAdmin() {
   const navigate = useNavigate()
@@ -223,6 +224,15 @@ export function CreateCityAdmin() {
       ...prev,
       [field]: value
     }))
+
+    // Auto-generate slug when city name is changed
+    if (field === 'name') {
+      const generatedSlug = slugify(value)
+      setFormData(prev => ({
+        ...prev,
+        city_slug: generatedSlug
+      }))
+    }
   }
 
   const handleKeywordsChange = (keywords: string[]) => {

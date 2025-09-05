@@ -26,6 +26,7 @@ import { CountriesService } from '@/data/countriesService'
 import { CitiesService } from '@/data/citiesService'
 import type { City } from '@/data/citiesTypes'
 import { TagInput } from '@/components/ui/tag-input'
+import { slugify } from '@/utils/slugify'
 
 interface ProcessStep {
   id: string
@@ -493,6 +494,15 @@ export function EditCountryAdmin() {
       ...prev,
       [field]: value
     }))
+
+    // Auto-generate slug when country name is changed
+    if (field === 'name') {
+      const generatedSlug = slugify(value)
+      setFormData(prev => ({
+        ...prev,
+        slug: generatedSlug
+      }))
+    }
   }
 
   const handleRichTextChange = (field: string, value: string) => {

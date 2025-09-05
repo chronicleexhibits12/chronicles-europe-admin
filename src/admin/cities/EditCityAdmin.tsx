@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog'
 import { useCity } from '@/hooks/useCitiesContent'
 import { CitiesService } from '@/data/citiesService'
+import { slugify } from '@/utils/slugify'
 
 interface CityData {
   // Basic city information
@@ -373,6 +374,15 @@ export function EditCityAdmin() {
       ...prev,
       [field]: value
     }))
+
+    // Auto-generate slug when city name is changed
+    if (field === 'name') {
+      const generatedSlug = slugify(value)
+      setFormData(prev => ({
+        ...prev,
+        city_slug: generatedSlug
+      }))
+    }
   }
 
   const handleKeywordsChange = (keywords: string[]) => {

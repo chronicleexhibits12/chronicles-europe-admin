@@ -1,4 +1,4 @@
-import { Home, Building, FileText } from 'lucide-react'
+import { Home, Building, FileText, MapPin, Globe } from 'lucide-react'
 import type { NavigationItem } from '@/data/commonTypes'
 
 export const navigationItems: NavigationItem[] = [
@@ -19,17 +19,17 @@ export const navigationItems: NavigationItem[] = [
     label: 'Stands',
     href: '/stands',
     icon: Building
+  },
+  {
+    id: 'cities',
+    label: 'Cities',
+    href: '/admin/cities',
+    icon: MapPin
+  },
+  {
+    id: 'countries',
+    label: 'Countries',
+    href: '/admin/countries',
+    icon: Globe
   }
-  // {
-  //   id: 'home-admin',
-  //   label: 'Home Admin',
-  //   href: '/admin/home',
-  //   icon: Settings
-  // },
-  // {
-  //   id: 'about-admin',
-  //   label: 'About Admin',
-  //   href: '/admin/about',
-  //   icon: Info
-  // }
 ]

@@ -12,6 +12,12 @@ import { CustomStandsAdmin } from '@/admin/customStands/CustomStandsAdmin'
 import { DoubleDeckStandsAdmin } from '@/admin/doubleDeckStands/DoubleDeckStandsAdmin'
 import { ModularStandsAdmin } from '@/admin/modularStands/ModularStandsAdmin'
 import { PavilionStandsAdmin } from '@/admin/pavilionStands/PavilionStandsAdmin'
+import { CitiesAdmin } from '@/admin/cities/CitiesAdmin'
+import { CreateCityAdmin } from '@/admin/cities/CreateCityAdmin'
+import { EditCityAdmin } from '@/admin/cities/EditCityAdmin'
+import { CountriesAdmin } from '@/admin/countries/CountriesAdmin'
+import { CreateCountryAdmin } from '@/admin/countries/CreateCountryAdmin'
+import { EditCountryAdmin } from '@/admin/countries/EditCountryAdmin'
 import { Toaster } from 'sonner'
 
 function App() {
@@ -37,6 +43,12 @@ function App() {
             <Route path="admin/double-decker-stands" element={<DoubleDeckStandsAdmin />} />
             <Route path="admin/modular-stands" element={<ModularStandsAdmin />} />
             <Route path="admin/pavilion-stands" element={<PavilionStandsAdmin />} />
+            <Route path="admin/cities" element={<CitiesAdmin />} />
+            <Route path="admin/cities/create" element={<CreateCityAdmin />} />
+            <Route path="admin/cities/:id/edit" element={<EditCityAdmin />} />
+            <Route path="admin/countries" element={<CountriesAdmin />} />
+            <Route path="admin/countries/create" element={<CreateCountryAdmin />} />
+            <Route path="admin/countries/:id/edit" element={<EditCountryAdmin />} />
           </Route>
         </Routes>
       </Router>

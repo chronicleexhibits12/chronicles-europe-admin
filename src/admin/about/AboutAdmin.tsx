@@ -9,6 +9,7 @@ import type { AboutPage, AboutCompanyStat, AboutService } from '@/data/aboutType
 import { AboutPageService } from '@/data/aboutService'
 import { Upload, Save, Loader2, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { TagInput } from '@/components/ui/tag-input'
 
 export function AboutAdmin() {
   const { data: aboutPage, loading, error, updateAboutPage, uploadImage } = useAboutPage()
@@ -133,7 +134,13 @@ export function AboutAdmin() {
     })
   }
 
+  const handleKeywordsChange = (keywords: string[]) => {
+    handleInputChange('meta', 'keywords', keywords.join(', '))
+  }
 
+  const getKeywordsArray = () => {
+    return formData.meta?.keywords ? formData.meta.keywords.split(',').map(k => k.trim()).filter(k => k) : []
+  }
 
   const handleSave = async () => {
     if (!aboutPage?.id) return
@@ -186,7 +193,7 @@ export function AboutAdmin() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">About Page Content</h1>
@@ -194,7 +201,10 @@ export function AboutAdmin() {
       </div>
 
       {/* Form */}
-      <form className="space-y-8">
+      <form className="space-y-8" onSubmit={(e) => {
+        e.preventDefault(); // Prevent page reload
+        handleSave();
+      }}>
         {/* Section 1: Hero Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 1 (Hero Section)</h2>
@@ -207,13 +217,12 @@ export function AboutAdmin() {
                 value={formData.hero?.title || ''}
                 onChange={(e) => handleInputChange('hero', 'title', e.target.value)}
                 placeholder="Enter hero title"
-                className="mt-1"
               />
             </div>
             
             <div>
               <Label htmlFor="hero-bg">Background Image</Label>
-              <div className="flex gap-2 mt-1">
+              <div className="flex gap-2">
                 <Input
                   id="hero-bg"
                   value={formData.hero?.backgroundImage || ''}
@@ -246,11 +255,11 @@ export function AboutAdmin() {
                 </Button>
               </div>
               {formData.hero?.backgroundImage && (
-                <div className="relative inline-block">
+                <div className="relative inline-block mt-2">
                   <img
                     src={formData.hero.backgroundImage}
                     alt="Hero background"
-                    className="h-20 w-32 object-cover rounded border"
+                    className="h-32 object-cover rounded border"
                   />
                 </div>
               )}
@@ -271,7 +280,6 @@ export function AboutAdmin() {
                   value={formData.companyInfo?.yearsInBusiness || ''}
                   onChange={(e) => handleInputChange('companyInfo', 'yearsInBusiness', e.target.value)}
                   placeholder="e.g., 25+"
-                  className="mt-1"
                 />
               </div>
               
@@ -282,7 +290,6 @@ export function AboutAdmin() {
                   value={formData.companyInfo?.yearsLabel || ''}
                   onChange={(e) => handleInputChange('companyInfo', 'yearsLabel', e.target.value)}
                   placeholder="e.g., YEARS"
-                  className="mt-1"
                 />
               </div>
             </div>
@@ -294,7 +301,6 @@ export function AboutAdmin() {
                 value={formData.companyInfo?.whoWeAreTitle || ''}
                 onChange={(e) => handleInputChange('companyInfo', 'whoWeAreTitle', e.target.value)}
                 placeholder="Enter who we are title"
-                className="mt-1"
               />
             </div>
             
@@ -304,12 +310,11 @@ export function AboutAdmin() {
                 content={formData.companyInfo?.description || ''}
                 onChange={(content) => handleInputChange('companyInfo', 'description', content)}
                 placeholder="Enter company description..."
-                className="mt-1"
               />
             </div>
             
             <div>
-              <div className="mb-3">
+              <div className="mb-2">
                 <Label>Company Quotes</Label>
               </div>
               
@@ -356,7 +361,6 @@ export function AboutAdmin() {
                 value={formData.factsSection?.title || ''}
                 onChange={(e) => handleInputChange('factsSection', 'title', e.target.value)}
                 placeholder="Enter facts title"
-                className="mt-1"
               />
             </div>
             
@@ -367,7 +371,6 @@ export function AboutAdmin() {
                 value={formData.factsSection?.description || ''}
                 onChange={(e) => handleInputChange('factsSection', 'description', e.target.value)}
                 placeholder="Enter facts description"
-                className="mt-1"
                 rows={3}
               />
             </div>
@@ -407,7 +410,6 @@ export function AboutAdmin() {
                         value={stat.value}
                         onChange={(e) => handleStatChange(index, 'value', parseInt(e.target.value) || 0)}
                         placeholder="Enter value"
-                        className="mt-1"
                       />
                     </div>
                     
@@ -417,7 +419,6 @@ export function AboutAdmin() {
                         value={stat.icon}
                         onChange={(e) => handleStatChange(index, 'icon', e.target.value)}
                         placeholder="Enter icon"
-                        className="mt-1"
                       />
                     </div>
                   </div>
@@ -428,7 +429,6 @@ export function AboutAdmin() {
                       value={stat.label}
                       onChange={(e) => handleStatChange(index, 'label', e.target.value)}
                       placeholder="Enter label"
-                      className="mt-1"
                     />
                   </div>
                   
@@ -438,7 +438,6 @@ export function AboutAdmin() {
                       value={stat.description}
                       onChange={(e) => handleStatChange(index, 'description', e.target.value)}
                       placeholder="Enter description"
-                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -459,7 +458,6 @@ export function AboutAdmin() {
                 value={formData.teamInfo?.title || ''}
                 onChange={(e) => handleInputChange('teamInfo', 'title', e.target.value)}
                 placeholder="Enter team title"
-                className="mt-1"
               />
             </div>
             
@@ -470,14 +468,13 @@ export function AboutAdmin() {
                 value={formData.teamInfo?.description || ''}
                 onChange={(e) => handleInputChange('teamInfo', 'description', e.target.value)}
                 placeholder="Enter team description"
-                className="mt-1"
                 rows={3}
               />
             </div>
             
             <div>
               <Label htmlFor="team-image">Team Image</Label>
-              <div className="flex gap-2 mt-1">
+              <div className="flex gap-2">
                 <Input
                   id="team-image"
                   value={formData.teamInfo?.teamImage || ''}
@@ -510,11 +507,11 @@ export function AboutAdmin() {
                 </Button>
               </div>
               {formData.teamInfo?.teamImage && (
-                <div className="relative inline-block">
+                <div className="relative inline-block mt-2">
                   <img
                     src={formData.teamInfo.teamImage}
                     alt="Team"
-                    className="h-20 w-32 object-cover rounded border"
+                    className="h-32 object-cover rounded border"
                   />
                 </div>
               )}
@@ -553,7 +550,6 @@ export function AboutAdmin() {
                       value={service.title}
                       onChange={(e) => handleServiceChange(index, 'title', e.target.value)}
                       placeholder="Enter service title"
-                      className="mt-1"
                     />
                   </div>
                   
@@ -563,14 +559,13 @@ export function AboutAdmin() {
                       value={service.description}
                       onChange={(e) => handleServiceChange(index, 'description', e.target.value)}
                       placeholder="Enter service description"
-                      className="mt-1"
                       rows={3}
                     />
                   </div>
                   
                   <div>
                     <Label>Image</Label>
-                    <div className="flex gap-2 mt-1">
+                    <div className="flex gap-2">
                       <Input
                         value={service.image}
                         onChange={(e) => handleServiceChange(index, 'image', e.target.value)}
@@ -604,11 +599,11 @@ export function AboutAdmin() {
                       </Button>
                     </div>
                     {service.image && (
-                      <div className="relative inline-block">
+                      <div className="relative inline-block mt-2">
                         <img
                           src={service.image}
                           alt={`Service ${index + 1}`}
-                          className="h-20 w-32 object-cover rounded border"
+                          className="h-32 object-cover rounded border"
                         />
                       </div>
                     )}
@@ -619,54 +614,51 @@ export function AboutAdmin() {
           </div>
         </div>
 
-        {/* SEO Meta Information - Moved to the end with proper spacing */}
-        <div className="admin-section mt-12 pt-8 border-t border-gray-200">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Meta Information</h2>
-          
-          <div className="grid gap-4">
+        {/* SEO Metadata Section */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Metadata</h2>
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="meta-title">Meta Title</Label>
+              <Label htmlFor="meta-title">SEO Title</Label>
               <Input
                 id="meta-title"
                 value={formData.meta?.title || ''}
                 onChange={(e) => handleInputChange('meta', 'title', e.target.value)}
-                placeholder="Enter meta title"
-                className="mt-1"
+                placeholder="SEO title for the about page"
               />
             </div>
             
             <div>
-              <Label htmlFor="meta-description">Meta Description</Label>
+              <Label htmlFor="meta-description">SEO Description</Label>
               <Textarea
                 id="meta-description"
                 value={formData.meta?.description || ''}
                 onChange={(e) => handleInputChange('meta', 'description', e.target.value)}
-                placeholder="Enter meta description"
-                className="mt-1"
+                placeholder="SEO description for the about page"
                 rows={3}
               />
             </div>
             
             <div>
-              <Label htmlFor="meta-keywords">Meta Keywords</Label>
-              <Input
-                id="meta-keywords"
-                value={formData.meta?.keywords || ''}
-                onChange={(e) => handleInputChange('meta', 'keywords', e.target.value)}
-                placeholder="Enter meta keywords (comma separated)"
-                className="mt-1"
+              <Label htmlFor="meta-keywords">SEO Keywords</Label>
+              <TagInput
+                tags={getKeywordsArray()}
+                onChange={handleKeywordsChange}
+                placeholder="Type keywords and press Enter"
               />
+              <p className="text-sm text-muted-foreground mt-1">
+                Press Enter, comma, or semicolon after typing each keyword to add it
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end pt-6 border-t">
+        {/* Form Actions */}
+        <div className="flex justify-end space-x-4">
           <Button 
             type="button" 
             onClick={handleSave} 
             disabled={saving}
-            size="lg"
           >
             {saving ? (
               <>

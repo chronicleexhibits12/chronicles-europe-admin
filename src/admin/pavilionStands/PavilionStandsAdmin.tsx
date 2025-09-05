@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -7,88 +7,208 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { PavilionStandsAdminSkeleton } from '../../components/PavilionStandsAdminSkeleton'
 import { usePavilionStandsContent } from '../../hooks/usePavilionStandsContent'
 import { PavilionStandsPageService } from '../../data/pavilionStandsService'
-import { Loader2, Save, Upload } from 'lucide-react'
+import { Loader2, Save, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 export function PavilionStandsAdmin() {
   const { content, loading, error, updateContent } = usePavilionStandsContent()
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
+  
+  // Temporary state for uploaded images (not yet saved)
+  const [tempImages, setTempImages] = useState<Record<string, string>>({})
+  
+  // Temporary state for selected files (not yet uploaded)
+  const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
+  
+  // Cleanup temporary files and preview URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      // Revoke object URLs to free memory
+      Object.values(tempImages).forEach(url => {
+        if (url && url.startsWith('blob:')) {
+          URL.revokeObjectURL(url)
+        }
+      })
+    }
+  }, [tempImages])
+  
+  // Cleanup temporary images when component unmounts
+  useEffect(() => {
+    return () => {
+      // Delete all temporary images if they exist
+      Object.values(tempImages).forEach(async (imageUrl) => {
+        if (imageUrl) {
+          try {
+            await PavilionStandsPageService.deleteImage(imageUrl)
+          } catch (error) {
+            console.warn('Failed to delete temporary image on unmount:', error)
+          }
+        }
+      })
+    }
+  }, [tempImages])
 
   const handleSave = async () => {
     if (!content) return
     
     setSaving(true)
     
-    const savePromise = updateContent(content)
-    
-    toast.promise(savePromise, {
-      loading: 'Saving changes...',
-      success: async () => {
-        // Trigger revalidation after successful save
-        await PavilionStandsPageService.triggerRevalidation()
-        return 'Pavilion stands page updated successfully!'
-      },
-      error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
-    })
-
     try {
-      await savePromise
+      // First, upload any pending files
+      const uploadedImages: Record<string, string> = {}
+      
+      for (const [field, file] of Object.entries(tempFiles)) {
+        try {
+          // Upload the file
+          const { data, error } = await PavilionStandsPageService.uploadImage(file)
+          
+          if (error) throw new Error(error)
+          if (!data) throw new Error('No URL returned from upload')
+          
+          uploadedImages[field] = data
+          
+          // Delete the previous image if it exists
+          const currentImageUrl = getCurrentImageUrl(field)
+          if (currentImageUrl) {
+            try {
+              await PavilionStandsPageService.deleteImage(currentImageUrl)
+            } catch (deleteError) {
+              console.warn('Failed to delete previous image:', deleteError)
+            }
+          }
+        } catch (uploadError) {
+          console.error(`Failed to upload image for field ${field}:`, uploadError)
+          toast.error(`Failed to upload image for field ${field}`)
+          throw uploadError
+        }
+      }
+      
+      // Update content with newly uploaded images
+      let updatedContent = { ...content }
+      
+      for (const [field, url] of Object.entries(uploadedImages)) {
+        switch (field) {
+          case 'hero-bg':
+            updatedContent = {
+              ...updatedContent,
+              hero: { ...updatedContent.hero, backgroundImage: url }
+            }
+            break
+          case 'benefits-img':
+            updatedContent = {
+              ...updatedContent,
+              benefits: { ...updatedContent.benefits, image: url }
+            }
+            break
+          case 'advantages-img':
+            updatedContent = {
+              ...updatedContent,
+              advantages: { ...updatedContent.advantages, image: url }
+            }
+            break
+        }
+      }
+      
+      const savePromise = updateContent(updatedContent)
+      
+      toast.promise(savePromise, {
+        loading: 'Saving changes...',
+        success: async () => {
+          // Trigger revalidation after successful save
+          await PavilionStandsPageService.triggerRevalidation()
+          return 'Pavilion stands page updated successfully!'
+        },
+        error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
+      })
+      
+      // Clear temp states after successful save
+      setTempFiles({})
+      setTempImages({})
+      
+      // Trigger revalidation after successful save
+      await PavilionStandsPageService.triggerRevalidation()
+    } catch (error: any) {
+      console.error('Error saving content:', error)
+      toast.error(`Failed to save: ${error.message || 'Unknown error'}`)
     } finally {
       setSaving(false)
     }
   }
 
   const handleImageUpload = async (file: File, field: string) => {
-    if (!content) return
-    
     setUploading(field)
     
-    const uploadPromise = PavilionStandsPageService.uploadImage(file, field)
-    
-    toast.promise(uploadPromise, {
-      loading: 'Uploading image...',
-      success: async (result) => {
-        if (result.data) {
-          // Update the appropriate field based on the field parameter
-          let updatedContent = { ...content }
-          
-          switch (field) {
-            case 'hero-bg':
-              updatedContent = {
-                ...content,
-                hero: { ...content.hero, backgroundImage: result.data }
-              }
-              break
-            case 'benefits-img':
-              updatedContent = {
-                ...content,
-                benefits: { ...content.benefits, image: result.data }
-              }
-              break
-            case 'advantages-img':
-              updatedContent = {
-                ...content,
-                advantages: { ...content.advantages, image: result.data }
-              }
-              break
-          }
-          
-          await updateContent(updatedContent)
-          // Trigger revalidation after successful image upload
-          await PavilionStandsPageService.triggerRevalidation()
-          return 'Image uploaded successfully!'
-        } else {
-          throw new Error(result.error || 'Upload failed')
-        }
-      },
-      error: (error) => `Failed to upload image: ${error.message || 'Unknown error'}`
-    })
-
     try {
-      await uploadPromise
+      // Store the selected file in temp state (not uploaded yet)
+      setTempFiles(prev => ({
+        ...prev,
+        [field]: file
+      }))
+
+      // Also store a preview URL for immediate preview
+      const previewUrl = URL.createObjectURL(file)
+      setTempImages(prev => ({
+        ...prev,
+        [field]: previewUrl
+      }))
+
+      toast.success('Image selected successfully! It will be uploaded when you save changes.')
+    } catch (error: any) {
+      console.error('Error selecting image:', error)
+      toast.error(`Failed to select image: ${error.message || 'Unknown error'}`);
     } finally {
       setUploading(null)
+    }
+  }
+
+  // Function to remove an image (with confirmation for existing images)
+  const removeImage = async (field: string) => {
+    // Check if this is a temporary image or an existing one
+    const isTempImage = !!tempImages[field];
+    const isTempFile = !!tempFiles[field];
+    
+    if (isTempImage || isTempFile) {
+      // Remove temporary image/file
+      setTempImages(prev => {
+        const newTempImages = { ...prev };
+        if (newTempImages[field]) {
+          // Revoke the object URL to free memory
+          if (newTempImages[field].startsWith('blob:')) {
+            URL.revokeObjectURL(newTempImages[field]);
+          }
+          delete newTempImages[field];
+        }
+        return newTempImages;
+      });
+      
+      setTempFiles(prev => {
+        const newTempFiles = { ...prev };
+        delete newTempFiles[field];
+        return newTempFiles;
+      });
+      
+      toast.success('Image removed successfully');
+    }
+  }
+
+  // Get current image URL for a field (from temp images first, then from content)
+  const getCurrentImageUrl = (field: string): string => {
+    // Check if we have a temporary preview URL
+    if (tempImages[field]) {
+      return tempImages[field]
+    }
+    
+    // Otherwise, use the URL from content based on field
+    switch (field) {
+      case 'hero-bg':
+        return content?.hero?.backgroundImage || ''
+      case 'benefits-img':
+        return content?.benefits?.image || ''
+      case 'advantages-img':
+        return content?.advantages?.image || ''
+      default:
+        return ''
     }
   }
 
@@ -121,7 +241,7 @@ export function PavilionStandsAdmin() {
       </div>
 
       {/* Form */}
-      <form className="space-y-8">
+      <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
         {/* Section 1: Hero Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 1 (Hero Section)</h2>
@@ -156,11 +276,16 @@ export function PavilionStandsAdmin() {
                 <div className="flex gap-2">
                   <Input
                     id="hero-background"
-                    value={content.hero?.backgroundImage || ''}
-                    onChange={(e) => updateContent({
-                      ...content,
-                      hero: { ...content.hero, backgroundImage: e.target.value }
-                    })}
+                    value={getCurrentImageUrl('hero-bg')}
+                    onChange={(e) => {
+                      // For direct URL input, we update the content directly
+                      if (!tempImages['hero-bg'] && !tempFiles['hero-bg']) {
+                        updateContent({
+                          ...content,
+                          hero: { ...content.hero, backgroundImage: e.target.value }
+                        })
+                      }
+                    }}
                     placeholder="Image URL or upload below"
                   />
                   <Button
@@ -175,13 +300,22 @@ export function PavilionStandsAdmin() {
                     )}
                   </Button>
                 </div>
-                {content.hero?.backgroundImage && (
+                {getCurrentImageUrl('hero-bg') && (
                   <div className="relative inline-block">
                     <img 
-                      src={content.hero.backgroundImage} 
+                      src={getCurrentImageUrl('hero-bg')} 
                       alt="Hero background preview" 
                       className="h-20 w-32 object-cover rounded border"
                     />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('hero-bg')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
                   </div>
                 )}
                 <input
@@ -190,6 +324,7 @@ export function PavilionStandsAdmin() {
                   accept="image/*"
                   className="hidden"
                   onChange={(e) => {
+                    e.preventDefault();
                     const file = e.target.files?.[0]
                     if (file) handleImageUpload(file, 'hero-bg')
                   }}
@@ -248,11 +383,16 @@ export function PavilionStandsAdmin() {
                 <div className="flex gap-2">
                   <Input
                     id="benefits-image"
-                    value={content.benefits?.image || ''}
-                    onChange={(e) => updateContent({
-                      ...content,
-                      benefits: { ...content.benefits, image: e.target.value }
-                    })}
+                    value={getCurrentImageUrl('benefits-img')}
+                    onChange={(e) => {
+                      // For direct URL input, we update the content directly
+                      if (!tempImages['benefits-img'] && !tempFiles['benefits-img']) {
+                        updateContent({
+                          ...content,
+                          benefits: { ...content.benefits, image: e.target.value }
+                        })
+                      }
+                    }}
                     placeholder="Image URL or upload below"
                   />
                   <Button
@@ -267,13 +407,22 @@ export function PavilionStandsAdmin() {
                     )}
                   </Button>
                 </div>
-                {content.benefits?.image && (
+                {getCurrentImageUrl('benefits-img') && (
                   <div className="relative inline-block">
                     <img 
-                      src={content.benefits.image} 
+                      src={getCurrentImageUrl('benefits-img')} 
                       alt="Benefits preview" 
                       className="h-20 w-32 object-cover rounded border"
                     />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('benefits-img')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
                   </div>
                 )}
                 <input
@@ -282,6 +431,7 @@ export function PavilionStandsAdmin() {
                   accept="image/*"
                   className="hidden"
                   onChange={(e) => {
+                    e.preventDefault();
                     const file = e.target.files?.[0]
                     if (file) handleImageUpload(file, 'benefits-img')
                   }}
@@ -363,11 +513,16 @@ export function PavilionStandsAdmin() {
                 <div className="flex gap-2">
                   <Input
                     id="advantages-image"
-                    value={content.advantages?.image || ''}
-                    onChange={(e) => updateContent({
-                      ...content,
-                      advantages: { ...content.advantages, image: e.target.value }
-                    })}
+                    value={getCurrentImageUrl('advantages-img')}
+                    onChange={(e) => {
+                      // For direct URL input, we update the content directly
+                      if (!tempImages['advantages-img'] && !tempFiles['advantages-img']) {
+                        updateContent({
+                          ...content,
+                          advantages: { ...content.advantages, image: e.target.value }
+                        })
+                      }
+                    }}
                     placeholder="Image URL or upload below"
                   />
                   <Button
@@ -382,13 +537,22 @@ export function PavilionStandsAdmin() {
                     )}
                   </Button>
                 </div>
-                {content.advantages?.image && (
+                {getCurrentImageUrl('advantages-img') && (
                   <div className="relative inline-block">
                     <img 
-                      src={content.advantages.image} 
+                      src={getCurrentImageUrl('advantages-img')} 
                       alt="Advantages preview" 
                       className="h-20 w-32 object-cover rounded border"
                     />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('advantages-img')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
                   </div>
                 )}
                 <input
@@ -397,6 +561,7 @@ export function PavilionStandsAdmin() {
                   accept="image/*"
                   className="hidden"
                   onChange={(e) => {
+                    e.preventDefault();
                     const file = e.target.files?.[0]
                     if (file) handleImageUpload(file, 'advantages-img')
                   }}

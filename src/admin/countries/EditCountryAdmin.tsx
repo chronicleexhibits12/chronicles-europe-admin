@@ -131,9 +131,6 @@ export function EditCountryAdmin() {
     cities_section_subtitle: '',
   })
 
-  // Temporary state for unsaved changes
-  const [tempFormData, setTempFormData] = useState<CountryData>({ ...formData })
-
   // Load country data
   useEffect(() => {
     if (country) {
@@ -211,33 +208,24 @@ export function EditCountryAdmin() {
       }
 
       setFormData(loadedData)
-      setTempFormData(loadedData) // Initialize temp data with loaded data
     }
   }, [country])
 
-  // Update temp form data when formData changes
-  useEffect(() => {
-    setTempFormData({ ...formData })
-  }, [formData])
-
-  // Temporary state for selected files (not yet uploaded)
-  const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
-  
-  // Temporary state for image previews
-  const [tempImages, setTempImages] = useState<Record<string, string>>({})
+  // State for selected files (not yet uploaded)
+  const [selectedFiles, setSelectedFiles] = useState<Record<string, File>>({})
   
   // State for delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [imageToDelete, setImageToDelete] = useState<{field: string, url: string} | null>(null)
 
-  // Get image URL for preview (from temp images first, then from form data)
+  // Get image URL for preview (from selected files as preview, or from form data)
   const getImageUrl = (field: string): string => {
-    // Check if we have a temporary preview URL
-    if (tempImages[field]) {
-      return tempImages[field]
+    // Check if we have a selected file for preview
+    if (selectedFiles[field]) {
+      return URL.createObjectURL(selectedFiles[field])
     }
-    // Otherwise, use the URL from temp form data
-    const fieldValue = tempFormData[field as keyof CountryData];
+    // Otherwise, use the URL from form data
+    const fieldValue = formData[field as keyof CountryData];
     return typeof fieldValue === 'string' ? fieldValue : ''
   }
 
@@ -246,17 +234,10 @@ export function EditCountryAdmin() {
     setUploading(field)
     
     try {
-      // Store the selected file in temp state (not uploaded yet)
-      setTempFiles(prev => ({
+      // Store the selected file in state (not uploaded yet)
+      setSelectedFiles(prev => ({
         ...prev,
         [field]: file
-      }))
-
-      // Also store a preview URL for immediate preview
-      const previewUrl = URL.createObjectURL(file)
-      setTempImages(prev => ({
-        ...prev,
-        [field]: previewUrl
       }))
 
       toast.success('Image selected successfully! It will be uploaded when you save changes.')
@@ -268,41 +249,28 @@ export function EditCountryAdmin() {
     }
   }
 
-  // Function to remove an image (with confirmation)
-  const removeImage = async (field: string) => {
-    // Check if this is a temporary image or an existing one
-    const isTempImage = !!tempImages[field];
-    const isTempFile = !!tempFiles[field];
+  // Function to remove an image
+  const removeImage = (field: string) => {
+    // Check if this is a selected file or an existing one
+    const isExistingImage = !!formData[field as keyof CountryData];
     
-    if (isTempImage || isTempFile) {
-      // Remove temporary image/file
-      setTempImages(prev => {
-        const newTempImages = { ...prev };
-        if (newTempImages[field]) {
-          // Revoke the object URL to free memory
-          if (newTempImages[field].startsWith('blob:')) {
-            URL.revokeObjectURL(newTempImages[field]);
-          }
-          delete newTempImages[field];
-        }
-        return newTempImages;
-      });
-      
-      setTempFiles(prev => {
-        const newTempFiles = { ...prev };
-        delete newTempFiles[field];
-        return newTempFiles;
-      });
-      
-      toast.success('Image removed successfully');
-    } else {
+    if (isExistingImage) {
       // For existing images, we'll mark it for deletion during save
-      setTempImages(prev => ({
+      setFormData(prev => ({
         ...prev,
-        [field]: '' // Mark as empty to be deleted during save
+        [field]: ''
       }));
       
       toast.success('Image marked for removal. It will be deleted when you save changes.');
+    } else {
+      // Remove selected file
+      setSelectedFiles(prev => {
+        const newSelectedFiles = { ...prev };
+        delete newSelectedFiles[field];
+        return newSelectedFiles;
+      });
+      
+      toast.success('Image removed successfully');
     }
   }
 
@@ -321,7 +289,7 @@ export function EditCountryAdmin() {
       }
       
       // Update form data to remove the image URL
-      setTempFormData(prev => ({
+      setFormData(prev => ({
         ...prev,
         [field]: ''
       }));
@@ -341,100 +309,76 @@ export function EditCountryAdmin() {
     
     setSaving(true)
     
-    // Update formData with tempFormData before saving
-    setFormData(tempFormData)
-    
     try {
-      // First, upload any pending files
-      const uploadedImages: Record<string, string> = {}
+      // First, upload any images
+      const updatedFormData = { ...formData }
       
-      for (const [field, file] of Object.entries(tempFiles)) {
-        try {
-          // Upload the file
-          const { data, error } = await CountriesService.uploadImage(file)
-          
-          if (error) throw new Error(error)
-          if (!data) throw new Error('No URL returned from upload')
-          
-          uploadedImages[field] = data
-          
-          // Delete the previous image if it exists
-          const currentImageUrl = formData[field as keyof CountryData]
-          if (currentImageUrl && typeof currentImageUrl === 'string') {
-            try {
-              await CountriesService.deleteImage(currentImageUrl)
-            } catch (deleteError) {
-              console.warn('Failed to delete previous image:', deleteError)
-            }
-          }
-        } catch (uploadError) {
-          console.error(`Failed to upload image for field ${field}:`, uploadError)
-          toast.error(`Failed to upload image for field ${field}`)
-          throw uploadError
-        }
-      }
-
-      // Handle image deletions (marked with empty string)
-      const fieldsToDelete: string[] = []
-      Object.entries(tempImages).forEach(([field, url]) => {
-        if (url === '' && formData[field as keyof CountryData]) {
-          fieldsToDelete.push(field)
-        }
-      })
-
-      // Prepare the data to save
-      const dataToSave: any = {
-        ...tempFormData,
-        ...uploadedImages
-      }
-
-      // Set deleted image fields to null
-      fieldsToDelete.forEach(field => {
-        dataToSave[field] = null
-        // Actually delete the image from storage
-        const imageUrl = formData[field as keyof CountryData];
-        if (typeof imageUrl === 'string' && imageUrl) {
+      // Handle hero background image upload
+      if (selectedFiles.hero_background_image_url) {
+        // Delete previous image if it exists
+        if (formData.hero_background_image_url) {
           try {
-            CountriesService.deleteImage(imageUrl)
+            await CountriesService.deleteImage(formData.hero_background_image_url)
           } catch (deleteError) {
-            console.warn('Failed to delete image:', deleteError)
+            console.warn('Failed to delete previous image:', deleteError)
           }
         }
-      })
+        
+        const { data, error } = await CountriesService.uploadImage(selectedFiles.hero_background_image_url)
+        if (error) throw new Error(error)
+        if (!data) throw new Error('No URL returned from upload')
+        updatedFormData.hero_background_image_url = data
+      }
+      
+      // Handle why choose us main image upload
+      if (selectedFiles.why_choose_us_main_image_url) {
+        // Delete previous image if it exists
+        if (formData.why_choose_us_main_image_url) {
+          try {
+            await CountriesService.deleteImage(formData.why_choose_us_main_image_url)
+          } catch (deleteError) {
+            console.warn('Failed to delete previous image:', deleteError)
+          }
+        }
+        
+        const { data, error } = await CountriesService.uploadImage(selectedFiles.why_choose_us_main_image_url)
+        if (error) throw new Error(error)
+        if (!data) throw new Error('No URL returned from upload')
+        updatedFormData.why_choose_us_main_image_url = data
+      }
 
       const { error } = await CountriesService.updateCountry(id, {
-        slug: dataToSave.slug,
-        name: dataToSave.name,
-        is_active: dataToSave.is_active,
-        seo_title: dataToSave.seo_title,
-        seo_description: dataToSave.seo_description,
-        seo_keywords: dataToSave.seo_keywords,
-        hero_title: dataToSave.hero_title,
-        hero_subtitle: dataToSave.hero_subtitle,
-        hero_background_image_url: dataToSave.hero_background_image_url,
-        why_choose_us_title: dataToSave.why_choose_us_title,
-        why_choose_us_subtitle: dataToSave.why_choose_us_subtitle,
-        why_choose_us_main_image_url: dataToSave.why_choose_us_main_image_url,
-        why_choose_us_benefits_html: dataToSave.why_choose_us_benefits_html,
-        what_we_do_title: dataToSave.what_we_do_title,
-        what_we_do_subtitle: dataToSave.what_we_do_subtitle,
-        what_we_do_description_html: dataToSave.what_we_do_description_html,
-        company_info_title: dataToSave.company_info_title,
-        company_info_content_html: dataToSave.company_info_content_html,
-        best_company_title: dataToSave.best_company_title,
-        best_company_subtitle: dataToSave.best_company_subtitle,
-        best_company_content_html: dataToSave.best_company_content_html,
-        process_section_title: dataToSave.process_section_title,
-        process_section_steps: dataToSave.process_section_steps,
-        cities_section_title: dataToSave.cities_section_title,
-        cities_section_subtitle: dataToSave.cities_section_subtitle,
+        slug: updatedFormData.slug,
+        name: updatedFormData.name,
+        is_active: updatedFormData.is_active,
+        seo_title: updatedFormData.seo_title,
+        seo_description: updatedFormData.seo_description,
+        seo_keywords: updatedFormData.seo_keywords,
+        hero_title: updatedFormData.hero_title,
+        hero_subtitle: updatedFormData.hero_subtitle,
+        hero_background_image_url: updatedFormData.hero_background_image_url,
+        why_choose_us_title: updatedFormData.why_choose_us_title,
+        why_choose_us_subtitle: updatedFormData.why_choose_us_subtitle,
+        why_choose_us_main_image_url: updatedFormData.why_choose_us_main_image_url,
+        why_choose_us_benefits_html: updatedFormData.why_choose_us_benefits_html,
+        what_we_do_title: updatedFormData.what_we_do_title,
+        what_we_do_subtitle: updatedFormData.what_we_do_subtitle,
+        what_we_do_description_html: updatedFormData.what_we_do_description_html,
+        company_info_title: updatedFormData.company_info_title,
+        company_info_content_html: updatedFormData.company_info_content_html,
+        best_company_title: updatedFormData.best_company_title,
+        best_company_subtitle: updatedFormData.best_company_subtitle,
+        best_company_content_html: updatedFormData.best_company_content_html,
+        process_section_title: updatedFormData.process_section_title,
+        process_section_steps: updatedFormData.process_section_steps,
+        cities_section_title: updatedFormData.cities_section_title,
+        cities_section_subtitle: updatedFormData.cities_section_subtitle,
       })
 
       if (error) throw new Error(error)
       
-      // Clear temp states after successful save
-      setTempFiles({})
-      setTempImages({})
+      // Clear selected files after successful save
+      setSelectedFiles({})
       
       toast.success('Country updated successfully!')
       navigate('/admin/countries')
@@ -447,7 +391,7 @@ export function EditCountryAdmin() {
   }
 
   const handleInputChange = (field: string, value: string) => {
-    setTempFormData(prev => ({
+    setFormData(prev => ({
       ...prev,
       [field]: value
     }))
@@ -455,7 +399,7 @@ export function EditCountryAdmin() {
     // Auto-generate slug when country name is changed
     if (field === 'name') {
       const generatedSlug = `exhibition-stand-builder-${slugify(value)}`
-      setTempFormData(prev => ({
+      setFormData(prev => ({
         ...prev,
         slug: generatedSlug
       }))
@@ -463,7 +407,7 @@ export function EditCountryAdmin() {
   }
 
   const handleRichTextChange = (field: string, value: string) => {
-    setTempFormData(prev => ({
+    setFormData(prev => ({
       ...prev,
       [field]: value
     }))
@@ -474,12 +418,12 @@ export function EditCountryAdmin() {
   }
 
   const getKeywordsArray = () => {
-    return tempFormData.seo_keywords ? tempFormData.seo_keywords.split(',').map(k => k.trim()).filter(k => k) : []
+    return formData.seo_keywords ? formData.seo_keywords.split(',').map(k => k.trim()).filter(k => k) : []
   }
 
   // Process steps handlers
   const updateProcessStep = (index: number, field: keyof ProcessStep, value: string) => {
-    setTempFormData(prev => {
+    setFormData(prev => {
       const updatedSteps = [...prev.process_section_steps]
       updatedSteps[index] = {
         ...updatedSteps[index],
@@ -501,17 +445,16 @@ export function EditCountryAdmin() {
     }
   }
 
-  // Cleanup temporary files and preview URLs when component unmounts
+  // Cleanup object URLs when component unmounts
   useEffect(() => {
     return () => {
-      // Revoke object URLs to free memory
-      Object.values(tempImages).forEach(url => {
-        if (url && url.startsWith('blob:')) {
-          URL.revokeObjectURL(url)
+      Object.values(selectedFiles).forEach(file => {
+        if (file) {
+          URL.revokeObjectURL(URL.createObjectURL(file))
         }
       })
     }
-  }, [tempImages])
+  }, [selectedFiles])
 
   if (loading) {
     return (
@@ -575,7 +518,10 @@ export function EditCountryAdmin() {
       </div>
 
       {/* Form */}
-      <form className="space-y-8">
+      <form className="space-y-8" onSubmit={(e) => {
+        e.preventDefault(); // Prevent page reload
+        handleSave();
+      }}>
         {/* Basic Information Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Basic Information</h2>
@@ -584,7 +530,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="name">Country Name *</Label>
               <Input
                 id="name"
-                value={tempFormData.name}
+                value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="e.g., France"
               />
@@ -593,7 +539,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="slug">Country Slug *</Label>
               <Input
                 id="slug"
-                value={tempFormData.slug}
+                value={formData.slug}
                 onChange={(e) => handleInputChange('slug', e.target.value)}
                 placeholder="e.g., exhibition-stand-builder-france"
                 readOnly
@@ -613,7 +559,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="hero_title">Hero Title</Label>
               <Input
                 id="hero_title"
-                value={tempFormData.hero_title}
+                value={formData.hero_title}
                 onChange={(e) => handleInputChange('hero_title', e.target.value)}
                 placeholder="e.g., EXHIBITION STAND DESIGN AND BUILD IN"
               />
@@ -622,7 +568,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="hero_subtitle">Hero Subtitle</Label>
               <Input
                 id="hero_subtitle"
-                value={tempFormData.hero_subtitle}
+                value={formData.hero_subtitle}
                 onChange={(e) => handleInputChange('hero_subtitle', e.target.value)}
                 placeholder="e.g., FRANCE"
               />
@@ -632,7 +578,7 @@ export function EditCountryAdmin() {
               <div className="flex items-start space-x-4">
                 <Input
                   id="hero_background_image_url"
-                  value={getImageUrl('hero_background_image_url')}
+                  value={formData.hero_background_image_url}
                   onChange={(e) => handleInputChange('hero_background_image_url', e.target.value)}
                   placeholder="Enter image URL or upload below"
                   className="flex-1"
@@ -683,7 +629,7 @@ export function EditCountryAdmin() {
                       size="sm"
                       className="mt-2"
                       onClick={() => {
-                        // Check if it's an existing image (from formData) or a temp image
+                        // Check if it's an existing image (from formData) or a selected file
                         const isExistingImage = formData.hero_background_image_url && 
                           getImageUrl('hero_background_image_url') === formData.hero_background_image_url;
                         
@@ -712,7 +658,7 @@ export function EditCountryAdmin() {
                     size="icon"
                     className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                     onClick={() => {
-                      // Check if it's an existing image (from formData) or a temp image
+                      // Check if it's an existing image (from formData) or a selected file
                       const isExistingImage = formData.hero_background_image_url && 
                         getImageUrl('hero_background_image_url') === formData.hero_background_image_url;
                       
@@ -739,7 +685,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="why_choose_us_title">Title</Label>
               <Input
                 id="why_choose_us_title"
-                value={tempFormData.why_choose_us_title}
+                value={formData.why_choose_us_title}
                 onChange={(e) => handleInputChange('why_choose_us_title', e.target.value)}
                 placeholder="e.g., Why Choose Us for Exhibition Stands in"
               />
@@ -748,7 +694,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="why_choose_us_subtitle">Subtitle</Label>
               <Input
                 id="why_choose_us_subtitle"
-                value={tempFormData.why_choose_us_subtitle}
+                value={formData.why_choose_us_subtitle}
                 onChange={(e) => handleInputChange('why_choose_us_subtitle', e.target.value)}
                 placeholder="e.g., France?"
               />
@@ -758,7 +704,7 @@ export function EditCountryAdmin() {
               <div className="flex items-start space-x-4">
                 <Input
                   id="why_choose_us_main_image_url"
-                  value={getImageUrl('why_choose_us_main_image_url')}
+                  value={formData.why_choose_us_main_image_url}
                   onChange={(e) => handleInputChange('why_choose_us_main_image_url', e.target.value)}
                   placeholder="Enter image URL or upload below"
                   className="flex-1"
@@ -809,7 +755,7 @@ export function EditCountryAdmin() {
                       size="sm"
                       className="mt-2"
                       onClick={() => {
-                        // Check if it's an existing image (from formData) or a temp image
+                        // Check if it's an existing image (from formData) or a selected file
                         const isExistingImage = formData.why_choose_us_main_image_url && 
                           getImageUrl('why_choose_us_main_image_url') === formData.why_choose_us_main_image_url;
                         
@@ -838,7 +784,7 @@ export function EditCountryAdmin() {
                     size="icon"
                     className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                     onClick={() => {
-                      // Check if it's an existing image (from formData) or a temp image
+                      // Check if it's an existing image (from formData) or a selected file
                       const isExistingImage = formData.why_choose_us_main_image_url && 
                         getImageUrl('why_choose_us_main_image_url') === formData.why_choose_us_main_image_url;
                       
@@ -857,7 +803,7 @@ export function EditCountryAdmin() {
             <div className="md:col-span-2">
               <Label>Benefits HTML Content</Label>
               <RichTextEditor
-                content={tempFormData.why_choose_us_benefits_html || ''}
+                content={formData.why_choose_us_benefits_html || ''}
                 onChange={(content) => handleRichTextChange('why_choose_us_benefits_html', content)}
                 controlled={true} // Enable controlled mode
               />
@@ -873,7 +819,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="what_we_do_title">Title</Label>
               <Input
                 id="what_we_do_title"
-                value={tempFormData.what_we_do_title}
+                value={formData.what_we_do_title}
                 onChange={(e) => handleInputChange('what_we_do_title', e.target.value)}
                 placeholder="e.g., WHAT WE DO?"
               />
@@ -882,7 +828,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="what_we_do_subtitle">Subtitle</Label>
               <Input
                 id="what_we_do_subtitle"
-                value={tempFormData.what_we_do_subtitle}
+                value={formData.what_we_do_subtitle}
                 onChange={(e) => handleInputChange('what_we_do_subtitle', e.target.value)}
                 placeholder="e.g., WE DO?"
               />
@@ -890,7 +836,7 @@ export function EditCountryAdmin() {
             <div className="md:col-span-2">
               <Label>Description HTML Content</Label>
               <RichTextEditor
-                content={tempFormData.what_we_do_description_html || ''}
+                content={formData.what_we_do_description_html || ''}
                 onChange={(content) => handleRichTextChange('what_we_do_description_html', content)}
                 controlled={true} // Enable controlled mode
               />
@@ -906,7 +852,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="company_info_title">Title</Label>
               <Input
                 id="company_info_title"
-                value={tempFormData.company_info_title}
+                value={formData.company_info_title}
                 onChange={(e) => handleInputChange('company_info_title', e.target.value)}
                 placeholder="e.g., DISTINGUISHED EXHIBITION STAND BUILDER IN FRANCE"
               />
@@ -914,7 +860,7 @@ export function EditCountryAdmin() {
             <div>
               <Label>Content HTML</Label>
               <RichTextEditor
-                content={tempFormData.company_info_content_html || ''}
+                content={formData.company_info_content_html || ''}
                 onChange={(content) => handleRichTextChange('company_info_content_html', content)}
                 controlled={true} // Enable controlled mode
               />
@@ -930,7 +876,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="best_company_title">Title</Label>
               <Input
                 id="best_company_title"
-                value={tempFormData.best_company_title}
+                value={formData.best_company_title}
                 onChange={(e) => handleInputChange('best_company_title', e.target.value)}
                 placeholder="e.g., BEST EXHIBITION STAND DESIGN COMPANY IN FRANCE FOR"
               />
@@ -939,7 +885,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="best_company_subtitle">Subtitle</Label>
               <Input
                 id="best_company_subtitle"
-                value={tempFormData.best_company_subtitle}
+                value={formData.best_company_subtitle}
                 onChange={(e) => handleInputChange('best_company_subtitle', e.target.value)}
                 placeholder="e.g., EXCEPTIONAL EXPERIENCE"
               />
@@ -947,7 +893,7 @@ export function EditCountryAdmin() {
             <div className="md:col-span-2">
               <Label>Content HTML</Label>
               <RichTextEditor
-                content={tempFormData.best_company_content_html || ''}
+                content={formData.best_company_content_html || ''}
                 onChange={(content) => handleRichTextChange('best_company_content_html', content)}
                 controlled={true} // Enable controlled mode
               />
@@ -963,7 +909,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="process_section_title">Title</Label>
               <Input
                 id="process_section_title"
-                value={tempFormData.process_section_title}
+                value={formData.process_section_title}
                 onChange={(e) => handleInputChange('process_section_title', e.target.value)}
                 placeholder="e.g., The Art And Science Behind Our Exhibition Stand Design & Build Process"
               />
@@ -971,7 +917,7 @@ export function EditCountryAdmin() {
             <div>
               <Label>Process Steps</Label>
               <div className="space-y-4">
-                {tempFormData.process_section_steps.map((step, index) => (
+                {formData.process_section_steps.map((step, index) => (
                   <div key={step.id} className="border rounded-lg p-4 space-y-3">
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium">Step {index + 1}</h3>
@@ -1023,7 +969,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="cities_section_title">Title</Label>
               <Input
                 id="cities_section_title"
-                value={tempFormData.cities_section_title}
+                value={formData.cities_section_title}
                 onChange={(e) => handleInputChange('cities_section_title', e.target.value)}
                 placeholder="e.g., EXHIBITION STANDS IN"
               />
@@ -1032,7 +978,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="cities_section_subtitle">Subtitle</Label>
               <Input
                 id="cities_section_subtitle"
-                value={tempFormData.cities_section_subtitle}
+                value={formData.cities_section_subtitle}
                 onChange={(e) => handleInputChange('cities_section_subtitle', e.target.value)}
                 placeholder="e.g., FRANCE"
               />
@@ -1057,7 +1003,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="seo_title">SEO Title</Label>
               <Input
                 id="seo_title"
-                value={tempFormData.seo_title}
+                value={formData.seo_title}
                 onChange={(e) => handleInputChange('seo_title', e.target.value)}
                 placeholder="SEO title for the country page"
               />
@@ -1066,7 +1012,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="seo_description">SEO Description</Label>
               <Textarea
                 id="seo_description"
-                value={tempFormData.seo_description}
+                value={formData.seo_description}
                 onChange={(e) => handleInputChange('seo_description', e.target.value)}
                 placeholder="SEO description for the country page"
                 rows={3}
@@ -1097,8 +1043,7 @@ export function EditCountryAdmin() {
             Cancel
           </Button>
           <Button
-            type="button"
-            onClick={handleSave}
+            type="submit"
             disabled={saving}
           >
             {saving ? (

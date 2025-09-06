@@ -7,6 +7,7 @@ import { Dashboard } from '@/pages/Dashboard'
 import { Stands } from '@/pages/Stands'
 import { Pages } from '@/pages/Pages'
 import { HomeAdmin } from '@/admin/home/HomeAdmin'
+import { AboutAdmin } from '@/admin/about/AboutAdmin'
 import { CustomStandsAdmin } from '@/admin/customStands/CustomStandsAdmin'
 import { DoubleDeckStandsAdmin } from '@/admin/doubleDeckStands/DoubleDeckStandsAdmin'
 import { ModularStandsAdmin } from '@/admin/modularStands/ModularStandsAdmin'
@@ -41,6 +42,7 @@ function App() {
             <Route path="pages" element={<Pages />} />
             <Route path="stands" element={<Stands />} />
             <Route path="admin/home" element={<HomeAdmin />} />
+            <Route path="admin/about-us" element={<AboutAdmin />} />
             <Route path="admin/custom-stands" element={<CustomStandsAdmin />} />
             <Route path="admin/double-decker-stands" element={<DoubleDeckStandsAdmin />} />
             <Route path="admin/modular-stands" element={<ModularStandsAdmin />} />

@@ -32,12 +32,15 @@ export function Stands() {
   const { data: pavilionStandsPage, loading: pavilionStandsLoading } = usePavilionStandsPage()
   const [stands, setStands] = useState<StandInfo[]>([])
 
+  // Get website URL from environment variables, with fallback
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
   useEffect(() => {
     const standsData: StandInfo[] = [
       {
         id: 'custom-stands',
         name: 'Custom Exhibition Stands',
-        path: 'https://chronicleseurope.vercel.app/custom-stands',
+        path: '/custom-stands',
         editPath: '/admin/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'
@@ -45,7 +48,7 @@ export function Stands() {
       {
         id: 'double-decker-stands',
         name: 'Double Decker Exhibition Stands',
-        path: 'https://chronicleseurope.vercel.app/double-decker-stands',
+        path: '/double-decker-stands',
         editPath: '/admin/double-decker-stands',
         lastUpdated: doubleDeckStandsPage?.updatedAt ? new Date(doubleDeckStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Double decker exhibition stands design and build services information'
@@ -53,7 +56,7 @@ export function Stands() {
       {
         id: 'modular-stands',
         name: 'Modular Exhibition Stands',
-        path: 'https://chronicleseurope.vercel.app/modular-stands',
+        path: '/modular-stands',
         editPath: '/admin/modular-stands',
         lastUpdated: modularStandsPage?.updatedAt ? new Date(modularStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Modular exhibition stands design and build services information'
@@ -61,7 +64,7 @@ export function Stands() {
       {
         id: 'pavilion-stands',
         name: 'Pavilion Exhibition Stands',
-        path: 'https://chronicleseurope.vercel.app/pavilion-design',
+        path: '/pavilion-design',
         editPath: '/admin/pavilion-stands',
         lastUpdated: pavilionStandsPage?.updatedAt ? new Date(pavilionStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Pavilion exhibition stands design and build services information'
@@ -75,8 +78,8 @@ export function Stands() {
   }
 
   const handleView = (path: string) => {
-    // Open the page in a new tab
-    window.open(path, '_blank')
+    // Open the page in a new tab using the environment variable
+    window.open(`${websiteUrl}${path}`, '_blank')
   }
 
   const loading = customStandsLoading || doubleDeckStandsLoading || modularStandsLoading || pavilionStandsLoading

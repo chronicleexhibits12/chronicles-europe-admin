@@ -176,11 +176,8 @@ export function EditCityAdmin() {
     }
   }, [city])
 
-  // Temporary state for uploaded images (not yet saved)
-  const [tempImages, setTempImages] = useState<Record<string, string>>({})
-
-  // Temporary state for selected files (not yet uploaded)
-  const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
+  // State for selected files (not yet uploaded)
+  const [selectedFiles, setSelectedFiles] = useState<Record<string, File>>({})
 
   const handleSave = async () => {
     if (!id) return
@@ -188,69 +185,48 @@ export function EditCityAdmin() {
     setSaving(true)
     
     try {
-      // First, upload any pending files
-      const uploadedImages: Record<string, string> = {}
+      // First, upload any images
+      const updatedFormData = { ...formData }
       
-      for (const [field, file] of Object.entries(tempFiles)) {
-        try {
-          // Upload the file
-          const { data, error } = await CitiesService.uploadImage(file)
-          
-          if (error) throw new Error(error)
-          if (!data) throw new Error('No URL returned from upload')
-          
-          uploadedImages[field] = data
-          
-          // Delete the previous image if it exists
-          const currentImageUrl = formData[field as keyof CityData]
-          if (currentImageUrl && typeof currentImageUrl === 'string') {
-            try {
-              await CitiesService.deleteImage(currentImageUrl)
-            } catch (deleteError) {
-              console.warn('Failed to delete previous image:', deleteError)
-            }
+      // Handle hero background image upload
+      if (selectedFiles.hero_background_image_url) {
+        // Delete previous image if it exists
+        if (formData.hero_background_image_url) {
+          try {
+            await CitiesService.deleteImage(formData.hero_background_image_url)
+          } catch (deleteError) {
+            console.warn('Failed to delete previous image:', deleteError)
           }
-        } catch (uploadError) {
-          console.error(`Failed to upload image for field ${field}:`, uploadError)
-          toast.error(`Failed to upload image for field ${field}`)
-          throw uploadError
         }
+        
+        const { data, error } = await CitiesService.uploadImage(selectedFiles.hero_background_image_url)
+        if (error) throw new Error(error)
+        if (!data) throw new Error('No URL returned from upload')
+        updatedFormData.hero_background_image_url = data
       }
-
-      // Handle image deletions (marked with empty string)
-      const fieldsToDelete: string[] = []
-      Object.entries(tempImages).forEach(([field, url]) => {
-        if (url === '' && formData[field as keyof CityData]) {
-          fieldsToDelete.push(field)
-        }
-      })
-
-      // Prepare the data to save
-      const dataToSave: any = {
-        ...formData,
-        ...uploadedImages
-      }
-
-      // Set deleted image fields to null
-      fieldsToDelete.forEach(field => {
-        dataToSave[field] = null
-        // Actually delete the image from storage
-        try {
-          const imageUrl = formData[field as keyof CityData];
-          if (typeof imageUrl === 'string' && imageUrl) {
-            CitiesService.deleteImage(imageUrl);
+      
+      // Handle why choose us main image upload
+      if (selectedFiles.why_choose_us_main_image_url) {
+        // Delete previous image if it exists
+        if (formData.why_choose_us_main_image_url) {
+          try {
+            await CitiesService.deleteImage(formData.why_choose_us_main_image_url)
+          } catch (deleteError) {
+            console.warn('Failed to delete previous image:', deleteError)
           }
-        } catch (deleteError) {
-          console.warn('Failed to delete image:', deleteError)
         }
-      })
+        
+        const { data, error } = await CitiesService.uploadImage(selectedFiles.why_choose_us_main_image_url)
+        if (error) throw new Error(error)
+        if (!data) throw new Error('No URL returned from upload')
+        updatedFormData.why_choose_us_main_image_url = data
+      }
 
       // Handle country change - remove from old country and add to new country
-      // Do this BEFORE updating the city to ensure we have the correct original country
       let countryUpdateSuccess = true;
-      const countryChanged = dataToSave.country_slug !== originalCountrySlug;
+      const countryChanged = updatedFormData.country_slug !== originalCountrySlug;
       
-      console.log('Country change detected:', countryChanged, 'Original:', originalCountrySlug, 'New:', dataToSave.country_slug); // Debug log
+      console.log('Country change detected:', countryChanged, 'Original:', originalCountrySlug, 'New:', updatedFormData.country_slug); // Debug log
       
       if (countryChanged) {
         // Remove from the old country if it existed
@@ -266,7 +242,7 @@ export function EditCityAdmin() {
             } else if (oldCountry) {
               // Remove the city slug from the old country's selected_cities array
               const updatedSelectedCities = (oldCountry.selected_cities || []).filter(
-                (slug: string) => slug !== dataToSave.city_slug
+                (slug: string) => slug !== updatedFormData.city_slug
               )
               
               console.log('Updated selected cities for old country:', updatedSelectedCities); // Debug log
@@ -293,10 +269,10 @@ export function EditCityAdmin() {
         }
         
         // Add to the new country if it exists
-        if (dataToSave.country_slug) {
+        if (updatedFormData.country_slug) {
           try {
-            console.log('Adding city to new country:', dataToSave.country_slug); // Debug log
-            const { data: newCountry, error: newCountryError } = await CountriesService.getCountryBySlug(dataToSave.country_slug)
+            console.log('Adding city to new country:', updatedFormData.country_slug); // Debug log
+            const { data: newCountry, error: newCountryError } = await CountriesService.getCountryBySlug(updatedFormData.country_slug)
             
             if (newCountryError) {
               console.error('Error fetching new country:', newCountryError)
@@ -305,8 +281,8 @@ export function EditCityAdmin() {
             } else if (newCountry) {
               // Add the city slug to the new country's selected_cities array if it's not already there
               const updatedSelectedCities = [...(newCountry.selected_cities || [])]
-              if (!updatedSelectedCities.includes(dataToSave.city_slug)) {
-                updatedSelectedCities.push(dataToSave.city_slug)
+              if (!updatedSelectedCities.includes(updatedFormData.city_slug)) {
+                updatedSelectedCities.push(updatedFormData.city_slug)
                 
                 console.log('Updated selected cities for new country:', updatedSelectedCities); // Debug log
                 
@@ -345,43 +321,42 @@ export function EditCityAdmin() {
       if (countryUpdateSuccess) {
         // Update the city
         const { error: updateError } = await CitiesService.updateCity(id, {
-          name: dataToSave.name,
-          city_slug: dataToSave.city_slug,
-          country_slug: dataToSave.country_slug,
-          is_active: dataToSave.is_active,
-          seo_title: dataToSave.seo_title,
-          seo_description: dataToSave.seo_description,
-          seo_keywords: dataToSave.seo_keywords,
-          hero_title: dataToSave.hero_title,
-          hero_subtitle: dataToSave.hero_subtitle,
-          hero_background_image_url: dataToSave.hero_background_image_url,
-          why_choose_us_title: dataToSave.why_choose_us_title,
-          why_choose_us_subtitle: dataToSave.why_choose_us_subtitle,
-          why_choose_us_main_image_url: dataToSave.why_choose_us_main_image_url,
-          why_choose_us_benefits_html: dataToSave.why_choose_us_benefits_html,
-          what_we_do_title: dataToSave.what_we_do_title,
-          what_we_do_subtitle: dataToSave.what_we_do_subtitle,
-          what_we_do_description_html: dataToSave.what_we_do_description_html,
-          portfolio_title_template: dataToSave.portfolio_title_template,
-          exhibiting_experience_title: dataToSave.exhibiting_experience_title,
-          exhibiting_experience_subtitle: dataToSave.exhibiting_experience_subtitle,
-          exhibiting_experience_benefits_html: dataToSave.exhibiting_experience_benefits_html,
-          exhibiting_experience_excellence_title: dataToSave.exhibiting_experience_excellence_title,
-          exhibiting_experience_excellence_subtitle: dataToSave.exhibiting_experience_excellence_subtitle,
-          exhibiting_experience_excellence_points_html: dataToSave.exhibiting_experience_excellence_points_html,
+          name: updatedFormData.name,
+          city_slug: updatedFormData.city_slug,
+          country_slug: updatedFormData.country_slug,
+          is_active: updatedFormData.is_active,
+          seo_title: updatedFormData.seo_title,
+          seo_description: updatedFormData.seo_description,
+          seo_keywords: updatedFormData.seo_keywords,
+          hero_title: updatedFormData.hero_title,
+          hero_subtitle: updatedFormData.hero_subtitle,
+          hero_background_image_url: updatedFormData.hero_background_image_url,
+          why_choose_us_title: updatedFormData.why_choose_us_title,
+          why_choose_us_subtitle: updatedFormData.why_choose_us_subtitle,
+          why_choose_us_main_image_url: updatedFormData.why_choose_us_main_image_url,
+          why_choose_us_benefits_html: updatedFormData.why_choose_us_benefits_html,
+          what_we_do_title: updatedFormData.what_we_do_title,
+          what_we_do_subtitle: updatedFormData.what_we_do_subtitle,
+          what_we_do_description_html: updatedFormData.what_we_do_description_html,
+          portfolio_title_template: updatedFormData.portfolio_title_template,
+          exhibiting_experience_title: updatedFormData.exhibiting_experience_title,
+          exhibiting_experience_subtitle: updatedFormData.exhibiting_experience_subtitle,
+          exhibiting_experience_benefits_html: updatedFormData.exhibiting_experience_benefits_html,
+          exhibiting_experience_excellence_title: updatedFormData.exhibiting_experience_excellence_title,
+          exhibiting_experience_excellence_subtitle: updatedFormData.exhibiting_experience_excellence_subtitle,
+          exhibiting_experience_excellence_points_html: updatedFormData.exhibiting_experience_excellence_points_html,
         })
 
         if (updateError) throw new Error(updateError)
 
         // Update the original country slug to the new one if country update was successful
         if (countryChanged && countryUpdateSuccess) {
-          console.log('Updating original country slug from', originalCountrySlug, 'to', dataToSave.country_slug); // Debug log
-          setOriginalCountrySlug(dataToSave.country_slug);
+          console.log('Updating original country slug from', originalCountrySlug, 'to', updatedFormData.country_slug); // Debug log
+          setOriginalCountrySlug(updatedFormData.country_slug);
         }
 
-        // Clear temp states after successful save
-        setTempFiles({})
-        setTempImages({})
+        // Clear selected files after successful save
+        setSelectedFiles({})
         
         toast.success('City updated successfully!')
         navigate('/admin/cities')
@@ -400,17 +375,10 @@ export function EditCityAdmin() {
     setUploading(field)
     
     try {
-      // Store the selected file in temp state (not uploaded yet)
-      setTempFiles(prev => ({
+      // Store the selected file in state (not uploaded yet)
+      setSelectedFiles(prev => ({
         ...prev,
         [field]: file
-      }))
-
-      // Also store a preview URL for immediate preview
-      const previewUrl = URL.createObjectURL(file)
-      setTempImages(prev => ({
-        ...prev,
-        [field]: previewUrl
       }))
 
       toast.success('Image selected successfully! It will be uploaded when you save changes.')
@@ -437,44 +405,27 @@ export function EditCityAdmin() {
 
   // Function to remove an image (with confirmation)
   const removeImage = async (field: string) => {
-    // Check if this is a temporary image or an existing one
-    const isTempImage = !!tempImages[field];
-    const isTempFile = !!tempFiles[field];
+    // Check if this is a selected file or an existing one
     const isExistingImage = !!formData[field as keyof CityData];
-    
-    if (isTempImage || isTempFile) {
-      // Remove temporary image/file
-      setTempImages(prev => {
-        const newTempImages = { ...prev };
-        if (newTempImages[field]) {
-          // Revoke the object URL to free memory
-          if (newTempImages[field].startsWith('blob:')) {
-            URL.revokeObjectURL(newTempImages[field]);
-          }
-          delete newTempImages[field];
-        }
-        return newTempImages;
-      });
-      
-      setTempFiles(prev => {
-        const newTempFiles = { ...prev };
-        delete newTempFiles[field];
-        return newTempFiles;
-      });
-      
-      toast.success('Image removed successfully');
-      return;
-    }
     
     if (isExistingImage) {
       // For existing images, we need to handle this during save
-      // We'll mark it for deletion during save
-      setTempImages(prev => ({
+      // We'll mark it for deletion during save by setting it to empty string
+      setFormData(prev => ({
         ...prev,
-        [field]: '' // Mark as empty to be deleted during save
+        [field]: ''
       }));
       
       toast.success('Image marked for removal. It will be deleted when you save changes.');
+    } else {
+      // Remove selected file
+      setSelectedFiles(prev => {
+        const newSelectedFiles = { ...prev };
+        delete newSelectedFiles[field];
+        return newSelectedFiles;
+      });
+      
+      toast.success('Image removed successfully');
     }
   }
 
@@ -532,28 +483,27 @@ export function EditCityAdmin() {
     return formData.seo_keywords ? formData.seo_keywords.split(',').map(k => k.trim()).filter(k => k) : []
   }
 
-  // Get image URL for preview (from temp images first, then from form data)
+  // Get image URL for preview (from selected files as preview, or from form data)
   const getImageUrl = (field: string): string => {
-    // Check if we have a temporary preview URL
-    if (tempImages[field]) {
-      return tempImages[field]
+    // Check if we have a selected file for preview
+    if (selectedFiles[field]) {
+      return URL.createObjectURL(selectedFiles[field])
     }
     // Otherwise, use the URL from form data
     const value = formData[field as keyof CityData]
     return typeof value === 'string' ? value : ''
   }
 
-  // Cleanup temporary files and preview URLs when component unmounts
+  // Cleanup object URLs when component unmounts
   useEffect(() => {
     return () => {
-      // Revoke object URLs to free memory
-      Object.values(tempImages).forEach(url => {
-        if (url && url.startsWith('blob:')) {
-          URL.revokeObjectURL(url)
+      Object.values(selectedFiles).forEach(file => {
+        if (file) {
+          URL.revokeObjectURL(URL.createObjectURL(file))
         }
       })
     }
-  }, [tempImages])
+  }, [selectedFiles])
 
   if (loading) {
     return (
@@ -697,7 +647,7 @@ export function EditCityAdmin() {
                 <div className="flex gap-2">
                   <Input
                     id="hero_background_image_url"
-                    value={getImageUrl('hero_background_image_url')}
+                    value={formData.hero_background_image_url}
                     onChange={(e) => handleInputChange('hero_background_image_url', e.target.value)}
                     placeholder="Image URL or upload below"
                   />
@@ -727,7 +677,7 @@ export function EditCityAdmin() {
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                       onClick={() => {
-                        // Check if it's an existing image (from formData) or a temp image
+                        // Check if it's an existing image (from formData) or a selected file
                         const isExistingImage = formData.hero_background_image_url && 
                           getImageUrl('hero_background_image_url') === formData.hero_background_image_url;
                         
@@ -786,7 +736,7 @@ export function EditCityAdmin() {
                 <div className="flex gap-2">
                   <Input
                     id="why_choose_us_main_image_url"
-                    value={getImageUrl('why_choose_us_main_image_url')}
+                    value={formData.why_choose_us_main_image_url}
                     onChange={(e) => handleInputChange('why_choose_us_main_image_url', e.target.value)}
                     placeholder="Image URL or upload below"
                   />
@@ -816,7 +766,7 @@ export function EditCityAdmin() {
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                       onClick={() => {
-                        // Check if it's an existing image (from formData) or a temp image
+                        // Check if it's an existing image (from formData) or a selected file
                         const isExistingImage = formData.why_choose_us_main_image_url && 
                           getImageUrl('why_choose_us_main_image_url') === formData.why_choose_us_main_image_url;
                         
@@ -849,6 +799,7 @@ export function EditCityAdmin() {
               <RichTextEditor
                 content={formData.why_choose_us_benefits_html}
                 onChange={(newContent) => handleInputChange('why_choose_us_benefits_html', newContent)}
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -881,6 +832,7 @@ export function EditCityAdmin() {
               <RichTextEditor
                 content={formData.what_we_do_description_html}
                 onChange={(newContent) => handleInputChange('what_we_do_description_html', newContent)}
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -929,6 +881,7 @@ export function EditCityAdmin() {
               <RichTextEditor
                 content={formData.exhibiting_experience_benefits_html}
                 onChange={(newContent) => handleInputChange('exhibiting_experience_benefits_html', newContent)}
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -961,6 +914,7 @@ export function EditCityAdmin() {
               <RichTextEditor
                 content={formData.exhibiting_experience_excellence_points_html}
                 onChange={(newContent) => handleInputChange('exhibiting_experience_excellence_points_html', newContent)}
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>

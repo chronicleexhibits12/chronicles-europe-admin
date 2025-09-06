@@ -17,7 +17,6 @@ export function HomeAdmin() {
   
   // Form state
   const [formData, setFormData] = useState<Partial<HomePage>>({})
-  const [tempFormData, setTempFormData] = useState<Partial<HomePage>>({}) // Temporary state for unsaved changes
   
   // File input refs
   const heroImageRef = useRef<HTMLInputElement>(null)
@@ -28,12 +27,11 @@ export function HomeAdmin() {
   useEffect(() => {
     if (homePage) {
       setFormData(homePage)
-      setTempFormData(homePage) // Initialize temp data with loaded data
     }
   }, [homePage])
 
   const handleInputChange = (section: keyof HomePage, field: string, value: string) => {
-    setTempFormData(prev => {
+    setFormData(prev => {
       const currentSection = (prev[section] as any) || {}
       return {
         ...prev,
@@ -74,7 +72,7 @@ export function HomeAdmin() {
   }
 
   const handleSolutionItemChange = (index: number, field: keyof SolutionItem, value: string) => {
-    setTempFormData(prev => {
+    setFormData(prev => {
       const solutions = { ...prev.solutions }
       const items = [...(solutions.items || [])]
       items[index] = { ...items[index], [field]: value }
@@ -116,15 +114,14 @@ export function HomeAdmin() {
 
     setSaving(true)
     
-    // Update formData with tempFormData before saving
-    setFormData(tempFormData)
-    
-    const savePromise = updateHomePage(homePage.id, tempFormData)
+    const savePromise = updateHomePage(homePage.id, formData)
     
     toast.promise(savePromise, {
       loading: 'Saving changes...',
       success: (result) => {
         if (result.data) {
+          // Update local form data with saved data
+          setFormData(result.data)
           return 'Home page updated successfully!'
         } else {
           throw new Error(result.error || 'Update failed')
@@ -175,14 +172,14 @@ export function HomeAdmin() {
                 <div>
                   <Input
                     id="hero-bg"
-                    value={tempFormData.hero?.backgroundImage || ''}
+                    value={formData.hero?.backgroundImage || ''}
                     onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
                     placeholder="Enter image URL"
                   />
                 </div>
                 <div>
                   <Input
-                    value={tempFormData.hero?.backgroundImageAlt || ''}
+                    value={formData.hero?.backgroundImageAlt || ''}
                     onChange={(e) => handleInputChange('hero', 'backgroundImageAlt', e.target.value)}
                     placeholder="Enter alt text"
                   />
@@ -213,11 +210,11 @@ export function HomeAdmin() {
                   )}
                 </Button>
               </div>
-              {tempFormData.hero?.backgroundImage && (
+              {formData.hero?.backgroundImage && (
                 <div className="mt-2">
                   <img
-                    src={tempFormData.hero.backgroundImage}
-                    alt={tempFormData.hero.backgroundImageAlt || "Hero background"}
+                    src={formData.hero.backgroundImage}
+                    alt={formData.hero.backgroundImageAlt || "Hero background"}
                     className="h-20 w-32 object-cover rounded border"
                   />
                 </div>
@@ -236,7 +233,7 @@ export function HomeAdmin() {
                 <Label htmlFor="europe-title">Title</Label>
                 <Input
                   id="europe-title"
-                  value={tempFormData.exhibitionEurope?.title || ''}
+                  value={formData.exhibitionEurope?.title || ''}
                   onChange={(e) => handleInputChange('exhibitionEurope', 'title', e.target.value)}
                   placeholder="Enter Europe exhibition title"
                   className="mt-1"
@@ -247,7 +244,7 @@ export function HomeAdmin() {
                 <Label htmlFor="europe-subtitle">Subtitle</Label>
                 <Input
                   id="europe-subtitle"
-                  value={tempFormData.exhibitionEurope?.subtitle || ''}
+                  value={formData.exhibitionEurope?.subtitle || ''}
                   onChange={(e) => handleInputChange('exhibitionEurope', 'subtitle', e.target.value)}
                   placeholder="Enter subtitle"
                   className="mt-1"
@@ -261,14 +258,14 @@ export function HomeAdmin() {
                 <div>
                   <Input
                     id="europe-booth"
-                    value={tempFormData.exhibitionEurope?.boothImage || ''}
+                    value={formData.exhibitionEurope?.boothImage || ''}
                     onChange={(e) => handleInputChange('exhibitionEurope', 'boothImage', e.target.value)}
                     placeholder="Enter image URL"
                   />
                 </div>
                 <div>
                   <Input
-                    value={tempFormData.exhibitionEurope?.boothImageAlt || ''}
+                    value={formData.exhibitionEurope?.boothImageAlt || ''}
                     onChange={(e) => handleInputChange('exhibitionEurope', 'boothImageAlt', e.target.value)}
                     placeholder="Enter alt text"
                   />
@@ -282,7 +279,7 @@ export function HomeAdmin() {
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'exhibition', 'boothImage')
+                    if (file) handleImageUpload(file, 'exhibitionEurope', 'boothImage')
                   }}
                 />
                 <Button
@@ -299,11 +296,11 @@ export function HomeAdmin() {
                   )}
                 </Button>
               </div>
-              {tempFormData.exhibitionEurope?.boothImage && (
+              {formData.exhibitionEurope?.boothImage && (
                 <div className="mt-2">
                   <img
-                    src={tempFormData.exhibitionEurope.boothImage}
-                    alt={tempFormData.exhibitionEurope.boothImageAlt || "Booth"}
+                    src={formData.exhibitionEurope.boothImage}
+                    alt={formData.exhibitionEurope.boothImageAlt || "Booth"}
                     className="h-20 w-32 object-cover rounded border"
                   />
                 </div>
@@ -313,11 +310,11 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={tempFormData.exhibitionEurope?.htmlContent || ''}
+                content={formData.exhibitionEurope?.htmlContent || ''}
                 onChange={(content) => handleInputChange('exhibitionEurope', 'htmlContent', content)}
                 placeholder="Enter exhibition content..."
                 className="mt-1"
-                controlled={true} // Enable controlled mode
+                controlled={true}
               />
             </div>
           </div>
@@ -332,7 +329,7 @@ export function HomeAdmin() {
               <Label htmlFor="usa-title">Title</Label>
               <Input
                 id="usa-title"
-                value={tempFormData.exhibitionUSA?.title || ''}
+                value={formData.exhibitionUSA?.title || ''}
                 onChange={(e) => handleInputChange('exhibitionUSA', 'title', e.target.value)}
                 placeholder="Enter USA exhibition title"
                 className="mt-1"
@@ -342,11 +339,11 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={tempFormData.exhibitionUSA?.htmlContent || ''}
+                content={formData.exhibitionUSA?.htmlContent || ''}
                 onChange={(content) => handleInputChange('exhibitionUSA', 'htmlContent', content)}
                 placeholder="Enter exhibition content..."
                 className="mt-1"
-                controlled={true} // Enable controlled mode
+                controlled={true}
               />
             </div>
           </div>
@@ -361,7 +358,7 @@ export function HomeAdmin() {
               <Label htmlFor="solutions-title">Title</Label>
               <Input
                 id="solutions-title"
-                value={tempFormData.solutions?.title || ''}
+                value={formData.solutions?.title || ''}
                 onChange={(e) => handleInputChange('solutions', 'title', e.target.value)}
                 placeholder="Enter solutions title"
                 className="mt-1"
@@ -371,10 +368,11 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={tempFormData.solutions?.htmlContent || ''}
+                content={formData.solutions?.htmlContent || ''}
                 onChange={(content) => handleInputChange('solutions', 'htmlContent', content)}
                 placeholder="Enter solutions content..."
                 className="mt-1"
+                controlled={true}
               />
             </div>
             
@@ -384,7 +382,7 @@ export function HomeAdmin() {
               </div>
               
               <div className="space-y-4">
-                {tempFormData.solutions?.items?.map((item, index) => (
+                {formData.solutions?.items?.map((item, index) => (
                   <div key={index} className="p-4 border rounded-lg space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -480,7 +478,7 @@ export function HomeAdmin() {
                 <Label htmlFor="main-title">Title</Label>
                 <Input
                   id="main-title"
-                  value={tempFormData.mainSection?.title || ''}
+                  value={formData.mainSection?.title || ''}
                   onChange={(e) => handleInputChange('mainSection', 'title', e.target.value)}
                   placeholder="Enter main title"
                   className="mt-1"
@@ -491,7 +489,7 @@ export function HomeAdmin() {
                 <Label htmlFor="main-subtitle">Subtitle</Label>
                 <Input
                   id="main-subtitle"
-                  value={tempFormData.mainSection?.subtitle || ''}
+                  value={formData.mainSection?.subtitle || ''}
                   onChange={(e) => handleInputChange('mainSection', 'subtitle', e.target.value)}
                   placeholder="Enter subtitle"
                   className="mt-1"
@@ -502,10 +500,11 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={tempFormData.mainSection?.htmlContent || ''}
+                content={formData.mainSection?.htmlContent || ''}
                 onChange={(content) => handleInputChange('mainSection', 'htmlContent', content)}
                 placeholder="Enter main content..."
                 className="mt-1"
+                controlled={true}
               />
             </div>
           </div>
@@ -521,7 +520,7 @@ export function HomeAdmin() {
                 <Label htmlFor="why-title">Title</Label>
                 <Input
                   id="why-title"
-                  value={tempFormData.whyBest?.title || ''}
+                  value={formData.whyBest?.title || ''}
                   onChange={(e) => handleInputChange('whyBest', 'title', e.target.value)}
                   placeholder="Enter title"
                   className="mt-1"
@@ -532,7 +531,7 @@ export function HomeAdmin() {
                 <Label htmlFor="why-subtitle">Subtitle</Label>
                 <Input
                   id="why-subtitle"
-                  value={tempFormData.whyBest?.subtitle || ''}
+                  value={formData.whyBest?.subtitle || ''}
                   onChange={(e) => handleInputChange('whyBest', 'subtitle', e.target.value)}
                   placeholder="Enter subtitle"
                   className="mt-1"
@@ -543,10 +542,11 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={tempFormData.whyBest?.htmlContent || ''}
+                content={formData.whyBest?.htmlContent || ''}
                 onChange={(content) => handleInputChange('whyBest', 'htmlContent', content)}
                 placeholder="Enter content..."
                 className="mt-1"
+                controlled={true}
               />
             </div>
           </div>

@@ -17,16 +17,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTradeShows } from '@/hooks/useTradeShowsContent'
 import { TradeShowsService } from '@/data/tradeShowsService'
+import * as XLSX from 'xlsx'
 
 export function TradeShowsAdmin() {
   const navigate = useNavigate()
   const { data: tradeShows, loading, error, refetch } = useTradeShows()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [tradeShowToDelete, setTradeShowToDelete] = useState<{id: string, title: string} | null>(null)
+
+  // Get website URL from environment variables, with fallback
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
 
   const handleCreateTradeShow = () => {
     navigate('/admin/trade-shows/create')
@@ -58,6 +62,35 @@ export function TradeShowsAdmin() {
       toast.error('Failed to delete trade show')
       setDeleteDialogOpen(false)
       setTradeShowToDelete(null)
+    }
+  }
+
+  const exportToExcel = () => {
+    try {
+      // Prepare data for export
+      const exportData = tradeShows.map(show => ({
+        Slug: show.slug,
+        Title: show.title,
+        'Start Date': show.startDate ? new Date(show.startDate).toLocaleDateString() : '',
+        'End Date': show.endDate ? new Date(show.endDate).toLocaleDateString() : '',
+        City: show.city || '',
+        Country: show.country || ''
+      }))
+
+      // Create worksheet
+      const ws = XLSX.utils.json_to_sheet(exportData)
+      
+      // Create workbook
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Trade Shows')
+      
+      // Export to file
+      XLSX.writeFile(wb, 'trade-shows-export.xlsx')
+      
+      toast.success('Excel file exported successfully')
+    } catch (error: any) {
+      console.error('Error exporting to Excel:', error)
+      toast.error('Failed to export Excel file')
     }
   }
 
@@ -115,10 +148,16 @@ export function TradeShowsAdmin() {
             Manage trade shows and exhibitions
           </p>
         </div>
-        <Button onClick={handleCreateTradeShow}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Trade Show
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={exportToExcel}>
+            <Download className="h-4 w-4 mr-2" />
+            Export to Excel
+          </Button>
+          <Button onClick={handleCreateTradeShow}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Trade Show
+          </Button>
+        </div>
       </div>
 
       {/* Trade Shows Table */}
@@ -155,7 +194,7 @@ export function TradeShowsAdmin() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(`/trade-shows/${tradeShow.slug}`, '_blank')}
+                    onClick={() => window.open(`${websiteUrl}/top-trade-shows-in-europe/${tradeShow.slug}`, '_blank')}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>

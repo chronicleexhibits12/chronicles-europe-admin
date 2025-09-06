@@ -14,25 +14,25 @@ export function RichTextEditor({ content, onChange, placeholder, className, cont
   
   // Update local content when the prop content changes (e.g., on save)
   useEffect(() => {
-    if (!controlled) {
+    if (controlled) {
       setLocalContent(content);
     }
   }, [content, controlled]);
   
   const handleChange = (newContent: string) => {
+    // In controlled mode, we still need to call onChange to propagate changes
+    // In uncontrolled mode, we also call onChange
+    onChange(newContent);
+    
+    // Only update local state in controlled mode
     if (controlled) {
-      // In controlled mode, only update local state
       setLocalContent(newContent);
-    } else {
-      // In uncontrolled mode, propagate changes immediately
-      setLocalContent(newContent);
-      onChange(newContent);
     }
   };
 
   return (
     <CKEditorComponent 
-      content={localContent} 
+      content={controlled ? localContent : content} 
       onChange={handleChange} 
       placeholder={placeholder} 
       className={className} 

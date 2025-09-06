@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,95 +43,32 @@ export function CreateTradeShowAdmin() {
     metaKeywords: '',
   })
 
-  // Temporary state for selected files (not yet uploaded)
-  const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
-
-  // Temporary state for uploaded images (not yet saved)
-  const [tempImages, setTempImages] = useState<Record<string, string>>({})
-
-  // Cleanup temporary files and preview URLs when component unmounts
-  useEffect(() => {
-    return () => {
-      // Revoke object URLs to free memory
-      Object.values(tempImages).forEach(url => {
-        if (url && url.startsWith('blob:')) {
-          URL.revokeObjectURL(url)
-        }
-      })
-    }
-  }, [tempImages])
-
-  // Cleanup temporary images when component unmounts
-  useEffect(() => {
-    return () => {
-      // Delete all temporary images if they exist
-      Object.values(tempImages).forEach(async (imageUrl) => {
-        if (imageUrl) {
-          try {
-            await TradeShowsService.deleteImage(imageUrl)
-          } catch (error) {
-            console.warn('Failed to delete temporary image on unmount:', error)
-          }
-        }
-      })
-    }
-  }, [tempImages])
-
   const handleSave = async () => {
     setSaving(true)
     
     try {
-      // First, upload any pending files
-      const uploadedImages: Record<string, string> = {}
-      
-      for (const [field, file] of Object.entries(tempFiles)) {
-        try {
-          // Upload the file
-          const { data, error } = await TradeShowsService.uploadImage(file)
-          
-          if (error) throw new Error(error)
-          if (!data) throw new Error('No URL returned from upload')
-          
-          uploadedImages[field] = data
-        } catch (uploadError) {
-          console.error(`Failed to upload image for field ${field}:`, uploadError)
-          toast.error(`Failed to upload image for field ${field}`)
-          throw uploadError
-        }
-      }
-
-      // Merge form data with newly uploaded images
-      const dataToSave = {
-        ...formData,
-        ...uploadedImages
-      }
-
       const { error } = await TradeShowsService.createTradeShow({
-        slug: dataToSave.slug,
-        title: dataToSave.title,
-        excerpt: dataToSave.excerpt,
-        content: dataToSave.content,
-        startDate: dataToSave.startDate,
-        endDate: dataToSave.endDate,
-        location: dataToSave.location,
-        country: dataToSave.country,
-        city: dataToSave.city,
-        category: dataToSave.category,
-        logo: dataToSave.logo,
-        logoAlt: dataToSave.logoAlt,
-        organizer: dataToSave.organizer,
-        website: dataToSave.website,
-        venue: dataToSave.venue,
-        metaTitle: dataToSave.metaTitle,
-        metaDescription: dataToSave.metaDescription,
-        metaKeywords: dataToSave.metaKeywords,
+        slug: formData.slug,
+        title: formData.title,
+        excerpt: formData.excerpt,
+        content: formData.content,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        location: formData.location,
+        country: formData.country,
+        city: formData.city,
+        category: formData.category,
+        logo: formData.logo,
+        logoAlt: formData.logoAlt,
+        organizer: formData.organizer,
+        website: formData.website,
+        venue: formData.venue,
+        metaTitle: formData.metaTitle,
+        metaDescription: formData.metaDescription,
+        metaKeywords: formData.metaKeywords,
       })
 
       if (error) throw new Error(error)
-      
-      // Clear temp states after successful save
-      setTempFiles({})
-      setTempImages({})
       
       toast.success('Trade show created successfully!')
       navigate('/admin/trade-shows')
@@ -147,56 +84,32 @@ export function CreateTradeShowAdmin() {
     setUploading(field)
     
     try {
-      // Store the selected file in temp state (not uploaded yet)
-      setTempFiles(prev => ({
+      const { data, error } = await TradeShowsService.uploadImage(file)
+      
+      if (error) throw new Error(error)
+      if (!data) throw new Error('No URL returned from upload')
+      
+      // Update form data with the uploaded image URL
+      setFormData(prev => ({
         ...prev,
-        [field]: file
+        [field]: data
       }))
-
-      // Also store a preview URL for immediate preview
-      const previewUrl = URL.createObjectURL(file)
-      setTempImages(prev => ({
-        ...prev,
-        [field]: previewUrl
-      }))
-
-      toast.success('Image selected successfully! It will be uploaded when you save changes.')
+      
+      toast.success('Image uploaded successfully!')
     } catch (error: any) {
-      console.error('Error selecting image:', error)
-      toast.error(`Failed to select image: ${error.message || 'Unknown error'}`);
+      console.error('Error uploading image:', error)
+      toast.error(`Failed to upload image: ${error.message || 'Unknown error'}`)
     } finally {
       setUploading(null)
     }
   }
 
-  // Function to remove an image (with confirmation)
-  const removeImage = async (field: string) => {
-    // Check if this is a temporary image or an existing one
-    const isTempImage = !!tempImages[field];
-    const isTempFile = !!tempFiles[field];
-    
-    if (isTempImage || isTempFile) {
-      // Remove temporary image/file
-      setTempImages(prev => {
-        const newTempImages = { ...prev };
-        if (newTempImages[field]) {
-          // Revoke the object URL to free memory
-          if (newTempImages[field].startsWith('blob:')) {
-            URL.revokeObjectURL(newTempImages[field]);
-          }
-          delete newTempImages[field];
-        }
-        return newTempImages;
-      });
-      
-      setTempFiles(prev => {
-        const newTempFiles = { ...prev };
-        delete newTempFiles[field];
-        return newTempFiles;
-      });
-      
-      toast.success('Image removed successfully');
-    }
+  const removeImage = (field: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: ''
+    }))
+    toast.success('Image removed successfully')
   }
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
@@ -223,13 +136,8 @@ export function CreateTradeShowAdmin() {
     return formData.metaKeywords ? formData.metaKeywords.split(',').map(k => k.trim()).filter(k => k) : []
   }
 
-  // Get image URL for preview (from temp images first, then from form data)
+  // Get image URL for preview
   const getImageUrl = (field: string): string => {
-    // Check if we have a temporary preview URL
-    if (tempImages[field]) {
-      return tempImages[field]
-    }
-    // Otherwise, use the URL from form data
     const value = formData[field as keyof typeof formData]
     return typeof value === 'string' ? value : ''
   }
@@ -286,6 +194,7 @@ export function CreateTradeShowAdmin() {
               <RichTextEditor
                 content={formData.content}
                 onChange={(newContent) => handleInputChange('content', newContent)}
+                controlled={true}
               />
             </div>
           </div>

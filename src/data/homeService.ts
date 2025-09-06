@@ -34,7 +34,8 @@ export class HomePageService {
           title: row.exhibition_europe_title || undefined,
           subtitle: row.exhibition_europe_subtitle || undefined,
           boothImage: row.exhibition_europe_booth_image || undefined,
-          boothImageAlt: row.exhibition_europe_booth_image_alt || undefined
+          boothImageAlt: row.exhibition_europe_booth_image_alt || undefined,
+          htmlContent: row.exhibition_europe_html_content || undefined
         },
         exhibitionUSA: {
           title: row.exhibition_usa_title || undefined,
@@ -121,7 +122,8 @@ export class HomePageService {
       if (data.solutions?.items !== undefined) {
         updateData.solutions_items = data.solutions.items
       }
-
+      // Note: solutions_items_alt is not being handled here, but it should be if used
+      
       // Why Best
       if (data.whyBest?.title !== undefined) {
         updateData.why_best_title = data.whyBest.title

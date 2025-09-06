@@ -28,6 +28,9 @@ export function CountriesAdmin() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [countryToDelete, setCountryToDelete] = useState<{id: string, name: string} | null>(null)
 
+  // Get website URL from environment variables, with fallback
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
   const handleCreateCountry = () => {
     navigate('/admin/countries/create')
   }
@@ -135,7 +138,6 @@ export function CountriesAdmin() {
             <TableRow>
               <TableHead>Country Name</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Cities Selected</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -146,15 +148,6 @@ export function CountriesAdmin() {
               <TableRow key={country.id}>
                 <TableCell className="font-medium">{country.name}</TableCell>
                 <TableCell>{country.slug}</TableCell>
-                <TableCell>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    country.is_active 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {country.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </TableCell>
                 <TableCell>{country.selected_cities?.length || 0} cities</TableCell>
                 <TableCell>
                   {country.updated_at ? new Date(country.updated_at).toLocaleDateString() : 'Never'}
@@ -163,7 +156,7 @@ export function CountriesAdmin() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(`/countries/${country.slug}`, '_blank')}
+                    onClick={() => window.open(`${websiteUrl}/countries/${country.slug}`, '_blank')}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,199 +13,94 @@ import { toast } from 'sonner'
 export function ModularStandsAdmin() {
   const { content, loading, error, updateContent } = useModularStandsContent()
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState<string | null>(null)
+  const [uploadingImages, setUploadingImages] = useState<{ [key: string]: boolean }>({})
   
-  // Temporary state for uploaded images (not yet saved)
-  const [tempImages, setTempImages] = useState<Record<string, string>>({})
+  // Form state
+  const [formData, setFormData] = useState<any>({})
   
-  // Temporary state for selected files (not yet uploaded)
-  const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
-  
-  // Cleanup temporary files and preview URLs when component unmounts
+  // File input refs
+  const benefitsImageRef = useRef<HTMLInputElement>(null)
+  const exhibitionBenefitsImageRef = useRef<HTMLInputElement>(null)
+
+  // Update form data when content loads
   useEffect(() => {
-    return () => {
-      // Revoke object URLs to free memory
-      Object.values(tempImages).forEach(url => {
-        if (url && url.startsWith('blob:')) {
-          URL.revokeObjectURL(url)
-        }
-      })
+    if (content) {
+      setFormData(content)
     }
-  }, [tempImages])
-  
-  // Cleanup temporary images when component unmounts
-  useEffect(() => {
-    return () => {
-      // Delete all temporary images if they exist
-      Object.values(tempImages).forEach(async (imageUrl) => {
-        if (imageUrl) {
-          try {
-            await ModularStandsPageService.deleteImage(imageUrl)
-          } catch (error) {
-            console.warn('Failed to delete temporary image on unmount:', error)
-          }
+  }, [content])
+
+  const handleInputChange = (section: string, field: string, value: string) => {
+    setFormData((prev: any) => {
+      const currentSection = (prev[section] as any) || {}
+      return {
+        ...prev,
+        [section]: {
+          ...currentSection,
+          [field]: value
         }
-      })
+      }
+    })
+  }
+
+  const handleImageUpload = async (file: File, section: string, field: string) => {
+    const uploadKey = `${section}-${field}`
+    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }))
+
+    const uploadPromise = ModularStandsPageService.uploadImage(file)
+    
+    toast.promise(uploadPromise, {
+      loading: 'Uploading image...',
+      success: (result) => {
+        if (result.data) {
+          handleInputChange(section, field, result.data)
+          // Trigger revalidation after successful image upload
+          ModularStandsPageService.triggerRevalidation()
+          return 'Image uploaded successfully!'
+        } else {
+          throw new Error(result.error || 'Upload failed')
+        }
+      },
+      error: (error) => `Failed to upload image: ${error.message || 'Unknown error'}`
+    })
+
+    try {
+      await uploadPromise
+    } finally {
+      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }))
     }
-  }, [tempImages])
+  }
 
   const handleSave = async () => {
-    if (!content) return
-    
     setSaving(true)
     
+    const savePromise = updateContent(formData)
+    
+    toast.promise(savePromise, {
+      loading: 'Saving changes...',
+      success: (result) => {
+        if (result.data) {
+          // Update local form data with saved data
+          setFormData(result.data)
+          return 'Modular stands page updated successfully!'
+        } else {
+          throw new Error(result.error || 'Update failed')
+        }
+      },
+      error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
+    })
+
     try {
-      // First, upload any pending files
-      const uploadedImages: Record<string, string> = {}
-      
-      for (const [field, file] of Object.entries(tempFiles)) {
-        try {
-          // Upload the file
-          const { data, error } = await ModularStandsPageService.uploadImage(file)
-          
-          if (error) throw new Error(error)
-          if (!data) throw new Error('No URL returned from upload')
-          
-          uploadedImages[field] = data
-          
-          // Delete the previous image if it exists
-          const currentImageUrl = getCurrentImageUrl(field)
-          if (currentImageUrl) {
-            try {
-              await ModularStandsPageService.deleteImage(currentImageUrl)
-            } catch (deleteError) {
-              console.warn('Failed to delete previous image:', deleteError)
-            }
-          }
-        } catch (uploadError) {
-          console.error(`Failed to upload image for field ${field}:`, uploadError)
-          toast.error(`Failed to upload image for field ${field}`)
-          throw uploadError
-        }
-      }
-      
-      // Update content with newly uploaded images
-      let updatedContent = { ...content }
-      
-      for (const [field, url] of Object.entries(uploadedImages)) {
-        switch (field) {
-          case 'hero-bg':
-            updatedContent = {
-              ...updatedContent,
-              hero: { ...updatedContent.hero, backgroundImage: url }
-            }
-            break
-          case 'benefits-img':
-            updatedContent = {
-              ...updatedContent,
-              benefits: { ...updatedContent.benefits, image: url }
-            }
-            break
-          case 'exhibition-benefits-img':
-            updatedContent = {
-              ...updatedContent,
-              exhibitionBenefits: { ...updatedContent.exhibitionBenefits, image: url }
-            }
-            break
-        }
-      }
-      
-      const savePromise = updateContent(updatedContent)
-      
-      toast.promise(savePromise, {
-        loading: 'Saving changes...',
-        success: 'Modular stands page updated successfully!',
-        error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
-      })
-      
-      // Clear temp states after successful save
-      setTempFiles({})
-      setTempImages({})
-      
+      await savePromise
       // Trigger revalidation after successful save
       await ModularStandsPageService.triggerRevalidation()
-    } catch (error: any) {
-      console.error('Error saving content:', error)
-      toast.error(`Failed to save: ${error.message || 'Unknown error'}`)
     } finally {
       setSaving(false)
     }
   }
 
-  const handleImageUpload = async (file: File, field: string) => {
-    setUploading(field)
-    
-    try {
-      // Store the selected file in temp state (not uploaded yet)
-      setTempFiles(prev => ({
-        ...prev,
-        [field]: file
-      }))
-
-      // Also store a preview URL for immediate preview
-      const previewUrl = URL.createObjectURL(file)
-      setTempImages(prev => ({
-        ...prev,
-        [field]: previewUrl
-      }))
-
-      toast.success('Image selected successfully! It will be uploaded when you save changes.')
-    } catch (error: any) {
-      console.error('Error selecting image:', error)
-      toast.error(`Failed to select image: ${error.message || 'Unknown error'}`);
-    } finally {
-      setUploading(null)
-    }
-  }
-
-  // Function to remove an image (with confirmation for existing images)
-  const removeImage = async (field: string) => {
-    // Check if this is a temporary image or an existing one
-    const isTempImage = !!tempImages[field];
-    const isTempFile = !!tempFiles[field];
-    
-    if (isTempImage || isTempFile) {
-      // Remove temporary image/file
-      setTempImages(prev => {
-        const newTempImages = { ...prev };
-        if (newTempImages[field]) {
-          // Revoke the object URL to free memory
-          if (newTempImages[field].startsWith('blob:')) {
-            URL.revokeObjectURL(newTempImages[field]);
-          }
-          delete newTempImages[field];
-        }
-        return newTempImages;
-      });
-      
-      setTempFiles(prev => {
-        const newTempFiles = { ...prev };
-        delete newTempFiles[field];
-        return newTempFiles;
-      });
-      
-      toast.success('Image removed successfully');
-    }
-  }
-
-  // Get current image URL for a field (from temp images first, then from content)
-  const getCurrentImageUrl = (field: string): string => {
-    // Check if we have a temporary preview URL
-    if (tempImages[field]) {
-      return tempImages[field]
-    }
-    
-    // Otherwise, use the URL from content based on field
-    switch (field) {
-      case 'hero-bg':
-        return content?.hero?.backgroundImage || ''
-      case 'benefits-img':
-        return content?.benefits?.image || ''
-      case 'exhibition-benefits-img':
-        return content?.exhibitionBenefits?.image || ''
-      default:
-        return ''
-    }
+  // Get current image URL for a field (from form data)
+  const getCurrentImageUrl = (section: string, field: string): string => {
+    return formData[section]?.[field] || ''
   }
 
   if (loading) {
@@ -247,84 +142,38 @@ export function ModularStandsAdmin() {
                 <Label htmlFor="hero-title">Hero Title</Label>
                 <Input
                   id="hero-title"
-                  value={content.hero?.title || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    hero: { ...content.hero, title: e.target.value }
-                  })}
+                  value={formData.hero?.title || ''}
+                  onChange={(e) => handleInputChange('hero', 'title', e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="hero-subtitle">Hero Subtitle</Label>
                 <Input
                   id="hero-subtitle"
-                  value={content.hero?.subtitle || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    hero: { ...content.hero, subtitle: e.target.value }
-                  })}
+                  value={formData.hero?.subtitle || ''}
+                  onChange={(e) => handleInputChange('hero', 'subtitle', e.target.value)}
                 />
               </div>
             </div>
             <div className="w-full">
-              <Label htmlFor="hero-background">Background Image</Label>
+              <Label htmlFor="hero-background">Background Image URL</Label>
               <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    id="hero-background"
-                    value={getCurrentImageUrl('hero-bg')}
-                    onChange={(e) => {
-                      // For direct URL input, we update the content directly
-                      if (!tempImages['hero-bg'] && !tempFiles['hero-bg']) {
-                        updateContent({
-                          ...content,
-                          hero: { ...content.hero, backgroundImage: e.target.value }
-                        })
-                      }
-                    }}
-                    placeholder="Image URL or upload below"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => document.getElementById('hero-bg-upload')?.click()}
-                    disabled={uploading === 'hero-bg'}
-                  >
-                    {uploading === 'hero-bg' ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                {getCurrentImageUrl('hero-bg') && (
+                <Input
+                  id="hero-background"
+                  value={getCurrentImageUrl('hero', 'backgroundImage')}
+                  onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
+                  placeholder="Image URL"
+                  readOnly
+                />
+                {getCurrentImageUrl('hero', 'backgroundImage') && (
                   <div className="relative inline-block">
                     <img 
-                      src={getCurrentImageUrl('hero-bg')} 
+                      src={getCurrentImageUrl('hero', 'backgroundImage')} 
                       alt="Hero background preview" 
                       className="h-20 w-32 object-cover rounded border"
                     />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={() => removeImage('hero-bg')}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
                   </div>
                 )}
-                <input
-                  id="hero-bg-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    e.preventDefault();
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'hero-bg')
-                  }}
-                />
               </div>
             </div>
           </div>
@@ -338,11 +187,8 @@ export function ModularStandsAdmin() {
               <Label htmlFor="benefits-title">Benefits Title</Label>
               <Input
                 id="benefits-title"
-                value={content.benefits?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  benefits: { ...content.benefits, title: e.target.value }
-                })}
+                value={formData.benefits?.title || ''}
+                onChange={(e) => handleInputChange('benefits', 'title', e.target.value)}
               />
             </div>
             <div className="w-full">
@@ -351,34 +197,37 @@ export function ModularStandsAdmin() {
                 <div className="flex gap-2">
                   <Input
                     id="benefits-image"
-                    value={getCurrentImageUrl('benefits-img')}
-                    onChange={(e) => {
-                      // For direct URL input, we update the content directly
-                      if (!tempImages['benefits-img'] && !tempFiles['benefits-img']) {
-                        updateContent({
-                          ...content,
-                          benefits: { ...content.benefits, image: e.target.value }
-                        })
-                      }
-                    }}
+                    value={getCurrentImageUrl('benefits', 'image')}
+                    onChange={(e) => handleInputChange('benefits', 'image', e.target.value)}
                     placeholder="Image URL or upload below"
+                  />
+                  <input
+                    ref={benefitsImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleImageUpload(file, 'benefits', 'image')
+                    }}
                   />
                   <Button
                     variant="outline"
-                    onClick={() => document.getElementById('benefits-img-upload')?.click()}
-                    disabled={uploading === 'benefits-img'}
+                    onClick={() => benefitsImageRef.current?.click()}
+                    disabled={uploadingImages['benefits-image']}
                   >
-                    {uploading === 'benefits-img' ? (
+                    {uploadingImages['benefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Upload className="h-4 w-4" />
                     )}
+                    Upload
                   </Button>
                 </div>
-                {getCurrentImageUrl('benefits-img') && (
+                {getCurrentImageUrl('benefits', 'image') && (
                   <div className="relative inline-block">
                     <img 
-                      src={getCurrentImageUrl('benefits-img')} 
+                      src={getCurrentImageUrl('benefits', 'image')} 
                       alt="Benefits preview" 
                       className="h-20 w-32 object-cover rounded border"
                     />
@@ -387,33 +236,20 @@ export function ModularStandsAdmin() {
                       variant="destructive"
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={() => removeImage('benefits-img')}
+                      onClick={() => handleInputChange('benefits', 'image', '')}
                     >
                       <X className="h-3 w-3" />
                     </Button>
                   </div>
                 )}
-                <input
-                  id="benefits-img-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    e.preventDefault();
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'benefits-img')
-                  }}
-                />
               </div>
             </div>
             <div className="w-full">
               <Label>Benefits Content (Rich Text)</Label>
               <RichTextEditor
-                content={content.benefits?.content || ''}
-                onChange={(newContent) => updateContent({
-                  ...content,
-                  benefits: { ...content.benefits, content: newContent }
-                })}
+                content={formData.benefits?.content || ''}
+                onChange={(newContent) => handleInputChange('benefits', 'content', newContent)}
+                controlled={true}
               />
             </div>
           </div>
@@ -427,21 +263,16 @@ export function ModularStandsAdmin() {
               <Label htmlFor="points-table-title">Title</Label>
               <Input
                 id="points-table-title"
-                value={content.pointsTable?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  pointsTable: { ...content.pointsTable, title: e.target.value }
-                })}
+                value={formData.pointsTable?.title || ''}
+                onChange={(e) => handleInputChange('pointsTable', 'title', e.target.value)}
               />
             </div>
             <div className="w-full">
               <Label>Points Table Content (Rich Text)</Label>
               <RichTextEditor
-                content={content.pointsTable?.content || ''}
-                onChange={(newContent) => updateContent({
-                  ...content,
-                  pointsTable: { ...content.pointsTable, content: newContent }
-                })}
+                content={formData.pointsTable?.content || ''}
+                onChange={(newContent) => handleInputChange('pointsTable', 'content', newContent)}
+                controlled={true}
               />
             </div>
           </div>
@@ -456,33 +287,25 @@ export function ModularStandsAdmin() {
                 <Label htmlFor="stand-project-title">Title</Label>
                 <Input
                   id="stand-project-title"
-                  value={content.standProjectText?.title || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    standProjectText: { ...content.standProjectText, title: e.target.value }
-                  })}
+                  value={formData.standProjectText?.title || ''}
+                  onChange={(e) => handleInputChange('standProjectText', 'title', e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="stand-project-highlight">Highlight Text</Label>
                 <Input
                   id="stand-project-highlight"
-                  value={content.standProjectText?.highlight || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    standProjectText: { ...content.standProjectText, highlight: e.target.value }
-                  })}
+                  value={formData.standProjectText?.highlight || ''}
+                  onChange={(e) => handleInputChange('standProjectText', 'highlight', e.target.value)}
                 />
               </div>
             </div>
             <div className="w-full">
               <Label>Description (Rich Text)</Label>
               <RichTextEditor
-                content={content.standProjectText?.description || ''}
-                onChange={(newContent) => updateContent({
-                  ...content,
-                  standProjectText: { ...content.standProjectText, description: newContent }
-                })}
+                content={formData.standProjectText?.description || ''}
+                onChange={(newContent) => handleInputChange('standProjectText', 'description', newContent)}
+                controlled={true}
               />
             </div>
           </div>
@@ -497,22 +320,16 @@ export function ModularStandsAdmin() {
                 <Label htmlFor="exhibition-benefits-title">Title</Label>
                 <Input
                   id="exhibition-benefits-title"
-                  value={content.exhibitionBenefits?.title || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    exhibitionBenefits: { ...content.exhibitionBenefits, title: e.target.value }
-                  })}
+                  value={formData.exhibitionBenefits?.title || ''}
+                  onChange={(e) => handleInputChange('exhibitionBenefits', 'title', e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="exhibition-benefits-subtitle">Subtitle</Label>
                 <Input
                   id="exhibition-benefits-subtitle"
-                  value={content.exhibitionBenefits?.subtitle || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    exhibitionBenefits: { ...content.exhibitionBenefits, subtitle: e.target.value }
-                  })}
+                  value={formData.exhibitionBenefits?.subtitle || ''}
+                  onChange={(e) => handleInputChange('exhibitionBenefits', 'subtitle', e.target.value)}
                 />
               </div>
             </div>
@@ -522,34 +339,37 @@ export function ModularStandsAdmin() {
                 <div className="flex gap-2">
                   <Input
                     id="exhibition-benefits-image"
-                    value={getCurrentImageUrl('exhibition-benefits-img')}
-                    onChange={(e) => {
-                      // For direct URL input, we update the content directly
-                      if (!tempImages['exhibition-benefits-img'] && !tempFiles['exhibition-benefits-img']) {
-                        updateContent({
-                          ...content,
-                          exhibitionBenefits: { ...content.exhibitionBenefits, image: e.target.value }
-                        })
-                      }
-                    }}
+                    value={getCurrentImageUrl('exhibitionBenefits', 'image')}
+                    onChange={(e) => handleInputChange('exhibitionBenefits', 'image', e.target.value)}
                     placeholder="Image URL or upload below"
+                  />
+                  <input
+                    ref={exhibitionBenefitsImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleImageUpload(file, 'exhibitionBenefits', 'image')
+                    }}
                   />
                   <Button
                     variant="outline"
-                    onClick={() => document.getElementById('exhibition-benefits-img-upload')?.click()}
-                    disabled={uploading === 'exhibition-benefits-img'}
+                    onClick={() => exhibitionBenefitsImageRef.current?.click()}
+                    disabled={uploadingImages['exhibitionBenefits-image']}
                   >
-                    {uploading === 'exhibition-benefits-img' ? (
+                    {uploadingImages['exhibitionBenefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Upload className="h-4 w-4" />
                     )}
+                    Upload
                   </Button>
                 </div>
-                {getCurrentImageUrl('exhibition-benefits-img') && (
+                {getCurrentImageUrl('exhibitionBenefits', 'image') && (
                   <div className="relative inline-block">
                     <img 
-                      src={getCurrentImageUrl('exhibition-benefits-img')} 
+                      src={getCurrentImageUrl('exhibitionBenefits', 'image')} 
                       alt="Exhibition benefits preview" 
                       className="h-20 w-32 object-cover rounded border"
                     />
@@ -558,33 +378,20 @@ export function ModularStandsAdmin() {
                       variant="destructive"
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={() => removeImage('exhibition-benefits-img')}
+                      onClick={() => handleInputChange('exhibitionBenefits', 'image', '')}
                     >
                       <X className="h-3 w-3" />
                     </Button>
                   </div>
                 )}
-                <input
-                  id="exhibition-benefits-img-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    e.preventDefault();
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'exhibition-benefits-img')
-                  }}
-                />
               </div>
             </div>
             <div className="w-full">
               <Label>Exhibition Benefits Content (Rich Text)</Label>
               <RichTextEditor
-                content={content.exhibitionBenefits?.content || ''}
-                onChange={(newContent) => updateContent({
-                  ...content,
-                  exhibitionBenefits: { ...content.exhibitionBenefits, content: newContent }
-                })}
+                content={formData.exhibitionBenefits?.content || ''}
+                onChange={(newContent) => handleInputChange('exhibitionBenefits', 'content', newContent)}
+                controlled={true}
               />
             </div>
           </div>
@@ -599,33 +406,25 @@ export function ModularStandsAdmin() {
                 <Label htmlFor="modular-diversity-title">Title</Label>
                 <Input
                   id="modular-diversity-title"
-                  value={content.modularDiversity?.title || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    modularDiversity: { ...content.modularDiversity, title: e.target.value }
-                  })}
+                  value={formData.modularDiversity?.title || ''}
+                  onChange={(e) => handleInputChange('modularDiversity', 'title', e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="modular-diversity-subtitle">Subtitle</Label>
                 <Input
                   id="modular-diversity-subtitle"
-                  value={content.modularDiversity?.subtitle || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    modularDiversity: { ...content.modularDiversity, subtitle: e.target.value }
-                  })}
+                  value={formData.modularDiversity?.subtitle || ''}
+                  onChange={(e) => handleInputChange('modularDiversity', 'subtitle', e.target.value)}
                 />
               </div>
             </div>
             <div className="w-full">
               <Label>Content (Rich Text)</Label>
               <RichTextEditor
-                content={content.modularDiversity?.content || ''}
-                onChange={(newContent) => updateContent({
-                  ...content,
-                  modularDiversity: { ...content.modularDiversity, content: newContent }
-                })}
+                content={formData.modularDiversity?.content || ''}
+                onChange={(newContent) => handleInputChange('modularDiversity', 'content', newContent)}
+                controlled={true}
               />
             </div>
           </div>
@@ -640,33 +439,25 @@ export function ModularStandsAdmin() {
                 <Label htmlFor="fastest-construction-title">Title</Label>
                 <Input
                   id="fastest-construction-title"
-                  value={content.fastestConstruction?.title || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    fastestConstruction: { ...content.fastestConstruction, title: e.target.value }
-                  })}
+                  value={formData.fastestConstruction?.title || ''}
+                  onChange={(e) => handleInputChange('fastestConstruction', 'title', e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="fastest-construction-subtitle">Subtitle</Label>
                 <Input
                   id="fastest-construction-subtitle"
-                  value={content.fastestConstruction?.subtitle || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    fastestConstruction: { ...content.fastestConstruction, subtitle: e.target.value }
-                  })}
+                  value={formData.fastestConstruction?.subtitle || ''}
+                  onChange={(e) => handleInputChange('fastestConstruction', 'subtitle', e.target.value)}
                 />
               </div>
             </div>
             <div className="w-full">
               <Label>Description (Rich Text)</Label>
               <RichTextEditor
-                content={content.fastestConstruction?.description || ''}
-                onChange={(newContent) => updateContent({
-                  ...content,
-                  fastestConstruction: { ...content.fastestConstruction, description: newContent }
-                })}
+                content={formData.fastestConstruction?.description || ''}
+                onChange={(newContent) => handleInputChange('fastestConstruction', 'description', newContent)}
+                controlled={true}
               />
             </div>
           </div>
@@ -681,33 +472,25 @@ export function ModularStandsAdmin() {
                 <Label htmlFor="experts-title">Title</Label>
                 <Input
                   id="experts-title"
-                  value={content.experts?.title || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    experts: { ...content.experts, title: e.target.value }
-                  })}
+                  value={formData.experts?.title || ''}
+                  onChange={(e) => handleInputChange('experts', 'title', e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="experts-subtitle">Subtitle</Label>
                 <Input
                   id="experts-subtitle"
-                  value={content.experts?.subtitle || ''}
-                  onChange={(e) => updateContent({
-                    ...content,
-                    experts: { ...content.experts, subtitle: e.target.value }
-                  })}
+                  value={formData.experts?.subtitle || ''}
+                  onChange={(e) => handleInputChange('experts', 'subtitle', e.target.value)}
                 />
               </div>
             </div>
             <div className="w-full">
               <Label>Description (Rich Text)</Label>
               <RichTextEditor
-                content={content.experts?.description || ''}
-                onChange={(newContent) => updateContent({
-                  ...content,
-                  experts: { ...content.experts, description: newContent }
-                })}
+                content={formData.experts?.description || ''}
+                onChange={(newContent) => handleInputChange('experts', 'description', newContent)}
+                controlled={true}
               />
             </div>
           </div>
@@ -721,22 +504,16 @@ export function ModularStandsAdmin() {
               <Label htmlFor="meta-title">Meta Title</Label>
               <Input
                 id="meta-title"
-                value={content.meta?.title || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  meta: { ...content.meta, title: e.target.value }
-                })}
+                value={formData.meta?.title || ''}
+                onChange={(e) => handleInputChange('meta', 'title', e.target.value)}
               />
             </div>
             <div>
               <Label htmlFor="meta-description">Meta Description</Label>
               <Textarea
                 id="meta-description"
-                value={content.meta?.description || ''}
-                onChange={(e) => updateContent({
-                  ...content,
-                  meta: { ...content.meta, description: e.target.value }
-                })}
+                value={formData.meta?.description || ''}
+                onChange={(e) => handleInputChange('meta', 'description', e.target.value)}
               />
             </div>
           </div>

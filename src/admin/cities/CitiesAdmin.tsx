@@ -28,6 +28,9 @@ export function CitiesAdmin() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [cityToDelete, setCityToDelete] = useState<{id: string, name: string} | null>(null)
 
+  // Get website URL from environment variables, with fallback
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
   const handleCreateCity = () => {
     navigate('/admin/cities/create')
   }
@@ -153,7 +156,7 @@ export function CitiesAdmin() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(`/countries/${city.country_slug}/${city.city_slug}`, '_blank')}
+                    onClick={() => window.open(`${websiteUrl}/${city.city_slug}`, '_blank')}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>

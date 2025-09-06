@@ -32,6 +32,9 @@ export function Pages() {
   const { data: tradeShowsPage, loading: tradeShowsLoading } = useTradeShowsPage()
   const [pages, setPages] = useState<PageInfo[]>([])
 
+  // Get website URL from environment variables, with fallback
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
   useEffect(() => {
     const pagesData: PageInfo[] = [
       {
@@ -45,15 +48,15 @@ export function Pages() {
       {
         id: 'about',
         name: 'About Page',
-        path: '/about-us',
-        editPath: 'admin/about-us',
+        path: '/about',
+        editPath: '/admin/about-us',
         lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Company information, team details, services, and statistics'
       },
       {
         id: 'trade-shows',
         name: 'Trade Shows Page',
-        path: '/trade-shows',
+        path: '/top-trade-shows-in-europe',
         editPath: '/admin/trade-shows-page',
         lastUpdated: tradeShowsPage?.updatedAt ? new Date(tradeShowsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Trade shows and exhibitions landing page'
@@ -67,8 +70,8 @@ export function Pages() {
   }
 
   const handleView = (path: string) => {
-    // Open the website page in a new tab
-    window.open(`https://chronicleseurope.vercel.app${path}`, '_blank')
+    // Open the website page in a new tab using the environment variable
+    window.open(`${websiteUrl}${path}`, '_blank')
   }
 
   const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading

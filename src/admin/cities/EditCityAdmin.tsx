@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/dialog'
 import { useCity } from '@/hooks/useCitiesContent'
 import { CitiesService } from '@/data/citiesService'
+import { CountriesService } from '@/data/countriesService'
+import type { Country } from '@/data/countriesTypes'
 import { slugify } from '@/utils/slugify'
 
 interface CityData {
@@ -72,6 +74,8 @@ export function EditCityAdmin() {
   const { data: city, loading, error } = useCity(id || '')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
+  const [availableCountries, setAvailableCountries] = useState<Country[]>([])
+  const [loadingCountries, setLoadingCountries] = useState(true)
   
   // Form state
   const [formData, setFormData] = useState<CityData>({
@@ -114,12 +118,31 @@ export function EditCityAdmin() {
     exhibiting_experience_excellence_points_html: '',
   })
 
-  // Temporary state for uploaded images (not yet saved)
-  const [tempImages, setTempImages] = useState<Record<string, string>>({})
+  // Load available countries for selection
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        setLoadingCountries(true)
+        const { data: countries, error } = await CountriesService.getCountries()
+        
+        if (error) throw new Error(error)
+        
+        setAvailableCountries(countries || [])
+      } catch (error: any) {
+        console.error('Error fetching countries:', error)
+        toast.error('Failed to load available countries')
+      } finally {
+        setLoadingCountries(false)
+      }
+    }
+    
+    fetchCountries()
+  }, [])
 
-  // Temporary state for selected files (not yet uploaded)
-  const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
+  // Store the original country slug to detect changes
+  const [originalCountrySlug, setOriginalCountrySlug] = useState<string>('')
 
+  // Load city data
   useEffect(() => {
     if (city) {
       setFormData({
@@ -148,8 +171,16 @@ export function EditCityAdmin() {
         exhibiting_experience_excellence_subtitle: city.exhibiting_experience_excellence_subtitle || '',
         exhibiting_experience_excellence_points_html: city.exhibiting_experience_excellence_points_html || '',
       })
+      // Store the original country slug
+      setOriginalCountrySlug(city.country_slug || '')
     }
   }, [city])
+
+  // Temporary state for uploaded images (not yet saved)
+  const [tempImages, setTempImages] = useState<Record<string, string>>({})
+
+  // Temporary state for selected files (not yet uploaded)
+  const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
 
   const handleSave = async () => {
     if (!id) return
@@ -214,41 +245,149 @@ export function EditCityAdmin() {
         }
       })
 
-      const { error } = await CitiesService.updateCity(id, {
-        name: dataToSave.name,
-        city_slug: dataToSave.city_slug,
-        country_slug: dataToSave.country_slug,
-        is_active: dataToSave.is_active,
-        seo_title: dataToSave.seo_title,
-        seo_description: dataToSave.seo_description,
-        seo_keywords: dataToSave.seo_keywords,
-        hero_title: dataToSave.hero_title,
-        hero_subtitle: dataToSave.hero_subtitle,
-        hero_background_image_url: dataToSave.hero_background_image_url,
-        why_choose_us_title: dataToSave.why_choose_us_title,
-        why_choose_us_subtitle: dataToSave.why_choose_us_subtitle,
-        why_choose_us_main_image_url: dataToSave.why_choose_us_main_image_url,
-        why_choose_us_benefits_html: dataToSave.why_choose_us_benefits_html,
-        what_we_do_title: dataToSave.what_we_do_title,
-        what_we_do_subtitle: dataToSave.what_we_do_subtitle,
-        what_we_do_description_html: dataToSave.what_we_do_description_html,
-        portfolio_title_template: dataToSave.portfolio_title_template,
-        exhibiting_experience_title: dataToSave.exhibiting_experience_title,
-        exhibiting_experience_subtitle: dataToSave.exhibiting_experience_subtitle,
-        exhibiting_experience_benefits_html: dataToSave.exhibiting_experience_benefits_html,
-        exhibiting_experience_excellence_title: dataToSave.exhibiting_experience_excellence_title,
-        exhibiting_experience_excellence_subtitle: dataToSave.exhibiting_experience_excellence_subtitle,
-        exhibiting_experience_excellence_points_html: dataToSave.exhibiting_experience_excellence_points_html,
-      })
+      // Handle country change - remove from old country and add to new country
+      // Do this BEFORE updating the city to ensure we have the correct original country
+      let countryUpdateSuccess = true;
+      const countryChanged = dataToSave.country_slug !== originalCountrySlug;
+      
+      console.log('Country change detected:', countryChanged, 'Original:', originalCountrySlug, 'New:', dataToSave.country_slug); // Debug log
+      
+      if (countryChanged) {
+        // Remove from the old country if it existed
+        if (originalCountrySlug) {
+          try {
+            console.log('Removing city from old country:', originalCountrySlug); // Debug log
+            const { data: oldCountry, error: oldCountryError } = await CountriesService.getCountryBySlug(originalCountrySlug)
+            
+            if (oldCountryError) {
+              console.error('Error fetching old country:', oldCountryError)
+              toast.error(`Failed to fetch old country: ${oldCountryError}`)
+              countryUpdateSuccess = false;
+            } else if (oldCountry) {
+              // Remove the city slug from the old country's selected_cities array
+              const updatedSelectedCities = (oldCountry.selected_cities || []).filter(
+                (slug: string) => slug !== dataToSave.city_slug
+              )
+              
+              console.log('Updated selected cities for old country:', updatedSelectedCities); // Debug log
+              
+              // Update the old country with the new selected_cities array
+              const { error: updateError } = await CountriesService.updateCountry(oldCountry.id, {
+                ...oldCountry,
+                selected_cities: updatedSelectedCities
+              })
+              
+              if (updateError) {
+                console.error('Error updating old country selected cities:', updateError)
+                toast.error(`Failed to update old country selected cities: ${updateError}`)
+                countryUpdateSuccess = false;
+              } else {
+                toast.success(`City removed from ${oldCountry.name} successfully!`)
+              }
+            }
+          } catch (oldCountryUpdateError: any) {
+            console.error('Error updating old country with selected city:', oldCountryUpdateError)
+            toast.error(`Failed to update old country with selected city: ${oldCountryUpdateError.message || 'Unknown error'}`)
+            countryUpdateSuccess = false;
+          }
+        }
+        
+        // Add to the new country if it exists
+        if (dataToSave.country_slug) {
+          try {
+            console.log('Adding city to new country:', dataToSave.country_slug); // Debug log
+            const { data: newCountry, error: newCountryError } = await CountriesService.getCountryBySlug(dataToSave.country_slug)
+            
+            if (newCountryError) {
+              console.error('Error fetching new country:', newCountryError)
+              toast.error(`Failed to fetch new country: ${newCountryError}`)
+              countryUpdateSuccess = false;
+            } else if (newCountry) {
+              // Add the city slug to the new country's selected_cities array if it's not already there
+              const updatedSelectedCities = [...(newCountry.selected_cities || [])]
+              if (!updatedSelectedCities.includes(dataToSave.city_slug)) {
+                updatedSelectedCities.push(dataToSave.city_slug)
+                
+                console.log('Updated selected cities for new country:', updatedSelectedCities); // Debug log
+                
+                // Update the new country with the new selected_cities array
+                const { error: updateError } = await CountriesService.updateCountry(newCountry.id, {
+                  ...newCountry,
+                  selected_cities: updatedSelectedCities
+                })
+                
+                if (updateError) {
+                  console.error('Error updating new country selected cities:', updateError)
+                  toast.error(`Failed to update new country selected cities: ${updateError}`)
+                  countryUpdateSuccess = false;
+                } else {
+                  toast.success(`City added to ${newCountry.name} successfully!`)
+                }
+              } else {
+                console.log('City already in new country selected cities'); // Debug log
+                // Even if the city is already in the new country, we still consider this a success
+                toast.success(`City is already in ${newCountry.name}!`)
+              }
+            }
+          } catch (newCountryUpdateError: any) {
+            console.error('Error updating new country with selected city:', newCountryUpdateError)
+            toast.error(`Failed to update new country with selected city: ${newCountryUpdateError.message || 'Unknown error'}`)
+            countryUpdateSuccess = false;
+          }
+        }
+      } else {
+        // No country change, so we consider this a success
+        console.log('No country change detected'); // Debug log
+        countryUpdateSuccess = true;
+      }
 
-      if (error) throw new Error(error)
-      
-      // Clear temp states after successful save
-      setTempFiles({})
-      setTempImages({})
-      
-      toast.success('City updated successfully!')
-      navigate('/admin/cities')
+      // Only update the city if country updates were successful
+      if (countryUpdateSuccess) {
+        // Update the city
+        const { error: updateError } = await CitiesService.updateCity(id, {
+          name: dataToSave.name,
+          city_slug: dataToSave.city_slug,
+          country_slug: dataToSave.country_slug,
+          is_active: dataToSave.is_active,
+          seo_title: dataToSave.seo_title,
+          seo_description: dataToSave.seo_description,
+          seo_keywords: dataToSave.seo_keywords,
+          hero_title: dataToSave.hero_title,
+          hero_subtitle: dataToSave.hero_subtitle,
+          hero_background_image_url: dataToSave.hero_background_image_url,
+          why_choose_us_title: dataToSave.why_choose_us_title,
+          why_choose_us_subtitle: dataToSave.why_choose_us_subtitle,
+          why_choose_us_main_image_url: dataToSave.why_choose_us_main_image_url,
+          why_choose_us_benefits_html: dataToSave.why_choose_us_benefits_html,
+          what_we_do_title: dataToSave.what_we_do_title,
+          what_we_do_subtitle: dataToSave.what_we_do_subtitle,
+          what_we_do_description_html: dataToSave.what_we_do_description_html,
+          portfolio_title_template: dataToSave.portfolio_title_template,
+          exhibiting_experience_title: dataToSave.exhibiting_experience_title,
+          exhibiting_experience_subtitle: dataToSave.exhibiting_experience_subtitle,
+          exhibiting_experience_benefits_html: dataToSave.exhibiting_experience_benefits_html,
+          exhibiting_experience_excellence_title: dataToSave.exhibiting_experience_excellence_title,
+          exhibiting_experience_excellence_subtitle: dataToSave.exhibiting_experience_excellence_subtitle,
+          exhibiting_experience_excellence_points_html: dataToSave.exhibiting_experience_excellence_points_html,
+        })
+
+        if (updateError) throw new Error(updateError)
+
+        // Update the original country slug to the new one if country update was successful
+        if (countryChanged && countryUpdateSuccess) {
+          console.log('Updating original country slug from', originalCountrySlug, 'to', dataToSave.country_slug); // Debug log
+          setOriginalCountrySlug(dataToSave.country_slug);
+        }
+
+        // Clear temp states after successful save
+        setTempFiles({})
+        setTempImages({})
+        
+        toast.success('City updated successfully!')
+        navigate('/admin/cities')
+      } else {
+        toast.error('Failed to update country relationships. City not updated.')
+      }
     } catch (error: any) {
       console.error('Error updating city:', error)
       toast.error(`Failed to update city: ${error.message || 'Unknown error'}`)
@@ -377,7 +516,7 @@ export function EditCityAdmin() {
 
     // Auto-generate slug when city name is changed
     if (field === 'name') {
-      const generatedSlug = slugify(value)
+      const generatedSlug = `exhibition-stand-builder-${slugify(value)}`
       setFormData(prev => ({
         ...prev,
         city_slug: generatedSlug
@@ -489,13 +628,30 @@ export function EditCityAdmin() {
               />
             </div>
             <div>
-              <Label htmlFor="country_slug">Country Slug *</Label>
-              <Input
-                id="country_slug"
-                value={formData.country_slug}
-                onChange={(e) => handleInputChange('country_slug', e.target.value)}
-                placeholder="e.g., france"
-              />
+              <Label htmlFor="country_slug">Country *</Label>
+              {loadingCountries ? (
+                <div className="flex items-center p-2 border rounded-md">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span>Loading countries...</span>
+                </div>
+              ) : (
+                <select
+                  id="country_slug"
+                  value={formData.country_slug}
+                  onChange={(e) => handleInputChange('country_slug', e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                  required
+                >
+                  <option value="">Select a country</option>
+                  {availableCountries
+                    .filter(country => country.is_active) // Only show active countries
+                    .map((country) => (
+                      <option key={country.id} value={country.slug}>
+                        {country.name}
+                      </option>
+                    ))}
+                </select>
+              )}
             </div>
             <div>
               <Label htmlFor="city_slug">City Slug *</Label>
@@ -503,8 +659,12 @@ export function EditCityAdmin() {
                 id="city_slug"
                 value={formData.city_slug}
                 onChange={(e) => handleInputChange('city_slug', e.target.value)}
-                placeholder="e.g., paris"
+                placeholder="e.g., exhibition-stand-builder-paris"
+                readOnly
               />
+              <p className="text-sm text-muted-foreground mt-1">
+                Slug is automatically generated as "exhibition-stand-builder-[city-name]"
+              </p>
             </div>
           </div>
         </div>

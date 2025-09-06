@@ -85,6 +85,34 @@ export class CountriesService {
     }
   }
 
+  // Get country by slug
+  static async getCountryBySlug(slug: string): Promise<{ data: Country | null; error: string | null }> {
+    try {
+      console.log('Fetching country by slug:', slug); // Debug log
+      const { data, error } = await supabase
+        .from('countries')
+        .select('*')
+        .eq('slug', slug)
+        .single()
+
+      if (error) throw new Error(error.message)
+      
+      // Parse the selected_cities and process_section_steps JSONB fields
+      const country = data ? {
+        ...(data as SupabaseCountry),
+        selected_cities: Array.isArray((data as SupabaseCountry).selected_cities) ? (data as SupabaseCountry).selected_cities : [],
+        process_section_steps: Array.isArray((data as SupabaseCountry).process_section_steps) ? (data as SupabaseCountry).process_section_steps : []
+      } : null
+      
+      console.log('Fetched country by slug:', slug, country); // Debug log
+      
+      return { data: country as Country, error: null }
+    } catch (error: any) {
+      console.error('Error fetching country by slug:', error)
+      return { data: null, error: error.message || 'Failed to fetch country' }
+    }
+  }
+
   // Create country
   static async createCountry(countryData: any): Promise<{ data: Country | null; error: string | null }> {
     try {
@@ -130,6 +158,8 @@ export class CountriesService {
         updated_at: new Date().toISOString()
       }
 
+      console.log('Updating country with data:', id, updateData); // Debug log
+
       const { data, error } = await (supabase as any)
         .from('countries')
         .update(updateData)
@@ -145,6 +175,8 @@ export class CountriesService {
         selected_cities: Array.isArray((data as SupabaseCountry).selected_cities) ? (data as SupabaseCountry).selected_cities : [],
         process_section_steps: (data as SupabaseCountry).process_section_steps || []
       } : null
+      
+      console.log('Updated country result:', country); // Debug log
       
       // Get the updated country to get slug for revalidation
       const { data: updatedCountry } = await this.getCountryById(id)

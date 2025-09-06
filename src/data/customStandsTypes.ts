@@ -8,11 +8,13 @@ export interface CustomStandsHero {
   title?: string
   subtitle?: string
   backgroundImage?: string
+  backgroundImageAlt?: string
 }
 
 export interface CustomStandsBenefits {
   title?: string
   image?: string
+  imageAlt?: string
   content?: string // Rich text content
 }
 
@@ -27,6 +29,7 @@ export interface CustomStandsExhibitionBenefits {
   subtitle?: string
   content?: string // Rich text content
   image?: string
+  imageAlt?: string
 }
 
 export interface CustomStandsBespoke {
@@ -78,8 +81,10 @@ export interface CustomStandsPageData {
   hero_title: string | null
   hero_subtitle: string | null
   hero_background_image: string | null
+  hero_background_image_alt: string | null
   benefits_title: string | null
   benefits_image: string | null
+  benefits_image_alt: string | null
   benefits_content: string | null
   stand_project_title: string | null
   stand_project_highlight: string | null
@@ -88,6 +93,7 @@ export interface CustomStandsPageData {
   exhibition_benefits_subtitle: string | null
   exhibition_benefits_content: string | null
   exhibition_benefits_image: string | null
+  exhibition_benefits_image_alt: string | null
   bespoke_title: string | null
   bespoke_subtitle: string | null
   bespoke_description: string | null

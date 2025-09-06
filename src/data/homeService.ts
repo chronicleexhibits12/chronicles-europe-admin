@@ -22,7 +22,8 @@ export class HomePageService {
       const homePage: HomePage = {
         id: row.id,
         hero: {
-          backgroundImage: row.hero_background_image || undefined
+          backgroundImage: row.hero_background_image || undefined,
+          backgroundImageAlt: row.hero_background_image_alt || undefined
         },
         mainSection: {
           title: row.main_title || undefined,
@@ -33,7 +34,7 @@ export class HomePageService {
           title: row.exhibition_europe_title || undefined,
           subtitle: row.exhibition_europe_subtitle || undefined,
           boothImage: row.exhibition_europe_booth_image || undefined,
-          htmlContent: row.exhibition_europe_html_content || undefined
+          boothImageAlt: row.exhibition_europe_booth_image_alt || undefined
         },
         exhibitionUSA: {
           title: row.exhibition_usa_title || undefined,
@@ -70,6 +71,9 @@ export class HomePageService {
       if (data.hero?.backgroundImage !== undefined) {
         updateData.hero_background_image = data.hero.backgroundImage
       }
+      if (data.hero?.backgroundImageAlt !== undefined) {
+        updateData.hero_background_image_alt = data.hero.backgroundImageAlt
+      }
 
       // Main section
       if (data.mainSection?.title !== undefined) {
@@ -91,6 +95,9 @@ export class HomePageService {
       }
       if (data.exhibitionEurope?.boothImage !== undefined) {
         updateData.exhibition_europe_booth_image = data.exhibitionEurope.boothImage
+      }
+      if (data.exhibitionEurope?.boothImageAlt !== undefined) {
+        updateData.exhibition_europe_booth_image_alt = data.exhibitionEurope.boothImageAlt
       }
       if (data.exhibitionEurope?.htmlContent !== undefined) {
         updateData.exhibition_europe_html_content = data.exhibitionEurope.htmlContent

@@ -77,6 +77,8 @@ export class CitiesService {
         updated_at: new Date().toISOString()
       }
 
+      console.log('Updating city with data:', id, updateData); // Debug log
+
       const { data, error } = await (supabase as any)
         .from('cities')
         .update(updateData)
@@ -92,36 +94,12 @@ export class CitiesService {
         await this.triggerRevalidation(`/${updatedCity.country_slug}/${updatedCity.city_slug}`)
       }
       
+      console.log('Updated city result:', data); // Debug log
+      
       return { data: data as City, error: null }
     } catch (error: any) {
       console.error('Error updating city:', error)
       return { data: null, error: error.message || 'Failed to update city' }
-    }
-  }
-
-  // Delete city and remove it from all countries that reference it
-  static async deleteCity(id: string): Promise<{ data: boolean; error: string | null }> {
-    try {
-      // First, get the city to be deleted to get its slug
-      const { data: cityToDelete, error: fetchError } = await this.getCityById(id)
-      if (fetchError) throw new Error(fetchError)
-      if (!cityToDelete) throw new Error('City not found')
-
-      // Delete the city
-      const { error } = await (supabase as any)
-        .from('cities')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw new Error(error.message)
-
-      // Remove this city from all countries that reference it
-      await this.removeCityFromCountries(cityToDelete.city_slug)
-      
-      return { data: true, error: null }
-    } catch (error: any) {
-      console.error('Error deleting city:', error)
-      return { data: false, error: error.message || 'Failed to delete city' }
     }
   }
 
@@ -157,6 +135,32 @@ export class CitiesService {
     } catch (error: any) {
       console.error('Error removing city from countries:', error)
       return { data: false, error: error.message || 'Failed to remove city from countries' }
+    }
+  }
+
+  // Delete city and remove it from all countries that reference it
+  static async deleteCity(id: string): Promise<{ data: boolean; error: string | null }> {
+    try {
+      // First, get the city to be deleted to get its slug
+      const { data: cityToDelete, error: fetchError } = await this.getCityById(id)
+      if (fetchError) throw new Error(fetchError)
+      if (!cityToDelete) throw new Error('City not found')
+
+      // Delete the city
+      const { error } = await (supabase as any)
+        .from('cities')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw new Error(error.message)
+
+      // Remove this city from all countries that reference it
+      await this.removeCityFromCountries(cityToDelete.city_slug)
+      
+      return { data: true, error: null }
+    } catch (error: any) {
+      console.error('Error deleting city:', error)
+      return { data: false, error: error.message || 'Failed to delete city' }
     }
   }
 

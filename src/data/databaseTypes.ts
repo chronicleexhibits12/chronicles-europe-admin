@@ -6,18 +6,21 @@ export interface Database {
         Row: {
           id: string
           hero_background_image: string | null
+          hero_background_image_alt: string | null
           main_title: string | null
           main_subtitle: string | null
           main_html_content: string | null
           exhibition_europe_title: string | null
           exhibition_europe_subtitle: string | null
           exhibition_europe_booth_image: string | null
+          exhibition_europe_booth_image_alt: string | null
           exhibition_europe_html_content: string | null
           exhibition_usa_title: string | null
           exhibition_usa_html_content: string | null
           solutions_title: string | null
           solutions_html_content: string | null
           solutions_items: any | null
+          solutions_items_alt: any | null
           why_best_title: string | null
           why_best_subtitle: string | null
           why_best_html_content: string | null
@@ -28,18 +31,21 @@ export interface Database {
         Insert: {
           id?: string
           hero_background_image?: string | null
+          hero_background_image_alt?: string | null
           main_title?: string | null
           main_subtitle?: string | null
           main_html_content?: string | null
           exhibition_europe_title?: string | null
           exhibition_europe_subtitle?: string | null
           exhibition_europe_booth_image?: string | null
+          exhibition_europe_booth_image_alt?: string | null
           exhibition_europe_html_content?: string | null
           exhibition_usa_title?: string | null
           exhibition_usa_html_content?: string | null
           solutions_title?: string | null
           solutions_html_content?: string | null
           solutions_items?: any | null
+          solutions_items_alt?: any | null
           why_best_title?: string | null
           why_best_subtitle?: string | null
           why_best_html_content?: string | null
@@ -50,18 +56,21 @@ export interface Database {
         Update: {
           id?: string
           hero_background_image?: string | null
+          hero_background_image_alt?: string | null
           main_title?: string | null
           main_subtitle?: string | null
           main_html_content?: string | null
           exhibition_europe_title?: string | null
           exhibition_europe_subtitle?: string | null
           exhibition_europe_booth_image?: string | null
+          exhibition_europe_booth_image_alt?: string | null
           exhibition_europe_html_content?: string | null
           exhibition_usa_title?: string | null
           exhibition_usa_html_content?: string | null
           solutions_title?: string | null
           solutions_html_content?: string | null
           solutions_items?: any | null
+          solutions_items_alt?: any | null
           why_best_title?: string | null
           why_best_subtitle?: string | null
           why_best_html_content?: string | null
@@ -78,6 +87,7 @@ export interface Database {
           meta_keywords: string | null
           hero_title: string | null
           hero_background_image: string | null
+          hero_background_image_alt: string | null
           company_years_in_business: string | null
           company_years_label: string | null
           company_who_we_are_title: string | null
@@ -89,6 +99,7 @@ export interface Database {
           team_title: string | null
           team_description: string | null
           team_image: string | null
+          team_image_alt: string | null
           services: any | null
           is_active: boolean
           created_at: string
@@ -101,6 +112,7 @@ export interface Database {
           meta_keywords?: string | null
           hero_title?: string | null
           hero_background_image?: string | null
+          hero_background_image_alt?: string | null
           company_years_in_business?: string | null
           company_years_label?: string | null
           company_who_we_are_title?: string | null
@@ -112,6 +124,7 @@ export interface Database {
           team_title?: string | null
           team_description?: string | null
           team_image?: string | null
+          team_image_alt?: string | null
           services?: any | null
           is_active?: boolean
           created_at?: string
@@ -124,6 +137,7 @@ export interface Database {
           meta_keywords?: string | null
           hero_title?: string | null
           hero_background_image?: string | null
+          hero_background_image_alt?: string | null
           company_years_in_business?: string | null
           company_years_label?: string | null
           company_who_we_are_title?: string | null
@@ -135,6 +149,7 @@ export interface Database {
           team_title?: string | null
           team_description?: string | null
           team_image?: string | null
+          team_image_alt?: string | null
           services?: any | null
           is_active?: boolean
           created_at?: string
@@ -150,8 +165,10 @@ export interface Database {
           hero_title: string | null
           hero_subtitle: string | null
           hero_background_image: string | null
+          hero_background_image_alt: string | null
           benefits_title: string | null
           benefits_image: string | null
+          benefits_image_alt: string | null
           benefits_content: string | null
           stand_project_title: string | null
           stand_project_highlight: string | null
@@ -160,6 +177,7 @@ export interface Database {
           exhibition_benefits_subtitle: string | null
           exhibition_benefits_content: string | null
           exhibition_benefits_image: string | null
+          exhibition_benefits_image_alt: string | null
           bespoke_title: string | null
           bespoke_subtitle: string | null
           bespoke_description: string | null
@@ -183,8 +201,10 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image?: string | null
+          hero_background_image_alt?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
+          benefits_image_alt?: string | null
           benefits_content?: string | null
           stand_project_title?: string | null
           stand_project_highlight?: string | null
@@ -193,6 +213,7 @@ export interface Database {
           exhibition_benefits_subtitle?: string | null
           exhibition_benefits_content?: string | null
           exhibition_benefits_image?: string | null
+          exhibition_benefits_image_alt?: string | null
           bespoke_title?: string | null
           bespoke_subtitle?: string | null
           bespoke_description?: string | null
@@ -216,8 +237,10 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image?: string | null
+          hero_background_image_alt?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
+          benefits_image_alt?: string | null
           benefits_content?: string | null
           stand_project_title?: string | null
           stand_project_highlight?: string | null
@@ -226,6 +249,7 @@ export interface Database {
           exhibition_benefits_subtitle?: string | null
           exhibition_benefits_content?: string | null
           exhibition_benefits_image?: string | null
+          exhibition_benefits_image_alt?: string | null
           bespoke_title?: string | null
           bespoke_subtitle?: string | null
           bespoke_description?: string | null
@@ -644,6 +668,127 @@ export interface Database {
           exhibiting_experience_excellence_title?: string | null
           exhibiting_experience_excellence_subtitle?: string | null
           exhibiting_experience_excellence_points_html?: string | null
+        }
+      }
+      trade_shows_page: {
+        Row: {
+          id: string
+          meta_title: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          hero_title: string | null
+          hero_subtitle: string | null
+          hero_background_image: string | null
+          hero_background_image_alt: string | null
+          description: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          hero_background_image_alt?: string | null
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          hero_background_image_alt?: string | null
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      trade_shows: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          excerpt: string | null
+          content: string | null
+          start_date: string | null
+          end_date: string | null
+          location: string | null
+          country: string | null
+          city: string | null
+          category: string | null
+          logo: string | null
+          logo_alt: string | null
+          organizer: string | null
+          website: string | null
+          venue: string | null
+          meta_title: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          sort_order: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          title: string
+          excerpt?: string | null
+          content?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          location?: string | null
+          country?: string | null
+          city?: string | null
+          category?: string | null
+          logo?: string | null
+          logo_alt?: string | null
+          organizer?: string | null
+          website?: string | null
+          venue?: string | null
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          title?: string
+          excerpt?: string | null
+          content?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          location?: string | null
+          country?: string | null
+          city?: string | null
+          category?: string | null
+          logo?: string | null
+          logo_alt?: string | null
+          organizer?: string | null
+          website?: string | null
+          venue?: string | null
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
         }
       }
     }

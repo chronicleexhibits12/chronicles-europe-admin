@@ -3,10 +3,12 @@ export interface SolutionItem {
   title: string
   description: string
   image: string
+  imageAlt?: string
 }
 
 export interface HeroSection {
   backgroundImage?: string
+  backgroundImageAlt?: string
 }
 
 export interface MainSection {
@@ -19,6 +21,7 @@ export interface ExhibitionEurope {
   title?: string
   subtitle?: string
   boothImage?: string
+  boothImageAlt?: string
   htmlContent?: string
 }
 

@@ -92,19 +92,31 @@ export function CustomStandsAdmin() {
           case 'hero-bg':
             updatedContent = {
               ...updatedContent,
-              hero: { ...updatedContent.hero, backgroundImage: url }
+              hero: { 
+                ...updatedContent.hero, 
+                backgroundImage: url,
+                backgroundImageAlt: updatedContent.hero?.backgroundImageAlt
+              }
             }
             break
           case 'benefits-img':
             updatedContent = {
               ...updatedContent,
-              benefits: { ...updatedContent.benefits, image: url }
+              benefits: { 
+                ...updatedContent.benefits, 
+                image: url,
+                imageAlt: updatedContent.benefits?.imageAlt
+              }
             }
             break
           case 'exhibition-benefits-img':
             updatedContent = {
               ...updatedContent,
-              exhibitionBenefits: { ...updatedContent.exhibitionBenefits, image: url }
+              exhibitionBenefits: { 
+                ...updatedContent.exhibitionBenefits, 
+                image: url,
+                imageAlt: updatedContent.exhibitionBenefits?.imageAlt
+              }
             }
             break
         }
@@ -208,6 +220,44 @@ export function CustomStandsAdmin() {
     }
   }
 
+  // Get current alt text for a field
+  const getCurrentImageAlt = (field: string): string => {
+    switch (field) {
+      case 'hero-bg':
+        return content?.hero?.backgroundImageAlt || ''
+      case 'benefits-img':
+        return content?.benefits?.imageAlt || ''
+      case 'exhibition-benefits-img':
+        return content?.exhibitionBenefits?.imageAlt || ''
+      default:
+        return ''
+    }
+  }
+
+  // Update alt text for an image
+  const updateImageAlt = (field: string, altText: string) => {
+    switch (field) {
+      case 'hero-bg':
+        updateContent({
+          ...content,
+          hero: { ...content?.hero, backgroundImageAlt: altText }
+        })
+        break
+      case 'benefits-img':
+        updateContent({
+          ...content,
+          benefits: { ...content?.benefits, imageAlt: altText }
+        })
+        break
+      case 'exhibition-benefits-img':
+        updateContent({
+          ...content,
+          exhibitionBenefits: { ...content?.exhibitionBenefits, imageAlt: altText }
+        })
+        break
+    }
+  }
+
   if (loading) {
     return <CustomStandsAdminSkeleton />
   }
@@ -269,21 +319,32 @@ export function CustomStandsAdmin() {
             <div className="w-full">
               <Label htmlFor="hero-background">Background Image</Label>
               <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      id="hero-background"
+                      value={getCurrentImageUrl('hero-bg')}
+                      onChange={(e) => {
+                        // For direct URL input, we update the content directly
+                        if (!tempImages['hero-bg'] && !tempFiles['hero-bg']) {
+                          updateContent({
+                            ...content,
+                            hero: { ...content.hero, backgroundImage: e.target.value }
+                          })
+                        }
+                      }}
+                      placeholder="Image URL"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      value={getCurrentImageAlt('hero-bg')}
+                      onChange={(e) => updateImageAlt('hero-bg', e.target.value)}
+                      placeholder="Alt text"
+                    />
+                  </div>
+                </div>
                 <div className="flex gap-2">
-                  <Input
-                    id="hero-background"
-                    value={getCurrentImageUrl('hero-bg')}
-                    onChange={(e) => {
-                      // For direct URL input, we update the content directly
-                      if (!tempImages['hero-bg'] && !tempFiles['hero-bg']) {
-                        updateContent({
-                          ...content,
-                          hero: { ...content.hero, backgroundImage: e.target.value }
-                        })
-                      }
-                    }}
-                    placeholder="Image URL or upload below"
-                  />
                   <Button
                     variant="outline"
                     onClick={() => document.getElementById('hero-bg-upload')?.click()}
@@ -294,13 +355,14 @@ export function CustomStandsAdmin() {
                     ) : (
                       <Upload className="h-4 w-4" />
                     )}
+                    Upload Image
                   </Button>
                 </div>
                 {getCurrentImageUrl('hero-bg') && (
                   <div className="relative inline-block">
                     <img 
                       src={getCurrentImageUrl('hero-bg')} 
-                      alt="Hero background preview" 
+                      alt={getCurrentImageAlt('hero-bg') || "Hero background preview"} 
                       className="h-20 w-32 object-cover rounded border"
                     />
                     <Button
@@ -348,21 +410,32 @@ export function CustomStandsAdmin() {
             <div className="w-full">
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      id="benefits-image"
+                      value={getCurrentImageUrl('benefits-img')}
+                      onChange={(e) => {
+                        // For direct URL input, we update the content directly
+                        if (!tempImages['benefits-img'] && !tempFiles['benefits-img']) {
+                          updateContent({
+                            ...content,
+                            benefits: { ...content.benefits, image: e.target.value }
+                          })
+                        }
+                      }}
+                      placeholder="Image URL"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      value={getCurrentImageAlt('benefits-img')}
+                      onChange={(e) => updateImageAlt('benefits-img', e.target.value)}
+                      placeholder="Alt text"
+                    />
+                  </div>
+                </div>
                 <div className="flex gap-2">
-                  <Input
-                    id="benefits-image"
-                    value={getCurrentImageUrl('benefits-img')}
-                    onChange={(e) => {
-                      // For direct URL input, we update the content directly
-                      if (!tempImages['benefits-img'] && !tempFiles['benefits-img']) {
-                        updateContent({
-                          ...content,
-                          benefits: { ...content.benefits, image: e.target.value }
-                        })
-                      }
-                    }}
-                    placeholder="Image URL or upload below"
-                  />
                   <Button
                     variant="outline"
                     onClick={() => document.getElementById('benefits-img-upload')?.click()}
@@ -373,13 +446,14 @@ export function CustomStandsAdmin() {
                     ) : (
                       <Upload className="h-4 w-4" />
                     )}
+                    Upload Image
                   </Button>
                 </div>
                 {getCurrentImageUrl('benefits-img') && (
                   <div className="relative inline-block">
                     <img 
                       src={getCurrentImageUrl('benefits-img')} 
-                      alt="Benefits preview" 
+                      alt={getCurrentImageAlt('benefits-img') || "Benefits preview"} 
                       className="h-20 w-32 object-cover rounded border"
                     />
                     <Button
@@ -519,21 +593,32 @@ export function CustomStandsAdmin() {
             <div className="w-full">
               <Label htmlFor="exhibition-benefits-image">Image</Label>
               <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      id="exhibition-benefits-image"
+                      value={getCurrentImageUrl('exhibition-benefits-img')}
+                      onChange={(e) => {
+                        // For direct URL input, we update the content directly
+                        if (!tempImages['exhibition-benefits-img'] && !tempFiles['exhibition-benefits-img']) {
+                          updateContent({
+                            ...content,
+                            exhibitionBenefits: { ...content.exhibitionBenefits, image: e.target.value }
+                          })
+                        }
+                      }}
+                      placeholder="Image URL"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      value={getCurrentImageAlt('exhibition-benefits-img')}
+                      onChange={(e) => updateImageAlt('exhibition-benefits-img', e.target.value)}
+                      placeholder="Alt text"
+                    />
+                  </div>
+                </div>
                 <div className="flex gap-2">
-                  <Input
-                    id="exhibition-benefits-image"
-                    value={getCurrentImageUrl('exhibition-benefits-img')}
-                    onChange={(e) => {
-                      // For direct URL input, we update the content directly
-                      if (!tempImages['exhibition-benefits-img'] && !tempFiles['exhibition-benefits-img']) {
-                        updateContent({
-                          ...content,
-                          exhibitionBenefits: { ...content.exhibitionBenefits, image: e.target.value }
-                        })
-                      }
-                    }}
-                    placeholder="Image URL or upload below"
-                  />
                   <Button
                     variant="outline"
                     onClick={() => document.getElementById('exhibition-benefits-img-upload')?.click()}
@@ -544,13 +629,14 @@ export function CustomStandsAdmin() {
                     ) : (
                       <Upload className="h-4 w-4" />
                     )}
+                    Upload Image
                   </Button>
                 </div>
                 {getCurrentImageUrl('exhibition-benefits-img') && (
                   <div className="relative inline-block">
                     <img 
                       src={getCurrentImageUrl('exhibition-benefits-img')} 
-                      alt="Exhibition benefits preview" 
+                      alt={getCurrentImageAlt('exhibition-benefits-img') || "Exhibition benefits preview"} 
                       className="h-20 w-32 object-cover rounded border"
                     />
                     <Button
@@ -619,15 +705,13 @@ export function CustomStandsAdmin() {
               </div>
             </div>
             <div className="w-full">
-              <Label htmlFor="bespoke-description">Description</Label>
-              <Textarea
-                id="bespoke-description"
-                value={content.bespoke?.description || ''}
-                onChange={(e) => updateContent({
+              <Label htmlFor="bespoke-description">Description (Rich Text)</Label>
+              <RichTextEditor
+                content={content.bespoke?.description || ''}
+                onChange={(newContent) => updateContent({
                   ...content,
-                  bespoke: { ...content.bespoke, description: e.target.value }
+                  bespoke: { ...content.bespoke, description: newContent }
                 })}
-                rows={6}
               />
             </div>
           </div>
@@ -662,15 +746,13 @@ export function CustomStandsAdmin() {
               </div>
             </div>
             <div className="w-full">
-              <Label htmlFor="fresh-design-description">Description</Label>
-              <Textarea
-                id="fresh-design-description"
-                value={content.freshDesign?.description || ''}
-                onChange={(e) => updateContent({
+              <Label htmlFor="fresh-design-description">Description (Rich Text)</Label>
+              <RichTextEditor
+                content={content.freshDesign?.description || ''}
+                onChange={(newContent) => updateContent({
                   ...content,
-                  freshDesign: { ...content.freshDesign, description: e.target.value }
+                  freshDesign: { ...content.freshDesign, description: newContent }
                 })}
-                rows={6}
               />
             </div>
           </div>
@@ -705,15 +787,13 @@ export function CustomStandsAdmin() {
               </div>
             </div>
             <div className="w-full">
-              <Label htmlFor="cost-section-description">Description</Label>
-              <Textarea
-                id="cost-section-description"
-                value={content.costSection?.description || ''}
-                onChange={(e) => updateContent({
+              <Label htmlFor="cost-section-description">Description (Rich Text)</Label>
+              <RichTextEditor
+                content={content.costSection?.description || ''}
+                onChange={(newContent) => updateContent({
                   ...content,
-                  costSection: { ...content.costSection, description: e.target.value }
+                  costSection: { ...content.costSection, description: newContent }
                 })}
-                rows={6}
               />
             </div>
           </div>

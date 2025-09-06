@@ -28,7 +28,8 @@ export class AboutPageService {
         },
         hero: {
           title: row.hero_title || undefined,
-          backgroundImage: row.hero_background_image || undefined
+          backgroundImage: row.hero_background_image || undefined,
+          backgroundImageAlt: row.hero_background_image_alt || undefined
         },
         companyInfo: {
           yearsInBusiness: row.company_years_in_business || undefined,
@@ -45,7 +46,8 @@ export class AboutPageService {
         teamInfo: {
           title: row.team_title || undefined,
           description: row.team_description || undefined,
-          teamImage: row.team_image || undefined
+          teamImage: row.team_image || undefined,
+          teamImageAlt: row.team_image_alt || undefined
         },
         services: row.services || [],
         isActive: row.is_active,
@@ -82,6 +84,9 @@ export class AboutPageService {
       }
       if (data.hero?.backgroundImage !== undefined) {
         updateData.hero_background_image = data.hero.backgroundImage
+      }
+      if (data.hero?.backgroundImageAlt !== undefined) {
+        updateData.hero_background_image_alt = data.hero.backgroundImageAlt
       }
 
       // Company Info
@@ -123,6 +128,9 @@ export class AboutPageService {
       }
       if (data.teamInfo?.teamImage !== undefined) {
         updateData.team_image = data.teamInfo.teamImage
+      }
+      if (data.teamInfo?.teamImageAlt !== undefined) {
+        updateData.team_image_alt = data.teamInfo.teamImageAlt
       }
 
       // Services

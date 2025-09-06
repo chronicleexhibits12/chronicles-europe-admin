@@ -1,4 +1,4 @@
-import { Home, Building, FileText, MapPin, Globe } from 'lucide-react'
+import { Home, Building, FileText, MapPin, Globe, Calendar } from 'lucide-react'
 import type { NavigationItem } from '@/data/commonTypes'
 
 export const navigationItems: NavigationItem[] = [
@@ -20,11 +20,12 @@ export const navigationItems: NavigationItem[] = [
     href: '/stands',
     icon: Building
   },
+
   {
-    id: 'about',
-    label: 'About Us',
-    href: '/about-us',
-    icon: FileText
+    id: 'trade-shows',
+    label: 'Trade Shows',
+    href: '/admin/trade-shows',
+    icon: Calendar
   },
   {
     id: 'cities',

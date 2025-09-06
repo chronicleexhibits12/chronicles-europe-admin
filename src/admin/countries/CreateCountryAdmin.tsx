@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,8 +22,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { CountriesService } from '@/data/countriesService'
-import { CitiesService } from '@/data/citiesService'
-import type { City } from '@/data/citiesTypes'
 import { TagInput } from '@/components/ui/tag-input'
 import { slugify } from '@/utils/slugify'
 
@@ -38,20 +36,7 @@ export function CreateCountryAdmin() {
   const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
-  const [availableCities, setAvailableCities] = useState<City[]>([])
-  const [loadingCities, setLoadingCities] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
   
-  // Filter cities based on search term
-  const filteredCities = useMemo(() => {
-    if (!searchTerm) return availableCities
-    const term = searchTerm.toLowerCase()
-    return availableCities.filter(city => 
-      city.name.toLowerCase().includes(term) || 
-      city.city_slug.toLowerCase().includes(term)
-    )
-  }, [availableCities, searchTerm])
-
   // Form state
   const [formData, setFormData] = useState({
     // Basic country information
@@ -103,31 +88,10 @@ export function CreateCountryAdmin() {
     // Cities Section
     cities_section_title: '',
     cities_section_subtitle: '',
-    
-    // Selected Cities
-    selected_cities: [] as string[],
   })
 
-  // Load available cities for selection
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        setLoadingCities(true)
-        const { data: cities, error } = await CitiesService.getCities()
-        
-        if (error) throw new Error(error)
-        
-        setAvailableCities(cities || [])
-      } catch (error: any) {
-        console.error('Error fetching cities:', error)
-        toast.error('Failed to load available cities')
-      } finally {
-        setLoadingCities(false)
-      }
-    }
-    
-    fetchCities()
-  }, [])
+  // Temporary state for unsaved changes
+  const [tempFormData, setTempFormData] = useState({ ...formData })
 
   // Temporary state for selected files (not yet uploaded)
   const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
@@ -138,6 +102,25 @@ export function CreateCountryAdmin() {
   // State for delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [imageToDelete, setImageToDelete] = useState<{field: string, url: string} | null>(null)
+
+  // Update temp form data when formData changes
+  useEffect(() => {
+    setTempFormData({ ...formData })
+  }, [formData])
+
+  const handleInputChange = (field: string, value: string) => {
+    setTempFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleRichTextChange = (field: string, content: string) => {
+    setTempFormData(prev => ({
+      ...prev,
+      [field]: content
+    }))
+  }
 
   const handleImageUpload = async (file: File, field: string) => {
     setUploading(field)
@@ -172,7 +155,7 @@ export function CreateCountryAdmin() {
       return tempImages[field]
     }
     // Otherwise, use the URL from form data
-    const fieldValue = formData[field as keyof typeof formData];
+    const fieldValue = tempFormData[field as keyof typeof tempFormData];
     return typeof fieldValue === 'string' ? fieldValue : ''
   }
 
@@ -209,6 +192,9 @@ export function CreateCountryAdmin() {
   const handleSave = async () => {
     setSaving(true)
     
+    // Update formData with tempFormData before saving
+    setFormData(tempFormData)
+    
     try {
       // First, upload any pending files
       const uploadedImages: Record<string, string> = {}
@@ -231,7 +217,7 @@ export function CreateCountryAdmin() {
 
       // Merge form data with newly uploaded images
       const dataToSave = {
-        ...formData,
+        ...tempFormData,
         ...uploadedImages
       }
 
@@ -261,7 +247,6 @@ export function CreateCountryAdmin() {
         process_section_steps: dataToSave.process_section_steps,
         cities_section_title: dataToSave.cities_section_title,
         cities_section_subtitle: dataToSave.cities_section_subtitle,
-        selected_cities: dataToSave.selected_cities,
       })
 
       if (error) throw new Error(error)
@@ -292,29 +277,6 @@ export function CreateCountryAdmin() {
     }
   }, [tempImages])
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-
-    // Auto-generate slug when country name is changed
-    if (field === 'name') {
-      const generatedSlug = slugify(value)
-      setFormData(prev => ({
-        ...prev,
-        slug: generatedSlug
-      }))
-    }
-  }
-
-  const handleRichTextChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
-
   const handleKeywordsChange = (keywords: string[]) => {
     handleInputChange('seo_keywords', keywords.join(', '))
   }
@@ -334,26 +296,6 @@ export function CreateCountryAdmin() {
       return {
         ...prev,
         process_section_steps: updatedSteps
-      }
-    })
-  }
-
-  const toggleCitySelection = (citySlug: string) => {
-    setFormData(prev => {
-      const selected = [...prev.selected_cities]
-      const index = selected.indexOf(citySlug)
-      
-      if (index >= 0) {
-        // Remove if already selected
-        selected.splice(index, 1)
-      } else {
-        // Add if not selected
-        selected.push(citySlug)
-      }
-      
-      return {
-        ...prev,
-        selected_cities: selected
       }
     })
   }
@@ -420,8 +362,12 @@ export function CreateCountryAdmin() {
                 id="slug"
                 value={formData.slug}
                 onChange={(e) => handleInputChange('slug', e.target.value)}
-                placeholder="e.g., france"
+                placeholder="e.g., exhibition-stand-builder-france"
+                readOnly
               />
+              <p className="text-sm text-muted-foreground mt-1">
+                Slug is automatically generated as "exhibition-stand-builder-[country-name]"
+              </p>
             </div>
           </div>
         </div>
@@ -790,122 +736,7 @@ export function CreateCountryAdmin() {
           </div>
         </div>
 
-        {/* Cities Section */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Cities Section</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="cities_section_title">Title</Label>
-              <Input
-                id="cities_section_title"
-                value={formData.cities_section_title}
-                onChange={(e) => handleInputChange('cities_section_title', e.target.value)}
-                placeholder="e.g., EXHIBITION STANDS IN"
-              />
-            </div>
-            <div>
-              <Label htmlFor="cities_section_subtitle">Subtitle</Label>
-              <Input
-                id="cities_section_subtitle"
-                value={formData.cities_section_subtitle}
-                onChange={(e) => handleInputChange('cities_section_subtitle', e.target.value)}
-                placeholder="e.g., FRANCE"
-              />
-            </div>
-            <div className="md:col-span-2">
-              {/* City Selection */}
-              <div>
-                <Label>Select Cities</Label>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Select cities to be displayed on this country's page
-                </p>
-                
-                {loadingCities ? (
-                  <div className="flex items-center justify-center p-4">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="ml-2">Loading cities...</span>
-                  </div>
-                ) : (
-                  <div className="border rounded-md">
-                    {/* Search Input */}
-                    <div className="p-3 border-b">
-                      <Input
-                        placeholder="Search cities..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full"
-                      />
-                    </div>
-                    
-                    {/* Cities List */}
-                    <div className="max-h-60 overflow-y-auto">
-                      {availableCities.length === 0 ? (
-                        <p className="text-muted-foreground text-center py-4">
-                          No cities available. Create some cities first.
-                        </p>
-                      ) : filteredCities.length === 0 ? (
-                        <p className="text-muted-foreground text-center py-4">
-                          No cities match your search.
-                        </p>
-                      ) : (
-                        <div className="space-y-1 p-2">
-                          {filteredCities.map((city) => (
-                            <div 
-                              key={city.id} 
-                              className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded"
-                            >
-                              <input
-                                type="checkbox"
-                                id={`city-${city.id}`}
-                                checked={formData.selected_cities.includes(city.city_slug)}
-                                onChange={() => toggleCitySelection(city.city_slug)}
-                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                              />
-                              <label 
-                                htmlFor={`city-${city.id}`} 
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1"
-                              >
-                                <div className="font-medium">{city.name}</div>
-                                <div className="text-xs text-muted-foreground">{city.city_slug}</div>
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {formData.selected_cities.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-sm font-medium mb-2">Selected cities:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.selected_cities.map((citySlug) => {
-                        const city = availableCities.find(c => c.city_slug === citySlug)
-                        return (
-                          <span 
-                            key={citySlug} 
-                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                          >
-                            {city ? city.name : citySlug}
-                            <button
-                              type="button"
-                              className="ml-2 inline-flex items-center rounded-full hover:bg-blue-200"
-                              onClick={() => toggleCitySelection(citySlug)}
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </span>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
+        
         {/* SEO Metadata Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Metadata</h2>

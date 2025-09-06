@@ -7,7 +7,6 @@ import { Dashboard } from '@/pages/Dashboard'
 import { Stands } from '@/pages/Stands'
 import { Pages } from '@/pages/Pages'
 import { HomeAdmin } from '@/admin/home/HomeAdmin'
-import { AboutAdmin } from '@/admin/about/AboutAdmin'
 import { CustomStandsAdmin } from '@/admin/customStands/CustomStandsAdmin'
 import { DoubleDeckStandsAdmin } from '@/admin/doubleDeckStands/DoubleDeckStandsAdmin'
 import { ModularStandsAdmin } from '@/admin/modularStands/ModularStandsAdmin'
@@ -18,6 +17,10 @@ import { EditCityAdmin } from '@/admin/cities/EditCityAdmin'
 import { CountriesAdmin } from '@/admin/countries/CountriesAdmin'
 import { CreateCountryAdmin } from '@/admin/countries/CreateCountryAdmin'
 import { EditCountryAdmin } from '@/admin/countries/EditCountryAdmin'
+import { TradeShowsPageAdmin } from '@/admin/tradeShowsPage/TradeShowsPageAdmin'
+import { TradeShowsAdmin } from '@/admin/tradeShows/TradeShowsAdmin'
+import { CreateTradeShowAdmin } from '@/admin/tradeShows/CreateTradeShowAdmin'
+import { EditTradeShowAdmin } from '@/admin/tradeShows/EditTradeShowAdmin'
 import { Toaster } from 'sonner'
 
 function App() {
@@ -38,11 +41,14 @@ function App() {
             <Route path="pages" element={<Pages />} />
             <Route path="stands" element={<Stands />} />
             <Route path="admin/home" element={<HomeAdmin />} />
-            <Route path="about-us" element={<AboutAdmin />} />
             <Route path="admin/custom-stands" element={<CustomStandsAdmin />} />
             <Route path="admin/double-decker-stands" element={<DoubleDeckStandsAdmin />} />
             <Route path="admin/modular-stands" element={<ModularStandsAdmin />} />
             <Route path="admin/pavilion-stands" element={<PavilionStandsAdmin />} />
+            <Route path="admin/trade-shows-page" element={<TradeShowsPageAdmin />} />
+            <Route path="admin/trade-shows" element={<TradeShowsAdmin />} />
+            <Route path="admin/trade-shows/create" element={<CreateTradeShowAdmin />} />
+            <Route path="admin/trade-shows/:id/edit" element={<EditTradeShowAdmin />} />
             <Route path="admin/cities" element={<CitiesAdmin />} />
             <Route path="admin/cities/create" element={<CreateCityAdmin />} />
             <Route path="admin/cities/:id/edit" element={<EditCityAdmin />} />

@@ -619,15 +619,13 @@ export function DoubleDeckStandsAdmin() {
               </div>
             </div>
             <div className="w-full">
-              <Label htmlFor="booth-partner-description">Description</Label>
-              <Textarea
-                id="booth-partner-description"
-                value={content.boothPartner?.description || ''}
-                onChange={(e) => updateContent({
+              <Label htmlFor="booth-partner-description">Description (Rich Text)</Label>
+              <RichTextEditor
+                content={content.boothPartner?.description || ''}
+                onChange={(newContent) => updateContent({
                   ...content,
-                  boothPartner: { ...content.boothPartner, description: e.target.value }
+                  boothPartner: { ...content.boothPartner, description: newContent }
                 })}
-                rows={6}
               />
             </div>
           </div>
@@ -662,15 +660,13 @@ export function DoubleDeckStandsAdmin() {
               </div>
             </div>
             <div className="w-full">
-              <Label htmlFor="bold-statement-description">Description</Label>
-              <Textarea
-                id="bold-statement-description"
-                value={content.boldStatement?.description || ''}
-                onChange={(e) => updateContent({
+              <Label htmlFor="bold-statement-description">Description (Rich Text)</Label>
+              <RichTextEditor
+                content={content.boldStatement?.description || ''}
+                onChange={(newContent) => updateContent({
                   ...content,
-                  boldStatement: { ...content.boldStatement, description: e.target.value }
+                  boldStatement: { ...content.boldStatement, description: newContent }
                 })}
-                rows={4}
               />
             </div>
           </div>

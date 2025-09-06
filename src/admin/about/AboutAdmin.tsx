@@ -18,6 +18,7 @@ export function AboutAdmin() {
   
   // Form state
   const [formData, setFormData] = useState<Partial<AboutPage>>({})
+  const [tempFormData, setTempFormData] = useState<Partial<AboutPage>>({}) // Temporary state for unsaved changes
   
   // File input refs
   const heroImageRef = useRef<HTMLInputElement>(null)
@@ -28,11 +29,12 @@ export function AboutAdmin() {
   useEffect(() => {
     if (aboutPage) {
       setFormData(aboutPage)
+      setTempFormData(aboutPage) // Initialize temp data with loaded data
     }
   }, [aboutPage])
 
   const handleInputChange = (section: keyof AboutPage, field: string, value: string) => {
-    setFormData(prev => {
+    setTempFormData(prev => {
       const currentSection = (prev[section] as any) || {}
       return {
         ...prev,
@@ -73,7 +75,7 @@ export function AboutAdmin() {
   }
 
   const handleStatChange = (index: number, field: keyof AboutCompanyStat, value: string | number) => {
-    setFormData(prev => {
+    setTempFormData(prev => {
       const stats = [...(prev.companyStats || [])]
       stats[index] = { ...stats[index], [field]: value }
       return { ...prev, companyStats: stats }
@@ -81,17 +83,15 @@ export function AboutAdmin() {
   }
 
   const deleteStat = (index: number) => {
-    setFormData(prev => {
+    setTempFormData(prev => {
       const stats = [...(prev.companyStats || [])]
       stats.splice(index, 1)
       return { ...prev, companyStats: stats }
     })
   }
 
-
-
   const handleServiceChange = (index: number, field: keyof AboutService, value: string | boolean | number) => {
-    setFormData(prev => {
+    setTempFormData(prev => {
       const services = [...(prev.services || [])]
       services[index] = { ...services[index], [field]: value }
       return { ...prev, services }
@@ -127,7 +127,7 @@ export function AboutAdmin() {
   }
 
   const deleteService = (index: number) => {
-    setFormData(prev => {
+    setTempFormData(prev => {
       const services = [...(prev.services || [])]
       services.splice(index, 1)
       return { ...prev, services }
@@ -139,7 +139,7 @@ export function AboutAdmin() {
   }
 
   const getKeywordsArray = () => {
-    return formData.meta?.keywords ? formData.meta.keywords.split(',').map(k => k.trim()).filter(k => k) : []
+    return tempFormData.meta?.keywords ? tempFormData.meta.keywords.split(',').map(k => k.trim()).filter(k => k) : []
   }
 
   const handleSave = async () => {
@@ -147,7 +147,10 @@ export function AboutAdmin() {
 
     setSaving(true)
     
-    const savePromise = updateAboutPage(aboutPage.id, formData)
+    // Update formData with tempFormData before saving
+    setFormData(tempFormData)
+    
+    const savePromise = updateAboutPage(aboutPage.id, tempFormData)
     
     toast.promise(savePromise, {
       loading: 'Saving changes...',
@@ -214,7 +217,7 @@ export function AboutAdmin() {
               <Label htmlFor="hero-title">Hero Title</Label>
               <Input
                 id="hero-title"
-                value={formData.hero?.title || ''}
+                value={tempFormData.hero?.title || ''}
                 onChange={(e) => handleInputChange('hero', 'title', e.target.value)}
                 placeholder="Enter hero title"
               />
@@ -222,14 +225,24 @@ export function AboutAdmin() {
             
             <div>
               <Label htmlFor="hero-bg">Background Image</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="hero-bg"
-                  value={formData.hero?.backgroundImage || ''}
-                  onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
-                  placeholder="Enter image URL"
-                  className="flex-1"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                <div>
+                  <Input
+                    id="hero-bg"
+                    value={tempFormData.hero?.backgroundImage || ''}
+                    onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
+                    placeholder="Enter image URL"
+                  />
+                </div>
+                <div>
+                  <Input
+                    value={tempFormData.hero?.backgroundImageAlt || ''}
+                    onChange={(e) => handleInputChange('hero', 'backgroundImageAlt', e.target.value)}
+                    placeholder="Enter alt text"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 mt-2">
                 <input
                   ref={heroImageRef}
                   type="file"
@@ -254,11 +267,11 @@ export function AboutAdmin() {
                   )}
                 </Button>
               </div>
-              {formData.hero?.backgroundImage && (
+              {tempFormData.hero?.backgroundImage && (
                 <div className="relative inline-block mt-2">
                   <img
-                    src={formData.hero.backgroundImage}
-                    alt="Hero background"
+                    src={tempFormData.hero.backgroundImage}
+                    alt={tempFormData.hero.backgroundImageAlt || "Hero background"}
                     className="h-32 object-cover rounded border"
                   />
                 </div>
@@ -277,7 +290,7 @@ export function AboutAdmin() {
                 <Label htmlFor="years-business">Years in Business</Label>
                 <Input
                   id="years-business"
-                  value={formData.companyInfo?.yearsInBusiness || ''}
+                  value={tempFormData.companyInfo?.yearsInBusiness || ''}
                   onChange={(e) => handleInputChange('companyInfo', 'yearsInBusiness', e.target.value)}
                   placeholder="e.g., 25+"
                 />
@@ -287,7 +300,7 @@ export function AboutAdmin() {
                 <Label htmlFor="years-label">Years Label</Label>
                 <Input
                   id="years-label"
-                  value={formData.companyInfo?.yearsLabel || ''}
+                  value={tempFormData.companyInfo?.yearsLabel || ''}
                   onChange={(e) => handleInputChange('companyInfo', 'yearsLabel', e.target.value)}
                   placeholder="e.g., YEARS"
                 />
@@ -298,7 +311,7 @@ export function AboutAdmin() {
               <Label htmlFor="who-we-are">Who We Are Title</Label>
               <Input
                 id="who-we-are"
-                value={formData.companyInfo?.whoWeAreTitle || ''}
+                value={tempFormData.companyInfo?.whoWeAreTitle || ''}
                 onChange={(e) => handleInputChange('companyInfo', 'whoWeAreTitle', e.target.value)}
                 placeholder="Enter who we are title"
               />
@@ -307,9 +320,10 @@ export function AboutAdmin() {
             <div>
               <Label htmlFor="company-description">Company Description</Label>
               <RichTextEditor
-                content={formData.companyInfo?.description || ''}
+                content={tempFormData.companyInfo?.description || ''}
                 onChange={(content) => handleInputChange('companyInfo', 'description', content)}
                 placeholder="Enter company description..."
+                controlled={true} // Enable controlled mode
               />
             </div>
             
@@ -319,14 +333,14 @@ export function AboutAdmin() {
               </div>
               
               <div className="space-y-3">
-                {formData.companyInfo?.quotes?.map((quote, index) => (
+                {tempFormData.companyInfo?.quotes?.map((quote, index) => (
                   <div key={index}>
                     <Textarea
                       value={quote}
                       onChange={(e) => {
-                        const quotes = [...(formData.companyInfo?.quotes || [])]
+                        const quotes = [...(tempFormData.companyInfo?.quotes || [])]
                         quotes[index] = e.target.value
-                        setFormData(prev => ({
+                        setTempFormData(prev => ({
                           ...prev,
                           companyInfo: {
                             ...prev.companyInfo,
@@ -341,7 +355,7 @@ export function AboutAdmin() {
                   </div>
                 ))}
                 
-                {(!formData.companyInfo?.quotes || formData.companyInfo.quotes.length === 0) && (
+                {(!tempFormData.companyInfo?.quotes || tempFormData.companyInfo.quotes.length === 0) && (
                   <p className="text-sm text-muted-foreground">No quotes added yet. Click "Add Quote" to add one.</p>
                 )}
               </div>
@@ -359,7 +373,7 @@ export function AboutAdmin() {
                 <Label htmlFor="facts-title">Facts Title</Label>
                 <Input
                   id="facts-title"
-                  value={formData.factsSection?.title || ''}
+                  value={tempFormData.factsSection?.title || ''}
                   onChange={(e) => handleInputChange('factsSection', 'title', e.target.value)}
                   placeholder="Enter facts title"
                 />
@@ -369,7 +383,7 @@ export function AboutAdmin() {
                 <Label htmlFor="facts-description">Facts Description</Label>
                 <Textarea
                   id="facts-description"
-                  value={formData.factsSection?.description || ''}
+                  value={tempFormData.factsSection?.description || ''}
                   onChange={(e) => handleInputChange('factsSection', 'description', e.target.value)}
                   placeholder="Enter facts description"
                   rows={3}
@@ -389,7 +403,7 @@ export function AboutAdmin() {
             </div>
             
             <div className="space-y-4">
-              {formData.companyStats?.map((stat, index) => (
+              {tempFormData.companyStats?.map((stat, index) => (
                 <div key={stat.id} className="p-4 border rounded-lg space-y-3">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium">Stat {index + 1}</span>
@@ -461,7 +475,7 @@ export function AboutAdmin() {
                 <Label htmlFor="team-title">Team Title</Label>
                 <Input
                   id="team-title"
-                  value={formData.teamInfo?.title || ''}
+                  value={tempFormData.teamInfo?.title || ''}
                   onChange={(e) => handleInputChange('teamInfo', 'title', e.target.value)}
                   placeholder="Enter team title"
                 />
@@ -471,7 +485,7 @@ export function AboutAdmin() {
                 <Label htmlFor="team-description">Team Description</Label>
                 <Textarea
                   id="team-description"
-                  value={formData.teamInfo?.description || ''}
+                  value={tempFormData.teamInfo?.description || ''}
                   onChange={(e) => handleInputChange('teamInfo', 'description', e.target.value)}
                   placeholder="Enter team description"
                   rows={3}
@@ -481,14 +495,24 @@ export function AboutAdmin() {
             
             <div>
               <Label htmlFor="team-image">Team Image</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="team-image"
-                  value={formData.teamInfo?.teamImage || ''}
-                  onChange={(e) => handleInputChange('teamInfo', 'teamImage', e.target.value)}
-                  placeholder="Enter image URL"
-                  className="flex-1"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                <div>
+                  <Input
+                    id="team-image"
+                    value={tempFormData.teamInfo?.teamImage || ''}
+                    onChange={(e) => handleInputChange('teamInfo', 'teamImage', e.target.value)}
+                    placeholder="Enter image URL"
+                  />
+                </div>
+                <div>
+                  <Input
+                    value={tempFormData.teamInfo?.teamImageAlt || ''}
+                    onChange={(e) => handleInputChange('teamInfo', 'teamImageAlt', e.target.value)}
+                    placeholder="Enter alt text"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 mt-2">
                 <input
                   ref={teamImageRef}
                   type="file"
@@ -513,11 +537,11 @@ export function AboutAdmin() {
                   )}
                 </Button>
               </div>
-              {formData.teamInfo?.teamImage && (
+              {tempFormData.teamInfo?.teamImage && (
                 <div className="relative inline-block mt-2">
                   <img
-                    src={formData.teamInfo.teamImage}
-                    alt="Team"
+                    src={tempFormData.teamInfo.teamImage}
+                    alt={tempFormData.teamInfo.teamImageAlt || "Team"}
                     className="h-32 object-cover rounded border"
                   />
                 </div>
@@ -536,7 +560,7 @@ export function AboutAdmin() {
             </div>
             
             <div className="space-y-4">
-              {formData.services?.map((service, index) => (
+              {tempFormData.services?.map((service, index) => (
                 <div key={service.id} className="p-4 border rounded-lg space-y-3">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium">Service {index + 1}</span>
@@ -574,13 +598,23 @@ export function AboutAdmin() {
                   
                   <div>
                     <Label>Image</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={service.image}
-                        onChange={(e) => handleServiceChange(index, 'image', e.target.value)}
-                        placeholder="Enter image URL"
-                        className="flex-1"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                      <div>
+                        <Input
+                          value={service.image}
+                          onChange={(e) => handleServiceChange(index, 'image', e.target.value)}
+                          placeholder="Enter image URL"
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          value={service.imageAlt || ''}
+                          onChange={(e) => handleServiceChange(index, 'imageAlt', e.target.value)}
+                          placeholder="Enter alt text"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-2">
                       <input
                         ref={(el) => {
                           if (el) serviceImageRefs.current[index] = el
@@ -611,7 +645,7 @@ export function AboutAdmin() {
                       <div className="relative inline-block mt-2">
                         <img
                           src={service.image}
-                          alt={`Service ${index + 1}`}
+                          alt={service.imageAlt || `Service ${index + 1}`}
                           className="h-32 object-cover rounded border"
                         />
                       </div>
@@ -631,7 +665,7 @@ export function AboutAdmin() {
               <Label htmlFor="meta-title">SEO Title</Label>
               <Input
                 id="meta-title"
-                value={formData.meta?.title || ''}
+                value={tempFormData.meta?.title || ''}
                 onChange={(e) => handleInputChange('meta', 'title', e.target.value)}
                 placeholder="SEO title for the about page"
               />
@@ -641,7 +675,7 @@ export function AboutAdmin() {
               <Label htmlFor="meta-description">SEO Description</Label>
               <Textarea
                 id="meta-description"
-                value={formData.meta?.description || ''}
+                value={tempFormData.meta?.description || ''}
                 onChange={(e) => handleInputChange('meta', 'description', e.target.value)}
                 placeholder="SEO description for the about page"
                 rows={3}

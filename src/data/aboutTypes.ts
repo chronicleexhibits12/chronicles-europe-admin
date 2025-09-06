@@ -8,6 +8,7 @@ export interface AboutMeta {
 export interface AboutHero {
   title?: string
   backgroundImage?: string
+  backgroundImageAlt?: string
 }
 
 export interface AboutCompanyInfo {
@@ -36,6 +37,7 @@ export interface AboutTeamInfo {
   title?: string
   description?: string
   teamImage?: string
+  teamImageAlt?: string
 }
 
 export interface AboutService {
@@ -43,6 +45,7 @@ export interface AboutService {
   title: string
   description: string
   image: string
+  imageAlt?: string
   isReversed: boolean
   order: number
 }

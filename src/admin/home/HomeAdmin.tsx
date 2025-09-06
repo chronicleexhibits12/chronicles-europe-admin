@@ -17,6 +17,7 @@ export function HomeAdmin() {
   
   // Form state
   const [formData, setFormData] = useState<Partial<HomePage>>({})
+  const [tempFormData, setTempFormData] = useState<Partial<HomePage>>({}) // Temporary state for unsaved changes
   
   // File input refs
   const heroImageRef = useRef<HTMLInputElement>(null)
@@ -27,11 +28,12 @@ export function HomeAdmin() {
   useEffect(() => {
     if (homePage) {
       setFormData(homePage)
+      setTempFormData(homePage) // Initialize temp data with loaded data
     }
   }, [homePage])
 
   const handleInputChange = (section: keyof HomePage, field: string, value: string) => {
-    setFormData(prev => {
+    setTempFormData(prev => {
       const currentSection = (prev[section] as any) || {}
       return {
         ...prev,
@@ -72,7 +74,7 @@ export function HomeAdmin() {
   }
 
   const handleSolutionItemChange = (index: number, field: keyof SolutionItem, value: string) => {
-    setFormData(prev => {
+    setTempFormData(prev => {
       const solutions = { ...prev.solutions }
       const items = [...(solutions.items || [])]
       items[index] = { ...items[index], [field]: value }
@@ -109,14 +111,15 @@ export function HomeAdmin() {
     }
   }
 
-
-
   const handleSave = async () => {
     if (!homePage?.id) return
 
     setSaving(true)
     
-    const savePromise = updateHomePage(homePage.id, formData)
+    // Update formData with tempFormData before saving
+    setFormData(tempFormData)
+    
+    const savePromise = updateHomePage(homePage.id, tempFormData)
     
     toast.promise(savePromise, {
       loading: 'Saving changes...',
@@ -168,14 +171,24 @@ export function HomeAdmin() {
           <div className="grid gap-4">
             <div className="w-full">
               <Label htmlFor="hero-bg">Background Image</Label>
-              <div className="flex gap-2 mt-1">
-                <Input
-                  id="hero-bg"
-                  value={formData.hero?.backgroundImage || ''}
-                  onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
-                  placeholder="Enter image URL"
-                  className="flex-1"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                <div>
+                  <Input
+                    id="hero-bg"
+                    value={tempFormData.hero?.backgroundImage || ''}
+                    onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
+                    placeholder="Enter image URL"
+                  />
+                </div>
+                <div>
+                  <Input
+                    value={tempFormData.hero?.backgroundImageAlt || ''}
+                    onChange={(e) => handleInputChange('hero', 'backgroundImageAlt', e.target.value)}
+                    placeholder="Enter alt text"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 mt-2">
                 <input
                   ref={heroImageRef}
                   type="file"
@@ -200,11 +213,11 @@ export function HomeAdmin() {
                   )}
                 </Button>
               </div>
-              {formData.hero?.backgroundImage && (
-                <div className="relative inline-block">
+              {tempFormData.hero?.backgroundImage && (
+                <div className="mt-2">
                   <img
-                    src={formData.hero.backgroundImage}
-                    alt="Hero background"
+                    src={tempFormData.hero.backgroundImage}
+                    alt={tempFormData.hero.backgroundImageAlt || "Hero background"}
                     className="h-20 w-32 object-cover rounded border"
                   />
                 </div>
@@ -223,7 +236,7 @@ export function HomeAdmin() {
                 <Label htmlFor="europe-title">Title</Label>
                 <Input
                   id="europe-title"
-                  value={formData.exhibitionEurope?.title || ''}
+                  value={tempFormData.exhibitionEurope?.title || ''}
                   onChange={(e) => handleInputChange('exhibitionEurope', 'title', e.target.value)}
                   placeholder="Enter Europe exhibition title"
                   className="mt-1"
@@ -234,7 +247,7 @@ export function HomeAdmin() {
                 <Label htmlFor="europe-subtitle">Subtitle</Label>
                 <Input
                   id="europe-subtitle"
-                  value={formData.exhibitionEurope?.subtitle || ''}
+                  value={tempFormData.exhibitionEurope?.subtitle || ''}
                   onChange={(e) => handleInputChange('exhibitionEurope', 'subtitle', e.target.value)}
                   placeholder="Enter subtitle"
                   className="mt-1"
@@ -244,14 +257,24 @@ export function HomeAdmin() {
             
             <div className="w-full">
               <Label htmlFor="europe-booth">Booth Image</Label>
-              <div className="flex gap-2 mt-1">
-                <Input
-                  id="europe-booth"
-                  value={formData.exhibitionEurope?.boothImage || ''}
-                  onChange={(e) => handleInputChange('exhibitionEurope', 'boothImage', e.target.value)}
-                  placeholder="Enter image URL"
-                  className="flex-1"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                <div>
+                  <Input
+                    id="europe-booth"
+                    value={tempFormData.exhibitionEurope?.boothImage || ''}
+                    onChange={(e) => handleInputChange('exhibitionEurope', 'boothImage', e.target.value)}
+                    placeholder="Enter image URL"
+                  />
+                </div>
+                <div>
+                  <Input
+                    value={tempFormData.exhibitionEurope?.boothImageAlt || ''}
+                    onChange={(e) => handleInputChange('exhibitionEurope', 'boothImageAlt', e.target.value)}
+                    placeholder="Enter alt text"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 mt-2">
                 <input
                   ref={boothImageRef}
                   type="file"
@@ -276,11 +299,11 @@ export function HomeAdmin() {
                   )}
                 </Button>
               </div>
-              {formData.exhibitionEurope?.boothImage && (
-                <div className="relative inline-block">
+              {tempFormData.exhibitionEurope?.boothImage && (
+                <div className="mt-2">
                   <img
-                    src={formData.exhibitionEurope.boothImage}
-                    alt="Booth"
+                    src={tempFormData.exhibitionEurope.boothImage}
+                    alt={tempFormData.exhibitionEurope.boothImageAlt || "Booth"}
                     className="h-20 w-32 object-cover rounded border"
                   />
                 </div>
@@ -290,10 +313,11 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={formData.exhibitionEurope?.htmlContent || ''}
+                content={tempFormData.exhibitionEurope?.htmlContent || ''}
                 onChange={(content) => handleInputChange('exhibitionEurope', 'htmlContent', content)}
                 placeholder="Enter exhibition content..."
                 className="mt-1"
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -308,7 +332,7 @@ export function HomeAdmin() {
               <Label htmlFor="usa-title">Title</Label>
               <Input
                 id="usa-title"
-                value={formData.exhibitionUSA?.title || ''}
+                value={tempFormData.exhibitionUSA?.title || ''}
                 onChange={(e) => handleInputChange('exhibitionUSA', 'title', e.target.value)}
                 placeholder="Enter USA exhibition title"
                 className="mt-1"
@@ -318,10 +342,11 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={formData.exhibitionUSA?.htmlContent || ''}
+                content={tempFormData.exhibitionUSA?.htmlContent || ''}
                 onChange={(content) => handleInputChange('exhibitionUSA', 'htmlContent', content)}
                 placeholder="Enter exhibition content..."
                 className="mt-1"
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -336,7 +361,7 @@ export function HomeAdmin() {
               <Label htmlFor="solutions-title">Title</Label>
               <Input
                 id="solutions-title"
-                value={formData.solutions?.title || ''}
+                value={tempFormData.solutions?.title || ''}
                 onChange={(e) => handleInputChange('solutions', 'title', e.target.value)}
                 placeholder="Enter solutions title"
                 className="mt-1"
@@ -346,7 +371,7 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={formData.solutions?.htmlContent || ''}
+                content={tempFormData.solutions?.htmlContent || ''}
                 onChange={(content) => handleInputChange('solutions', 'htmlContent', content)}
                 placeholder="Enter solutions content..."
                 className="mt-1"
@@ -359,7 +384,7 @@ export function HomeAdmin() {
               </div>
               
               <div className="space-y-4">
-                {formData.solutions?.items?.map((item, index) => (
+                {tempFormData.solutions?.items?.map((item, index) => (
                   <div key={index} className="p-4 border rounded-lg space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -385,13 +410,23 @@ export function HomeAdmin() {
                     
                     <div className="w-full">
                       <Label>Image</Label>
-                      <div className="flex gap-2 mt-1">
-                        <Input
-                          value={item.image}
-                          onChange={(e) => handleSolutionItemChange(index, 'image', e.target.value)}
-                          placeholder="Enter image URL"
-                          className="flex-1"
-                        />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                        <div>
+                          <Input
+                            value={item.image}
+                            onChange={(e) => handleSolutionItemChange(index, 'image', e.target.value)}
+                            placeholder="Enter image URL"
+                          />
+                        </div>
+                        <div>
+                          <Input
+                            value={item.imageAlt || ''}
+                            onChange={(e) => handleSolutionItemChange(index, 'imageAlt', e.target.value)}
+                            placeholder="Enter alt text"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-2">
                         <input
                           ref={(el) => {
                             if (el) solutionImageRefs.current[index] = el
@@ -419,10 +454,10 @@ export function HomeAdmin() {
                         </Button>
                       </div>
                       {item.image && (
-                        <div className="relative inline-block">
+                        <div className="mt-2">
                           <img
                             src={item.image}
-                            alt={`Solution ${index + 1}`}
+                            alt={item.imageAlt || `Solution ${index + 1}`}
                             className="h-20 w-32 object-cover rounded border"
                           />
                         </div>
@@ -445,7 +480,7 @@ export function HomeAdmin() {
                 <Label htmlFor="main-title">Title</Label>
                 <Input
                   id="main-title"
-                  value={formData.mainSection?.title || ''}
+                  value={tempFormData.mainSection?.title || ''}
                   onChange={(e) => handleInputChange('mainSection', 'title', e.target.value)}
                   placeholder="Enter main title"
                   className="mt-1"
@@ -456,7 +491,7 @@ export function HomeAdmin() {
                 <Label htmlFor="main-subtitle">Subtitle</Label>
                 <Input
                   id="main-subtitle"
-                  value={formData.mainSection?.subtitle || ''}
+                  value={tempFormData.mainSection?.subtitle || ''}
                   onChange={(e) => handleInputChange('mainSection', 'subtitle', e.target.value)}
                   placeholder="Enter subtitle"
                   className="mt-1"
@@ -467,7 +502,7 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={formData.mainSection?.htmlContent || ''}
+                content={tempFormData.mainSection?.htmlContent || ''}
                 onChange={(content) => handleInputChange('mainSection', 'htmlContent', content)}
                 placeholder="Enter main content..."
                 className="mt-1"
@@ -486,7 +521,7 @@ export function HomeAdmin() {
                 <Label htmlFor="why-title">Title</Label>
                 <Input
                   id="why-title"
-                  value={formData.whyBest?.title || ''}
+                  value={tempFormData.whyBest?.title || ''}
                   onChange={(e) => handleInputChange('whyBest', 'title', e.target.value)}
                   placeholder="Enter title"
                   className="mt-1"
@@ -497,7 +532,7 @@ export function HomeAdmin() {
                 <Label htmlFor="why-subtitle">Subtitle</Label>
                 <Input
                   id="why-subtitle"
-                  value={formData.whyBest?.subtitle || ''}
+                  value={tempFormData.whyBest?.subtitle || ''}
                   onChange={(e) => handleInputChange('whyBest', 'subtitle', e.target.value)}
                   placeholder="Enter subtitle"
                   className="mt-1"
@@ -508,7 +543,7 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label>Content</Label>
               <RichTextEditor
-                content={formData.whyBest?.htmlContent || ''}
+                content={tempFormData.whyBest?.htmlContent || ''}
                 onChange={(content) => handleInputChange('whyBest', 'htmlContent', content)}
                 placeholder="Enter content..."
                 className="mt-1"

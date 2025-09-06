@@ -15,11 +15,13 @@ export class CustomStandsPageService {
       hero: {
         title: 'CUSTOM EXHIBITION STANDS',
         subtitle: 'DESIGN & BUILD',
-        backgroundImage: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=600&fit=crop'
+        backgroundImage: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=600&fit=crop',
+        backgroundImageAlt: 'Custom exhibition stands design and build'
       },
       benefits: {
         title: 'BENEFITS OF CUSTOM EXHIBITION STAND:',
         image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=300&fit=crop',
+        imageAlt: 'Benefits of custom exhibition stands',
         content: '<ul><li><strong>Custom stand designs</strong> are tailored to your brand, accurately representing your company\'s values.</li><li><strong>Bespoke exhibition booths</strong> are visually attractive, capturing visitors\' attention and creating a buzz on the show floor.</li><li>They feature <em>interactive elements</em>, live presentations, and product demonstrations, encouraging more visitor engagement.</li></ul>'
       },
       standProjectText: {
@@ -31,7 +33,8 @@ export class CustomStandsPageService {
         title: 'Why Choose Our Exhibition Stands?',
         subtitle: 'Discover the advantages that make our stands unique and effective.',
         content: '<ul><li><strong>Tailor-made designs</strong> to match your brand identity with precision.</li><li><strong>High-quality materials</strong> ensuring durability and elegance throughout the event.</li></ul>',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=300&fit=crop'
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=300&fit=crop',
+        imageAlt: 'Exhibition stands benefits'
       },
       bespoke: {
         title: 'A BESPOKE EXHIBITION STAND:',
@@ -89,11 +92,13 @@ export class CustomStandsPageService {
         hero: {
           title: row.hero_title || undefined,
           subtitle: row.hero_subtitle || undefined,
-          backgroundImage: row.hero_background_image || undefined
+          backgroundImage: row.hero_background_image || undefined,
+          backgroundImageAlt: row.hero_background_image_alt || undefined
         },
         benefits: {
           title: row.benefits_title || undefined,
           image: row.benefits_image || undefined,
+          imageAlt: row.benefits_image_alt || undefined,
           content: row.benefits_content || undefined
         },
         standProjectText: {
@@ -105,7 +110,8 @@ export class CustomStandsPageService {
           title: row.exhibition_benefits_title || undefined,
           subtitle: row.exhibition_benefits_subtitle || undefined,
           content: row.exhibition_benefits_content || undefined,
-          image: row.exhibition_benefits_image || undefined
+          image: row.exhibition_benefits_image || undefined,
+          imageAlt: row.exhibition_benefits_image_alt || undefined
         },
         bespoke: {
           title: row.bespoke_title || undefined,
@@ -162,6 +168,9 @@ export class CustomStandsPageService {
       if (data.hero?.backgroundImage !== undefined) {
         updateData.hero_background_image = data.hero.backgroundImage
       }
+      if (data.hero?.backgroundImageAlt !== undefined) {
+        updateData.hero_background_image_alt = data.hero.backgroundImageAlt
+      }
 
       // Benefits section
       if (data.benefits?.title !== undefined) {
@@ -169,6 +178,9 @@ export class CustomStandsPageService {
       }
       if (data.benefits?.image !== undefined) {
         updateData.benefits_image = data.benefits.image
+      }
+      if (data.benefits?.imageAlt !== undefined) {
+        updateData.benefits_image_alt = data.benefits.imageAlt
       }
       if (data.benefits?.content !== undefined) {
         updateData.benefits_content = data.benefits.content
@@ -197,6 +209,9 @@ export class CustomStandsPageService {
       }
       if (data.exhibitionBenefits?.image !== undefined) {
         updateData.exhibition_benefits_image = data.exhibitionBenefits.image
+      }
+      if (data.exhibitionBenefits?.imageAlt !== undefined) {
+        updateData.exhibition_benefits_image_alt = data.exhibitionBenefits.imageAlt
       }
 
       // Bespoke section

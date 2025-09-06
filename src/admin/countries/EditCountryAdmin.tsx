@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,8 +23,6 @@ import {
 } from '@/components/ui/dialog'
 import { useCountry } from '@/hooks/useCountriesContent'
 import { CountriesService } from '@/data/countriesService'
-import { CitiesService } from '@/data/citiesService'
-import type { City } from '@/data/citiesTypes'
 import { TagInput } from '@/components/ui/tag-input'
 import { slugify } from '@/utils/slugify'
 
@@ -78,9 +76,6 @@ interface CountryData {
   // Cities Section
   cities_section_title: string
   cities_section_subtitle: string
-  
-  // Selected Cities
-  selected_cities: string[]
 }
 
 export function EditCountryAdmin() {
@@ -89,19 +84,6 @@ export function EditCountryAdmin() {
   const { data: country, loading, error } = useCountry(id || '')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
-  const [availableCities, setAvailableCities] = useState<City[]>([])
-  const [loadingCities, setLoadingCities] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-
-  // Filter cities based on search term
-  const filteredCities = useMemo(() => {
-    if (!searchTerm) return availableCities
-    const term = searchTerm.toLowerCase()
-    return availableCities.filter(city => 
-      city.name.toLowerCase().includes(term) || 
-      city.city_slug.toLowerCase().includes(term)
-    )
-  }, [availableCities, searchTerm])
 
   // Form state
   const [formData, setFormData] = useState<CountryData>({
@@ -147,10 +129,10 @@ export function EditCountryAdmin() {
     // Cities Section
     cities_section_title: '',
     cities_section_subtitle: '',
-    
-    // Selected Cities
-    selected_cities: [],
   })
+
+  // Temporary state for unsaved changes
+  const [tempFormData, setTempFormData] = useState<CountryData>({ ...formData })
 
   // Load country data
   useEffect(() => {
@@ -200,7 +182,7 @@ export function EditCountryAdmin() {
         processSteps = processSteps.slice(0, 6)
       }
 
-      setFormData({
+      const loadedData: CountryData = {
         slug: country.slug || '',
         name: country.name || '',
         is_active: country.is_active !== undefined ? country.is_active : true,
@@ -226,31 +208,17 @@ export function EditCountryAdmin() {
         process_section_steps: processSteps,
         cities_section_title: country.cities_section_title || '',
         cities_section_subtitle: country.cities_section_subtitle || '',
-        selected_cities: country.selected_cities || [],
-      })
+      }
+
+      setFormData(loadedData)
+      setTempFormData(loadedData) // Initialize temp data with loaded data
     }
   }, [country])
 
-  // Load available cities for selection
+  // Update temp form data when formData changes
   useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        setLoadingCities(true)
-        const { data: cities, error } = await CitiesService.getCities()
-        
-        if (error) throw new Error(error)
-        
-        setAvailableCities(cities || [])
-      } catch (error: any) {
-        console.error('Error fetching cities:', error)
-        toast.error('Failed to load available cities')
-      } finally {
-        setLoadingCities(false)
-      }
-    }
-    
-    fetchCities()
-  }, [])
+    setTempFormData({ ...formData })
+  }, [formData])
 
   // Temporary state for selected files (not yet uploaded)
   const [tempFiles, setTempFiles] = useState<Record<string, File>>({})
@@ -262,6 +230,18 @@ export function EditCountryAdmin() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [imageToDelete, setImageToDelete] = useState<{field: string, url: string} | null>(null)
 
+  // Get image URL for preview (from temp images first, then from form data)
+  const getImageUrl = (field: string): string => {
+    // Check if we have a temporary preview URL
+    if (tempImages[field]) {
+      return tempImages[field]
+    }
+    // Otherwise, use the URL from temp form data
+    const fieldValue = tempFormData[field as keyof CountryData];
+    return typeof fieldValue === 'string' ? fieldValue : ''
+  }
+
+  // Function to handle image upload (for new images)
   const handleImageUpload = async (file: File, field: string) => {
     setUploading(field)
     
@@ -288,32 +268,11 @@ export function EditCountryAdmin() {
     }
   }
 
-  // Get image URL for preview (from temp images first, then from form data)
-  const getImageUrl = (field: string): string => {
-    // Check if we have a temporary preview URL
-    if (tempImages[field]) {
-      return tempImages[field]
-    }
-    // Otherwise, use the URL from form data
-    const fieldValue = formData[field as keyof CountryData];
-    return typeof fieldValue === 'string' ? fieldValue : ''
-  }
-
-  // Function to confirm image deletion
-  const confirmImageDeletion = (field: string) => {
-    const imageUrl = getImageUrl(field)
-    if (imageUrl) {
-      setImageToDelete({ field, url: imageUrl } as { field: string; url: string })
-      setDeleteDialogOpen(true)
-    }
-  }
-
   // Function to remove an image (with confirmation)
   const removeImage = async (field: string) => {
     // Check if this is a temporary image or an existing one
     const isTempImage = !!tempImages[field];
     const isTempFile = !!tempFiles[field];
-    const isExistingImage = !!formData[field as keyof CountryData];
     
     if (isTempImage || isTempFile) {
       // Remove temporary image/file
@@ -336,12 +295,8 @@ export function EditCountryAdmin() {
       });
       
       toast.success('Image removed successfully');
-      return;
-    }
-    
-    if (isExistingImage) {
-      // For existing images, we need to handle this during save
-      // We'll mark it for deletion during save
+    } else {
+      // For existing images, we'll mark it for deletion during save
       setTempImages(prev => ({
         ...prev,
         [field]: '' // Mark as empty to be deleted during save
@@ -366,7 +321,7 @@ export function EditCountryAdmin() {
       }
       
       // Update form data to remove the image URL
-      setFormData(prev => ({
+      setTempFormData(prev => ({
         ...prev,
         [field]: ''
       }));
@@ -385,6 +340,9 @@ export function EditCountryAdmin() {
     if (!id) return
     
     setSaving(true)
+    
+    // Update formData with tempFormData before saving
+    setFormData(tempFormData)
     
     try {
       // First, upload any pending files
@@ -426,7 +384,7 @@ export function EditCountryAdmin() {
 
       // Prepare the data to save
       const dataToSave: any = {
-        ...formData,
+        ...tempFormData,
         ...uploadedImages
       }
 
@@ -470,7 +428,6 @@ export function EditCountryAdmin() {
         process_section_steps: dataToSave.process_section_steps,
         cities_section_title: dataToSave.cities_section_title,
         cities_section_subtitle: dataToSave.cities_section_subtitle,
-        selected_cities: dataToSave.selected_cities,
       })
 
       if (error) throw new Error(error)
@@ -490,15 +447,15 @@ export function EditCountryAdmin() {
   }
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setTempFormData(prev => ({
       ...prev,
       [field]: value
     }))
 
     // Auto-generate slug when country name is changed
     if (field === 'name') {
-      const generatedSlug = slugify(value)
-      setFormData(prev => ({
+      const generatedSlug = `exhibition-stand-builder-${slugify(value)}`
+      setTempFormData(prev => ({
         ...prev,
         slug: generatedSlug
       }))
@@ -506,7 +463,7 @@ export function EditCountryAdmin() {
   }
 
   const handleRichTextChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setTempFormData(prev => ({
       ...prev,
       [field]: value
     }))
@@ -517,12 +474,12 @@ export function EditCountryAdmin() {
   }
 
   const getKeywordsArray = () => {
-    return formData.seo_keywords ? formData.seo_keywords.split(',').map(k => k.trim()).filter(k => k) : []
+    return tempFormData.seo_keywords ? tempFormData.seo_keywords.split(',').map(k => k.trim()).filter(k => k) : []
   }
 
   // Process steps handlers
   const updateProcessStep = (index: number, field: keyof ProcessStep, value: string) => {
-    setFormData(prev => {
+    setTempFormData(prev => {
       const updatedSteps = [...prev.process_section_steps]
       updatedSteps[index] = {
         ...updatedSteps[index],
@@ -535,24 +492,13 @@ export function EditCountryAdmin() {
     })
   }
 
-  const toggleCitySelection = (citySlug: string) => {
-    setFormData(prev => {
-      const selected = [...prev.selected_cities]
-      const index = selected.indexOf(citySlug)
-      
-      if (index >= 0) {
-        // Remove if already selected
-        selected.splice(index, 1)
-      } else {
-        // Add if not selected
-        selected.push(citySlug)
-      }
-      
-      return {
-        ...prev,
-        selected_cities: selected
-      }
-    })
+  // Function to confirm image deletion
+  const confirmImageDeletion = (field: string) => {
+    const imageUrl = formData[field as keyof CountryData];
+    if (typeof imageUrl === 'string') {
+      setImageToDelete({ field, url: imageUrl });
+      setDeleteDialogOpen(true);
+    }
   }
 
   // Cleanup temporary files and preview URLs when component unmounts
@@ -569,13 +515,12 @@ export function EditCountryAdmin() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="animate-pulse space-y-8">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
           <div className="space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-full"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
           </div>
         </div>
       </div>
@@ -584,16 +529,16 @@ export function EditCountryAdmin() {
 
   if (error) {
     return (
-      <div className="p-8 text-center text-red-600">
-        Error loading country: {error}
+      <div className="text-center text-destructive">
+        <p>Error loading country: {error}</p>
       </div>
     )
   }
 
-  if (!country && !loading) {
+  if (!country) {
     return (
-      <div className="p-8 text-center text-red-600">
-        Country not found
+      <div className="text-center">
+        <p>Country not found</p>
       </div>
     )
   }
@@ -626,14 +571,11 @@ export function EditCountryAdmin() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Edit Country</h1>
-        <p className="text-muted-foreground">Update country information and content</p>
+        <p className="text-muted-foreground">Edit country details and content</p>
       </div>
 
       {/* Form */}
-      <form className="space-y-8" onSubmit={(e) => {
-        e.preventDefault(); // Prevent page reload
-        handleSave();
-      }}>
+      <form className="space-y-8">
         {/* Basic Information Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Basic Information</h2>
@@ -642,7 +584,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="name">Country Name *</Label>
               <Input
                 id="name"
-                value={formData.name}
+                value={tempFormData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="e.g., France"
               />
@@ -651,10 +593,14 @@ export function EditCountryAdmin() {
               <Label htmlFor="slug">Country Slug *</Label>
               <Input
                 id="slug"
-                value={formData.slug}
+                value={tempFormData.slug}
                 onChange={(e) => handleInputChange('slug', e.target.value)}
-                placeholder="e.g., france"
+                placeholder="e.g., exhibition-stand-builder-france"
+                readOnly
               />
+              <p className="text-sm text-muted-foreground mt-1">
+                Slug is automatically generated as "exhibition-stand-builder-[country-name]"
+              </p>
             </div>
           </div>
         </div>
@@ -667,7 +613,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="hero_title">Hero Title</Label>
               <Input
                 id="hero_title"
-                value={formData.hero_title}
+                value={tempFormData.hero_title}
                 onChange={(e) => handleInputChange('hero_title', e.target.value)}
                 placeholder="e.g., EXHIBITION STAND DESIGN AND BUILD IN"
               />
@@ -676,7 +622,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="hero_subtitle">Hero Subtitle</Label>
               <Input
                 id="hero_subtitle"
-                value={formData.hero_subtitle}
+                value={tempFormData.hero_subtitle}
                 onChange={(e) => handleInputChange('hero_subtitle', e.target.value)}
                 placeholder="e.g., FRANCE"
               />
@@ -793,7 +739,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="why_choose_us_title">Title</Label>
               <Input
                 id="why_choose_us_title"
-                value={formData.why_choose_us_title}
+                value={tempFormData.why_choose_us_title}
                 onChange={(e) => handleInputChange('why_choose_us_title', e.target.value)}
                 placeholder="e.g., Why Choose Us for Exhibition Stands in"
               />
@@ -802,7 +748,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="why_choose_us_subtitle">Subtitle</Label>
               <Input
                 id="why_choose_us_subtitle"
-                value={formData.why_choose_us_subtitle}
+                value={tempFormData.why_choose_us_subtitle}
                 onChange={(e) => handleInputChange('why_choose_us_subtitle', e.target.value)}
                 placeholder="e.g., France?"
               />
@@ -911,8 +857,9 @@ export function EditCountryAdmin() {
             <div className="md:col-span-2">
               <Label>Benefits HTML Content</Label>
               <RichTextEditor
-                content={formData.why_choose_us_benefits_html || ''}
+                content={tempFormData.why_choose_us_benefits_html || ''}
                 onChange={(content) => handleRichTextChange('why_choose_us_benefits_html', content)}
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -926,7 +873,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="what_we_do_title">Title</Label>
               <Input
                 id="what_we_do_title"
-                value={formData.what_we_do_title}
+                value={tempFormData.what_we_do_title}
                 onChange={(e) => handleInputChange('what_we_do_title', e.target.value)}
                 placeholder="e.g., WHAT WE DO?"
               />
@@ -935,7 +882,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="what_we_do_subtitle">Subtitle</Label>
               <Input
                 id="what_we_do_subtitle"
-                value={formData.what_we_do_subtitle}
+                value={tempFormData.what_we_do_subtitle}
                 onChange={(e) => handleInputChange('what_we_do_subtitle', e.target.value)}
                 placeholder="e.g., WE DO?"
               />
@@ -943,8 +890,9 @@ export function EditCountryAdmin() {
             <div className="md:col-span-2">
               <Label>Description HTML Content</Label>
               <RichTextEditor
-                content={formData.what_we_do_description_html || ''}
+                content={tempFormData.what_we_do_description_html || ''}
                 onChange={(content) => handleRichTextChange('what_we_do_description_html', content)}
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -958,7 +906,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="company_info_title">Title</Label>
               <Input
                 id="company_info_title"
-                value={formData.company_info_title}
+                value={tempFormData.company_info_title}
                 onChange={(e) => handleInputChange('company_info_title', e.target.value)}
                 placeholder="e.g., DISTINGUISHED EXHIBITION STAND BUILDER IN FRANCE"
               />
@@ -966,8 +914,9 @@ export function EditCountryAdmin() {
             <div>
               <Label>Content HTML</Label>
               <RichTextEditor
-                content={formData.company_info_content_html || ''}
+                content={tempFormData.company_info_content_html || ''}
                 onChange={(content) => handleRichTextChange('company_info_content_html', content)}
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -981,7 +930,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="best_company_title">Title</Label>
               <Input
                 id="best_company_title"
-                value={formData.best_company_title}
+                value={tempFormData.best_company_title}
                 onChange={(e) => handleInputChange('best_company_title', e.target.value)}
                 placeholder="e.g., BEST EXHIBITION STAND DESIGN COMPANY IN FRANCE FOR"
               />
@@ -990,7 +939,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="best_company_subtitle">Subtitle</Label>
               <Input
                 id="best_company_subtitle"
-                value={formData.best_company_subtitle}
+                value={tempFormData.best_company_subtitle}
                 onChange={(e) => handleInputChange('best_company_subtitle', e.target.value)}
                 placeholder="e.g., EXCEPTIONAL EXPERIENCE"
               />
@@ -998,8 +947,9 @@ export function EditCountryAdmin() {
             <div className="md:col-span-2">
               <Label>Content HTML</Label>
               <RichTextEditor
-                content={formData.best_company_content_html || ''}
+                content={tempFormData.best_company_content_html || ''}
                 onChange={(content) => handleRichTextChange('best_company_content_html', content)}
+                controlled={true} // Enable controlled mode
               />
             </div>
           </div>
@@ -1013,7 +963,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="process_section_title">Title</Label>
               <Input
                 id="process_section_title"
-                value={formData.process_section_title}
+                value={tempFormData.process_section_title}
                 onChange={(e) => handleInputChange('process_section_title', e.target.value)}
                 placeholder="e.g., The Art And Science Behind Our Exhibition Stand Design & Build Process"
               />
@@ -1021,7 +971,7 @@ export function EditCountryAdmin() {
             <div>
               <Label>Process Steps</Label>
               <div className="space-y-4">
-                {formData.process_section_steps.map((step, index) => (
+                {tempFormData.process_section_steps.map((step, index) => (
                   <div key={step.id} className="border rounded-lg p-4 space-y-3">
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium">Step {index + 1}</h3>
@@ -1073,7 +1023,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="cities_section_title">Title</Label>
               <Input
                 id="cities_section_title"
-                value={formData.cities_section_title}
+                value={tempFormData.cities_section_title}
                 onChange={(e) => handleInputChange('cities_section_title', e.target.value)}
                 placeholder="e.g., EXHIBITION STANDS IN"
               />
@@ -1082,100 +1032,18 @@ export function EditCountryAdmin() {
               <Label htmlFor="cities_section_subtitle">Subtitle</Label>
               <Input
                 id="cities_section_subtitle"
-                value={formData.cities_section_subtitle}
+                value={tempFormData.cities_section_subtitle}
                 onChange={(e) => handleInputChange('cities_section_subtitle', e.target.value)}
                 placeholder="e.g., FRANCE"
               />
             </div>
             <div className="md:col-span-2">
-              {/* City Selection */}
-              <div>
-                <Label>Select Cities</Label>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Select cities to be displayed on this country's page
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <h3 className="font-medium text-blue-800 mb-2">City Management</h3>
+                <p className="text-sm text-blue-700">
+                  Cities for this country are managed automatically. When you create a city in the Cities section 
+                  and select this country, it will automatically appear on this country's page.
                 </p>
-                
-                {loadingCities ? (
-                  <div className="flex items-center justify-center p-4">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="ml-2">Loading cities...</span>
-                  </div>
-                ) : (
-                  <div className="border rounded-md">
-                    {/* Search Input */}
-                    <div className="p-3 border-b">
-                      <Input
-                        placeholder="Search cities..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full"
-                      />
-                    </div>
-                    
-                    {/* Cities List */}
-                    <div className="max-h-60 overflow-y-auto">
-                      {availableCities.length === 0 ? (
-                        <p className="text-muted-foreground text-center py-4">
-                          No cities available. Create some cities first.
-                        </p>
-                      ) : filteredCities.length === 0 ? (
-                        <p className="text-muted-foreground text-center py-4">
-                          No cities match your search.
-                        </p>
-                      ) : (
-                        <div className="space-y-1 p-2">
-                          {filteredCities.map((city) => (
-                            <div 
-                              key={city.id} 
-                              className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded"
-                            >
-                              <input
-                                type="checkbox"
-                                id={`city-${city.id}`}
-                                checked={formData.selected_cities.includes(city.city_slug)}
-                                onChange={() => toggleCitySelection(city.city_slug)}
-                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                              />
-                              <label 
-                                htmlFor={`city-${city.id}`} 
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1"
-                              >
-                                <div className="font-medium">{city.name}</div>
-                                <div className="text-xs text-muted-foreground">{city.city_slug}</div>
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {formData.selected_cities.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-sm font-medium mb-2">Selected cities:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.selected_cities.map((citySlug) => {
-                        const city = availableCities.find(c => c.city_slug === citySlug)
-                        return (
-                          <span 
-                            key={citySlug} 
-                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                          >
-                            {city ? city.name : citySlug}
-                            <button
-                              type="button"
-                              className="ml-2 inline-flex items-center rounded-full hover:bg-blue-200"
-                              onClick={() => toggleCitySelection(citySlug)}
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </span>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -1189,7 +1057,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="seo_title">SEO Title</Label>
               <Input
                 id="seo_title"
-                value={formData.seo_title}
+                value={tempFormData.seo_title}
                 onChange={(e) => handleInputChange('seo_title', e.target.value)}
                 placeholder="SEO title for the country page"
               />
@@ -1198,7 +1066,7 @@ export function EditCountryAdmin() {
               <Label htmlFor="seo_description">SEO Description</Label>
               <Textarea
                 id="seo_description"
-                value={formData.seo_description}
+                value={tempFormData.seo_description}
                 onChange={(e) => handleInputChange('seo_description', e.target.value)}
                 placeholder="SEO description for the country page"
                 rows={3}
@@ -1241,7 +1109,7 @@ export function EditCountryAdmin() {
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save Country
+                Save Changes
               </>
             )}
           </Button>

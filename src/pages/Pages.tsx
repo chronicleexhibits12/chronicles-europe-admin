@@ -12,6 +12,7 @@ import {
 import { useHomePage } from '@/hooks/useHomeContent'
 import { useAboutPage } from '@/hooks/useAboutContent'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
+import { useTradeShowsPage } from '@/hooks/useTradeShowsContent'
 import { Edit, FileText, Eye } from 'lucide-react'
 
 interface PageInfo {
@@ -28,6 +29,7 @@ export function Pages() {
   const { data: homePage, loading: homeLoading } = useHomePage()
   const { data: aboutPage, loading: aboutLoading } = useAboutPage()
   const { data: customStandsPage, loading: customStandsLoading } = useCustomStandsPage()
+  const { data: tradeShowsPage, loading: tradeShowsLoading } = useTradeShowsPage()
   const [pages, setPages] = useState<PageInfo[]>([])
 
   useEffect(() => {
@@ -44,13 +46,21 @@ export function Pages() {
         id: 'about',
         name: 'About Page',
         path: '/about-us',
-        editPath: '/about-us',
+        editPath: 'admin/about-us',
         lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Company information, team details, services, and statistics'
+      },
+      {
+        id: 'trade-shows',
+        name: 'Trade Shows Page',
+        path: '/trade-shows',
+        editPath: '/admin/trade-shows-page',
+        lastUpdated: tradeShowsPage?.updatedAt ? new Date(tradeShowsPage.updatedAt).toLocaleDateString() : 'Never',
+        description: 'Trade shows and exhibitions landing page'
       }
     ]
     setPages(pagesData)
-  }, [homePage, aboutPage, customStandsPage])
+  }, [homePage, aboutPage, customStandsPage, tradeShowsPage])
 
   const handleEdit = (editPath: string) => {
     navigate(editPath)
@@ -61,7 +71,7 @@ export function Pages() {
     window.open(`https://chronicleseurope.vercel.app${path}`, '_blank')
   }
 
-  const loading = homeLoading || aboutLoading || customStandsLoading
+  const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading
 
   if (loading) {
     return (

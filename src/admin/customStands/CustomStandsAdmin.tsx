@@ -165,39 +165,6 @@ export function CustomStandsAdmin() {
                 />
               </div>
             </div>
-            <div className="w-full">
-              <Label htmlFor="hero-background">Background Image URL</Label>
-              <div className="space-y-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Input
-                      id="hero-background"
-                      value={getCurrentImageUrl('hero', 'backgroundImage')}
-                      onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
-                      placeholder="Image URL"
-                      readOnly
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      value={getCurrentImageAlt('hero', 'backgroundImage')}
-                      onChange={(e) => updateImageAlt('hero', 'backgroundImage', e.target.value)}
-                      placeholder="Alt text"
-                      readOnly
-                    />
-                  </div>
-                </div>
-                {getCurrentImageUrl('hero', 'backgroundImage') && (
-                  <div className="relative inline-block">
-                    <img 
-                      src={getCurrentImageUrl('hero', 'backgroundImage')} 
-                      alt={getCurrentImageAlt('hero', 'backgroundImage') || "Hero background preview"} 
-                      className="h-20 w-32 object-cover rounded border"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 

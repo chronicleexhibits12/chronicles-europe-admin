@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -6,20 +6,15 @@ import { Textarea } from '@/components/ui/textarea'
 import { useTestimonialsPage } from '@/data/hooks/useTestimonialsContent'
 import type { TestimonialsPage, TestimonialItem } from '@/data/testimonialsTypes'
 import { TestimonialsPageService } from '@/data/testimonialsService'
-import { Upload, Save, Loader2, Trash2, Plus } from 'lucide-react'
+import { Save, Loader2, Trash2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 export function TestimonialsAdmin() {
-  const { data: testimonialsPage, loading, error, updateTestimonialsPage, updateTestimonials, uploadImage } = useTestimonialsPage()
+  const { data: testimonialsPage, loading, error, updateTestimonialsPage, updateTestimonials } = useTestimonialsPage()
   const [saving, setSaving] = useState(false)
-  const [uploadingImages, setUploadingImages] = useState<{ [key: string]: boolean }>({})
   
   // Form state
   const [formData, setFormData] = useState<Partial<TestimonialsPage>>({})
-  
-  // File input refs
-  const heroImageRef = useRef<HTMLInputElement>(null)
-  const testimonialLogoRefs = useRef<{ [key: number]: HTMLInputElement | null }>({})
 
   // Update form data when testimonials page loads
   useEffect(() => {
@@ -41,68 +36,12 @@ export function TestimonialsAdmin() {
     })
   }
 
-  const handleImageUpload = async (file: File, section: string, field: string) => {
-    const uploadKey = `${section}-${field}`
-    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }))
-
-    const uploadPromise = uploadImage(file, section)
-    
-    toast.promise(uploadPromise, {
-      loading: 'Uploading image...',
-      success: (result) => {
-        if (result.data) {
-          handleInputChange(section as keyof TestimonialsPage, field, result.data)
-          // Trigger revalidation after successful image upload
-          TestimonialsPageService.triggerRevalidation()
-          return 'Image uploaded successfully!'
-        } else {
-          throw new Error(result.error || 'Upload failed')
-        }
-      },
-      error: (error) => `Failed to upload image: ${error.message || 'Unknown error'}`
-    })
-
-    try {
-      await uploadPromise
-    } finally {
-      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }))
-    }
-  }
-
   const handleTestimonialChange = (index: number, field: keyof TestimonialItem, value: string | number | boolean) => {
     setFormData(prev => {
       const testimonials = [...(prev.testimonials || [])]
       testimonials[index] = { ...testimonials[index], [field]: value }
       return { ...prev, testimonials }
     })
-  }
-
-  const handleTestimonialLogoUpload = async (file: File, index: number) => {
-    const uploadKey = `testimonial-${index}-logo`
-    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }))
-
-    const uploadPromise = uploadImage(file, 'testimonials')
-    
-    toast.promise(uploadPromise, {
-      loading: 'Uploading logo...',
-      success: (result) => {
-        if (result.data) {
-          handleTestimonialChange(index, 'companyLogoUrl', result.data)
-          // Trigger revalidation after successful image upload
-          TestimonialsPageService.triggerRevalidation()
-          return 'Logo uploaded successfully!'
-        } else {
-          throw new Error(result.error || 'Upload failed')
-        }
-      },
-      error: (error) => `Failed to upload logo: ${error.message || 'Unknown error'}`
-    })
-
-    try {
-      await uploadPromise
-    } finally {
-      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }))
-    }
   }
 
   const addTestimonial = () => {
@@ -219,55 +158,6 @@ export function TestimonialsAdmin() {
                 placeholder="Enter hero title"
               />
             </div>
-            
-            <div>
-              <Label htmlFor="hero-bg">Background Image URL</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div>
-                  <Input
-                    id="hero-bg"
-                    value={formData.hero?.backgroundImage || ''}
-                    onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
-                    placeholder="Enter image URL"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2 mt-2">
-                <input
-                  ref={heroImageRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'hero', 'backgroundImage')
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => heroImageRef.current?.click()}
-                  disabled={uploadingImages['hero-backgroundImage']}
-                >
-                  {uploadingImages['hero-backgroundImage'] ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4" />
-                  )}
-                  Upload Hero Image
-                </Button>
-              </div>
-              {formData.hero?.backgroundImage && (
-                <div className="relative inline-block mt-2">
-                  <img
-                    src={formData.hero.backgroundImage}
-                    alt="Hero background"
-                    className="h-32 object-cover rounded border"
-                  />
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -365,37 +255,6 @@ export function TestimonialsAdmin() {
                         placeholder="Enter logo URL"
                       />
                     </div>
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      ref={(el) => { testimonialLogoRefs.current[index] = el; }}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) handleTestimonialLogoUpload(file, index)
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const input = testimonialLogoRefs.current[index];
-                        if (input) {
-                          input.click();
-                        }
-                      }}
-                      disabled={uploadingImages[`testimonial-${index}-logo`]}
-                    >
-                      {uploadingImages[`testimonial-${index}-logo`] ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Upload className="w-4 h-4" />
-                      )}
-                      Upload Logo
-                    </Button>
                   </div>
                   {testimonial.companyLogoUrl && (
                     <div className="relative inline-block mt-2">

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { 
   Table, 
   TableBody, 
@@ -17,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2, Eye, Download } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Download, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTradeShows } from '@/hooks/useTradeShowsContent'
 import { TradeShowsService } from '@/data/tradeShowsService'
@@ -28,9 +29,24 @@ export function TradeShowsAdmin() {
   const { data: tradeShows, loading, error, refetch } = useTradeShows()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [tradeShowToDelete, setTradeShowToDelete] = useState<{id: string, title: string} | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
+  // Filter trade shows based on search term
+  const filteredTradeShows = useMemo(() => {
+    if (!tradeShows || !searchTerm) return tradeShows || []
+    
+    const term = searchTerm.toLowerCase()
+    return tradeShows.filter(show => 
+      show.title.toLowerCase().includes(term) ||
+      (show.category && show.category.toLowerCase().includes(term)) ||
+      (show.location && show.location.toLowerCase().includes(term)) ||
+      (show.city && show.city.toLowerCase().includes(term)) ||
+      (show.country && show.country.toLowerCase().includes(term))
+    )
+  }, [tradeShows, searchTerm])
 
   const handleCreateTradeShow = () => {
     navigate('/admin/trade-shows/create')
@@ -160,6 +176,28 @@ export function TradeShowsAdmin() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="flex items-center gap-2">
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search trade shows..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        {searchTerm && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSearchTerm('')}
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+
       {/* Trade Shows Table */}
       <div className="bg-white rounded-lg border shadow-sm w-full">
         <div className="px-6 py-4 border-b">
@@ -180,7 +218,7 @@ export function TradeShowsAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tradeShows.map((tradeShow) => (
+            {filteredTradeShows.map((tradeShow) => (
               <TableRow key={tradeShow.id}>
                 <TableCell className="font-medium">{tradeShow.title}</TableCell>
                 <TableCell>{tradeShow.category}</TableCell>
@@ -218,17 +256,21 @@ export function TradeShowsAdmin() {
           </TableBody>
         </Table>
 
-        {tradeShows.length === 0 && (
+        {filteredTradeShows.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No trade shows found</p>
-            <Button
-              variant="default"
-              className="mt-4"
-              onClick={handleCreateTradeShow}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create First Trade Show
-            </Button>
+            <p className="text-gray-500">
+              {searchTerm ? 'No trade shows found matching your search' : 'No trade shows found'}
+            </p>
+            {!searchTerm && (
+              <Button
+                variant="default"
+                className="mt-4"
+                onClick={handleCreateTradeShow}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create First Trade Show
+              </Button>
+            )}
           </div>
         )}
       </div>

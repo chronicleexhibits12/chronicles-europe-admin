@@ -58,6 +58,14 @@ export function Pages() {
         description: 'Company information, team details, services, and statistics'
       },
       {
+        id: 'services',
+        name: 'Services Page',
+        path: '/services',
+        editPath: '/admin/services',
+        lastUpdated: 'Never', // Services page doesn't have a single updatedAt field
+        description: 'Our services and solutions for exhibition stands'
+      },
+      {
         id: 'trade-shows',
         name: 'Trade Shows Page',
         path: '/top-trade-shows-in-europe',

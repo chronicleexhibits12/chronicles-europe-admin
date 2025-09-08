@@ -997,6 +997,63 @@ export interface Database {
           updated_at?: string
         }
       }
+      // Add the services table definition
+      services: {
+        Row: {
+          id: string
+          meta_title: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          hero_title: string | null
+          hero_subtitle: string | null
+          hero_background_image: string | null
+          hero_background_image_alt: string | null
+          intro_title: string | null
+          intro_description: string | null
+          service_title: string | null
+          service_description_html: string | null
+          is_service: boolean
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          hero_background_image_alt?: string | null
+          intro_title?: string | null
+          intro_description?: string | null
+          service_title?: string | null
+          service_description_html?: string | null
+          is_service?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          hero_background_image_alt?: string | null
+          intro_title?: string | null
+          intro_description?: string | null
+          service_title?: string | null
+          service_description_html?: string | null
+          is_service?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

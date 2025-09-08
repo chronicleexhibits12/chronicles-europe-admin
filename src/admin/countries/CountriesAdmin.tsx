@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { 
   Table, 
   TableBody, 
@@ -17,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCountries } from '@/hooks/useCountriesContent'
 import { CountriesService } from '@/data/countriesService'
@@ -27,9 +28,21 @@ export function CountriesAdmin() {
   const { data: countries, loading, error, refetch } = useCountries()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [countryToDelete, setCountryToDelete] = useState<{id: string, name: string} | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
+  // Filter countries based on search term
+  const filteredCountries = useMemo(() => {
+    if (!countries || !searchTerm) return countries || []
+    
+    const term = searchTerm.toLowerCase()
+    return countries.filter(country => 
+      country.name.toLowerCase().includes(term) ||
+      country.slug.toLowerCase().includes(term)
+    )
+  }, [countries, searchTerm])
 
   const handleCreateCountry = () => {
     navigate('/admin/countries/create')
@@ -124,6 +137,28 @@ export function CountriesAdmin() {
         </Button>
       </div>
 
+      {/* Search Bar */}
+      <div className="flex items-center gap-2">
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search countries..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        {searchTerm && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSearchTerm('')}
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+
       {/* Countries Table */}
       <div className="bg-white rounded-lg border shadow-sm">
         <div className="px-6 py-4 border-b">
@@ -144,7 +179,7 @@ export function CountriesAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {countries.map((country) => (
+            {filteredCountries.map((country) => (
               <TableRow key={country.id}>
                 <TableCell className="font-medium">{country.name}</TableCell>
                 <TableCell>{country.slug}</TableCell>
@@ -180,17 +215,21 @@ export function CountriesAdmin() {
           </TableBody>
         </Table>
 
-        {countries.length === 0 && (
+        {filteredCountries.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No countries found</p>
-            <Button
-              variant="default"
-              className="mt-4"
-              onClick={handleCreateCountry}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create First Country
-            </Button>
+            <p className="text-gray-500">
+              {searchTerm ? 'No countries found matching your search' : 'No countries found'}
+            </p>
+            {!searchTerm && (
+              <Button
+                variant="default"
+                className="mt-4"
+                onClick={handleCreateCountry}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create First Country
+              </Button>
+            )}
           </div>
         )}
       </div>

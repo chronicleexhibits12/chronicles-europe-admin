@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { 
   Table, 
   TableBody, 
@@ -17,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useBlogPosts } from '@/hooks/useBlogContent'
 import { BlogService } from '@/data/blogService'
@@ -27,9 +28,22 @@ export function BlogPostsAdmin() {
   const { data: blogPosts, loading, error, refetch } = useBlogPosts()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [blogPostToDelete, setBlogPostToDelete] = useState<{id: string, title: string} | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
+  // Filter blog posts based on search term
+  const filteredBlogPosts = useMemo(() => {
+    if (!blogPosts || !searchTerm) return blogPosts || []
+    
+    const term = searchTerm.toLowerCase()
+    return blogPosts.filter(post => 
+      post.title.toLowerCase().includes(term) ||
+      (post.category && post.category.toLowerCase().includes(term)) ||
+      (post.author && post.author.toLowerCase().includes(term))
+    )
+  }, [blogPosts, searchTerm])
 
   const handleCreateBlogPost = () => {
     navigate('/admin/blog-posts/create')
@@ -124,6 +138,28 @@ export function BlogPostsAdmin() {
         </Button>
       </div>
 
+      {/* Search Bar */}
+      <div className="flex items-center gap-2">
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search blog posts..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        {searchTerm && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSearchTerm('')}
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+
       {/* Blog Posts Table */}
       <div className="bg-white rounded-lg border shadow-sm w-full">
         <div className="px-6 py-4 border-b">
@@ -144,7 +180,7 @@ export function BlogPostsAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {blogPosts.map((blogPost) => (
+            {filteredBlogPosts.map((blogPost) => (
               <TableRow key={blogPost.id}>
                 <TableCell className="font-medium">{blogPost.title}</TableCell>
                 <TableCell>{blogPost.category || 'N/A'}</TableCell>
@@ -182,17 +218,21 @@ export function BlogPostsAdmin() {
           </TableBody>
         </Table>
 
-        {blogPosts.length === 0 && (
+        {filteredBlogPosts.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No blog posts found</p>
-            <Button
-              variant="default"
-              className="mt-4"
-              onClick={handleCreateBlogPost}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create First Blog Post
-            </Button>
+            <p className="text-gray-500">
+              {searchTerm ? 'No blog posts found matching your search' : 'No blog posts found'}
+            </p>
+            {!searchTerm && (
+              <Button
+                variant="default"
+                className="mt-4"
+                onClick={handleCreateBlogPost}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create First Blog Post
+              </Button>
+            )}
           </div>
         )}
       </div>

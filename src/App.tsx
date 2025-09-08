@@ -27,6 +27,7 @@ import { BlogPostsAdmin } from '@/admin/blog/BlogPostsAdmin'
 import { CreateBlogPostAdmin } from '@/admin/blog/CreateBlogPostAdmin'
 import { EditBlogPostAdmin } from '@/admin/blog/EditBlogPostAdmin'
 import { TestimonialsAdmin } from '@/admin/testimonials/TestimonialsAdmin'
+import { ServicesAdmin } from '@/admin/services/ServicesAdmin'
 import { Toaster } from 'sonner'
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
             <Route path="admin/blog-posts/create" element={<CreateBlogPostAdmin />} />
             <Route path="admin/blog-posts/:id/edit" element={<EditBlogPostAdmin />} />
             <Route path="admin/testimonials" element={<TestimonialsAdmin />} />
+            <Route path="admin/services" element={<ServicesAdmin />} />
             <Route path="admin/cities" element={<CitiesAdmin />} />
             <Route path="admin/cities/create" element={<CreateCityAdmin />} />
             <Route path="admin/cities/:id/edit" element={<EditCityAdmin />} />

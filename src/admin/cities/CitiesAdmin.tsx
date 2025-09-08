@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { 
   Table, 
   TableBody, 
@@ -17,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCities } from '@/hooks/useCitiesContent'
 import { CitiesService } from '@/data/citiesService'
@@ -27,9 +28,22 @@ export function CitiesAdmin() {
   const { data: cities, loading, error, refetch } = useCities()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [cityToDelete, setCityToDelete] = useState<{id: string, name: string} | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
+  // Filter cities based on search term
+  const filteredCities = useMemo(() => {
+    if (!cities || !searchTerm) return cities || []
+    
+    const term = searchTerm.toLowerCase()
+    return cities.filter(city => 
+      city.name.toLowerCase().includes(term) ||
+      city.country_slug.toLowerCase().includes(term) ||
+      city.city_slug.toLowerCase().includes(term)
+    )
+  }, [cities, searchTerm])
 
   const handleCreateCity = () => {
     navigate('/admin/cities/create')
@@ -124,6 +138,28 @@ export function CitiesAdmin() {
         </Button>
       </div>
 
+      {/* Search Bar */}
+      <div className="flex items-center gap-2">
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search cities..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        {searchTerm && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSearchTerm('')}
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+
       {/* Cities Table */}
       <div className="bg-white rounded-lg border shadow-sm w-full">
         <div className="px-6 py-4 border-b">
@@ -144,7 +180,7 @@ export function CitiesAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cities.map((city) => (
+            {filteredCities.map((city) => (
               <TableRow key={city.id}>
                 <TableCell className="font-medium">{city.name}</TableCell>
                 <TableCell>{city.country_slug}</TableCell>
@@ -180,17 +216,21 @@ export function CitiesAdmin() {
           </TableBody>
         </Table>
 
-        {cities.length === 0 && (
+        {filteredCities.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No cities found</p>
-            <Button
-              variant="default"
-              className="mt-4"
-              onClick={handleCreateCity}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create First City
-            </Button>
+            <p className="text-gray-500">
+              {searchTerm ? 'No cities found matching your search' : 'No cities found'}
+            </p>
+            {!searchTerm && (
+              <Button
+                variant="default"
+                className="mt-4"
+                onClick={handleCreateCity}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create First City
+              </Button>
+            )}
           </div>
         )}
       </div>

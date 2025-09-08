@@ -6,6 +6,7 @@ A modern React-based Content Management System for managing exhibition stand bui
 
 - **Home Page Management** - Edit hero sections, content blocks, and solutions
 - **About Page Management** - Manage company info, team details, services, and statistics
+- **Services Page Management** - Manage services page content and individual services
 - **Rich Text Editor** - WYSIWYG editor for content creation
 - **Image Upload** - Supabase storage integration for media management
 - **Authentication** - Secure admin access with Supabase Auth
@@ -126,6 +127,7 @@ src/
 
 - **home_page** - Home page content management
 - **about_page** - About page content management
+- **services** - Services page content management
 - **Storage buckets** - Image and media storage
 
 ## 🔒 Security

@@ -791,6 +791,212 @@ export interface Database {
           updated_at?: string
         }
       }
+      // Add the blog_page table definition
+      blog_page: {
+        Row: {
+          id: string
+          meta_title: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          hero_title: string | null
+          hero_subtitle: string | null
+          hero_background_image: string | null
+          hero_background_image_alt: string | null
+          hero_image: string | null
+          description: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          hero_background_image_alt?: string | null
+          hero_image?: string | null
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image?: string | null
+          hero_background_image_alt?: string | null
+          hero_image?: string | null
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      // Add the blog_posts table definition
+      blog_posts: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          excerpt: string | null
+          content: string | null
+          published_date: string | null
+          featured_image: string | null
+          featured_image_alt: string | null
+          category: string | null
+          author: string | null
+          read_time: string | null
+          tags: string[] | null
+          meta_title: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          sort_order: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          title: string
+          excerpt?: string | null
+          content?: string | null
+          published_date?: string | null
+          featured_image?: string | null
+          featured_image_alt?: string | null
+          category?: string | null
+          author?: string | null
+          read_time?: string | null
+          tags?: string[] | null
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          title?: string
+          excerpt?: string | null
+          content?: string | null
+          published_date?: string | null
+          featured_image?: string | null
+          featured_image_alt?: string | null
+          category?: string | null
+          author?: string | null
+          read_time?: string | null
+          tags?: string[] | null
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      // Add the testimonials_page table definition
+      testimonials_page: {
+        Row: {
+          id: string
+          meta_title: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          hero_title: string | null
+          hero_background_image: string | null
+          intro_title: string | null
+          intro_subtitle: string | null
+          intro_description: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_background_image?: string | null
+          intro_title?: string | null
+          intro_subtitle?: string | null
+          intro_description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_background_image?: string | null
+          intro_title?: string | null
+          intro_subtitle?: string | null
+          intro_description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      // Add the testimonials table definition
+      testimonials: {
+        Row: {
+          id: string
+          page_id: string
+          client_name: string | null
+          company_name: string | null
+          company_logo_url: string | null
+          rating: number | null
+          testimonial_text: string | null
+          is_featured: boolean
+          display_order: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          page_id: string
+          client_name?: string | null
+          company_name?: string | null
+          company_logo_url?: string | null
+          rating?: number | null
+          testimonial_text?: string | null
+          is_featured?: boolean
+          display_order?: number
+          // Note: is_active is always true, but kept for database compatibility
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          page_id?: string
+          client_name?: string | null
+          company_name?: string | null
+          company_logo_url?: string | null
+          rating?: number | null
+          testimonial_text?: string | null
+          is_featured?: boolean
+          display_order?: number
+          // Note: is_active is always true, but kept for database compatibility
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

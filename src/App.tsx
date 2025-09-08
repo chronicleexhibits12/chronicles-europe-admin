@@ -22,6 +22,11 @@ import { TradeShowsPageAdmin } from '@/admin/tradeShowsPage/TradeShowsPageAdmin'
 import { TradeShowsAdmin } from '@/admin/tradeShows/TradeShowsAdmin'
 import { CreateTradeShowAdmin } from '@/admin/tradeShows/CreateTradeShowAdmin'
 import { EditTradeShowAdmin } from '@/admin/tradeShows/EditTradeShowAdmin'
+import { BlogPageAdmin } from '@/admin/blog/BlogPageAdmin'
+import { BlogPostsAdmin } from '@/admin/blog/BlogPostsAdmin'
+import { CreateBlogPostAdmin } from '@/admin/blog/CreateBlogPostAdmin'
+import { EditBlogPostAdmin } from '@/admin/blog/EditBlogPostAdmin'
+import { TestimonialsAdmin } from '@/admin/testimonials/TestimonialsAdmin'
 import { Toaster } from 'sonner'
 
 function App() {
@@ -51,6 +56,11 @@ function App() {
             <Route path="admin/trade-shows" element={<TradeShowsAdmin />} />
             <Route path="admin/trade-shows/create" element={<CreateTradeShowAdmin />} />
             <Route path="admin/trade-shows/:id/edit" element={<EditTradeShowAdmin />} />
+            <Route path="admin/blog-page" element={<BlogPageAdmin />} />
+            <Route path="admin/blog-posts" element={<BlogPostsAdmin />} />
+            <Route path="admin/blog-posts/create" element={<CreateBlogPostAdmin />} />
+            <Route path="admin/blog-posts/:id/edit" element={<EditBlogPostAdmin />} />
+            <Route path="admin/testimonials" element={<TestimonialsAdmin />} />
             <Route path="admin/cities" element={<CitiesAdmin />} />
             <Route path="admin/cities/create" element={<CreateCityAdmin />} />
             <Route path="admin/cities/:id/edit" element={<EditCityAdmin />} />

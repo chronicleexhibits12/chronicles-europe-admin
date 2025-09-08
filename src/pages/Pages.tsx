@@ -13,6 +13,8 @@ import { useHomePage } from '@/hooks/useHomeContent'
 import { useAboutPage } from '@/hooks/useAboutContent'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
 import { useTradeShowsPage } from '@/hooks/useTradeShowsContent'
+import { useBlogPage } from '@/hooks/useBlogContent'
+import { useTestimonialsPage } from '@/data/hooks/useTestimonialsContent'
 import { Edit, FileText, Eye } from 'lucide-react'
 
 interface PageInfo {
@@ -30,6 +32,8 @@ export function Pages() {
   const { data: aboutPage, loading: aboutLoading } = useAboutPage()
   const { data: customStandsPage, loading: customStandsLoading } = useCustomStandsPage()
   const { data: tradeShowsPage, loading: tradeShowsLoading } = useTradeShowsPage()
+  const { data: blogPage, loading: blogLoading } = useBlogPage()
+  const { data: testimonialsPage, loading: testimonialsLoading } = useTestimonialsPage()
   const [pages, setPages] = useState<PageInfo[]>([])
 
   // Get website URL from environment variables, with fallback
@@ -60,10 +64,26 @@ export function Pages() {
         editPath: '/admin/trade-shows-page',
         lastUpdated: tradeShowsPage?.updatedAt ? new Date(tradeShowsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Trade shows and exhibitions landing page'
+      },
+      {
+        id: 'blog',
+        name: 'Blog Page',
+        path: '/blog',
+        editPath: '/admin/blog-page',
+        lastUpdated: blogPage?.updatedAt ? new Date(blogPage.updatedAt).toLocaleDateString() : 'Never',
+        description: 'Blog landing page with all posts'
+      },
+      {
+        id: 'testimonials',
+        name: 'Testimonials Page',
+        path: '/review',
+        editPath: '/admin/testimonials',
+        lastUpdated: testimonialsPage?.updatedAt ? new Date(testimonialsPage.updatedAt).toLocaleDateString() : 'Never',
+        description: 'Client testimonials and reviews'
       }
     ]
     setPages(pagesData)
-  }, [homePage, aboutPage, customStandsPage, tradeShowsPage])
+  }, [homePage, aboutPage, customStandsPage, tradeShowsPage, blogPage, testimonialsPage])
 
   const handleEdit = (editPath: string) => {
     navigate(editPath)
@@ -74,7 +94,7 @@ export function Pages() {
     window.open(`${websiteUrl}${path}`, '_blank')
   }
 
-  const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading
+  const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading || blogLoading || testimonialsLoading
 
   if (loading) {
     return (

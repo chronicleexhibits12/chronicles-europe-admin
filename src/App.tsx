@@ -29,6 +29,8 @@ import { EditBlogPostAdmin } from '@/admin/blog/EditBlogPostAdmin'
 import { TestimonialsAdmin } from '@/admin/testimonials/TestimonialsAdmin'
 import { ServicesAdmin } from '@/admin/services/ServicesAdmin'
 import { PortfolioAdmin } from '@/admin/portfolio/PortfolioAdmin'
+import { ContactAdmin } from '@/admin/contact/ContactAdmin'
+import { FormSubmissionsAdmin } from '@/admin/formSubmissions'
 import { Toaster } from 'sonner'
 
 function App() {
@@ -65,6 +67,8 @@ function App() {
             <Route path="admin/testimonials" element={<TestimonialsAdmin />} />
             <Route path="admin/services" element={<ServicesAdmin />} />
             <Route path="admin/portfolio" element={<PortfolioAdmin />} />
+            <Route path="admin/contact" element={<ContactAdmin />} />
+            <Route path="admin/form-submissions" element={<FormSubmissionsAdmin />} />
             <Route path="admin/cities" element={<CitiesAdmin />} />
             <Route path="admin/cities/create" element={<CreateCityAdmin />} />
             <Route path="admin/cities/:id/edit" element={<EditCityAdmin />} />

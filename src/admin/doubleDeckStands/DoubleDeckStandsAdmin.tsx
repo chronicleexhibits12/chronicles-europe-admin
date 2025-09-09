@@ -174,12 +174,14 @@ export function DoubleDeckStandsAdmin() {
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Input
-                    id="benefits-image"
-                    value={getCurrentImageUrl('benefits', 'image')}
-                    onChange={(e) => handleInputChange('benefits', 'image', e.target.value)}
-                    placeholder="Image URL or upload below"
-                  />
+                  <div className="hidden">
+                    <Input
+                      id="benefits-image"
+                      value={getCurrentImageUrl('benefits', 'image')}
+                      onChange={(e) => handleInputChange('benefits', 'image', e.target.value)}
+                      placeholder="Image URL or upload below"
+                    />
+                  </div>
                   <input
                     ref={benefitsImageRef}
                     type="file"
@@ -198,9 +200,11 @@ export function DoubleDeckStandsAdmin() {
                     {uploadingImages['benefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose File
+                      </>
                     )}
-                    Upload
                   </Button>
                 </div>
                 {getCurrentImageUrl('benefits', 'image') && (
@@ -316,12 +320,14 @@ export function DoubleDeckStandsAdmin() {
               <Label htmlFor="exhibition-benefits-image">Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Input
-                    id="exhibition-benefits-image"
-                    value={getCurrentImageUrl('exhibitionBenefits', 'image')}
-                    onChange={(e) => handleInputChange('exhibitionBenefits', 'image', e.target.value)}
-                    placeholder="Image URL or upload below"
-                  />
+                  <div className="hidden">
+                    <Input
+                      id="exhibition-benefits-image"
+                      value={getCurrentImageUrl('exhibitionBenefits', 'image')}
+                      onChange={(e) => handleInputChange('exhibitionBenefits', 'image', e.target.value)}
+                      placeholder="Image URL or upload below"
+                    />
+                  </div>
                   <input
                     ref={exhibitionBenefitsImageRef}
                     type="file"
@@ -340,9 +346,11 @@ export function DoubleDeckStandsAdmin() {
                     {uploadingImages['exhibitionBenefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose File
+                      </>
                     )}
-                    Upload
                   </Button>
                 </div>
                 {getCurrentImageUrl('exhibitionBenefits', 'image') && (

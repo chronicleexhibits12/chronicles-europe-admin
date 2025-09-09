@@ -184,7 +184,7 @@ export function CustomStandsAdmin() {
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="hidden">
                     <Input
                       id="benefits-image"
                       value={getCurrentImageUrl('benefits', 'image')}
@@ -219,9 +219,11 @@ export function CustomStandsAdmin() {
                     {uploadingImages['benefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose File
+                      </>
                     )}
-                    Upload Image
                   </Button>
                 </div>
                 {getCurrentImageUrl('benefits', 'image') && (
@@ -337,7 +339,7 @@ export function CustomStandsAdmin() {
               <Label htmlFor="exhibition-benefits-image">Image</Label>
               <div className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="hidden">
                     <Input
                       id="exhibition-benefits-image"
                       value={getCurrentImageUrl('exhibitionBenefits', 'image')}
@@ -372,9 +374,11 @@ export function CustomStandsAdmin() {
                     {uploadingImages['exhibitionBenefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose File
+                      </>
                     )}
-                    Upload Image
                   </Button>
                 </div>
                 {getCurrentImageUrl('exhibitionBenefits', 'image') && (

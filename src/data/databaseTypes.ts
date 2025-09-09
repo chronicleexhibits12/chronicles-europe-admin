@@ -1099,6 +1099,84 @@ export interface Database {
           seo_keywords?: string | null
         }
       }
+      // Add the contact_page table definition
+      contact_page: {
+        Row: {
+          id: string
+          meta_title: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          hero_title: string | null
+          hero_background_image: string | null
+          hero_background_image_alt: string | null
+          contact_info_title: string | null
+          contact_info_address: string | null
+          contact_info_full_address: string | null
+          contact_info_phone_1: string | null
+          contact_info_phone_2: string | null
+          contact_info_email: string | null
+          form_fields: any | null
+          other_offices_title: string | null
+          other_offices: any | null
+          support_title: string | null
+          support_description: string | null
+          support_items: any | null
+          map_embed_url: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_background_image?: string | null
+          hero_background_image_alt?: string | null
+          contact_info_title?: string | null
+          contact_info_address?: string | null
+          contact_info_full_address?: string | null
+          contact_info_phone_1?: string | null
+          contact_info_phone_2?: string | null
+          contact_info_email?: string | null
+          form_fields?: any | null
+          other_offices_title?: string | null
+          other_offices?: any | null
+          support_title?: string | null
+          support_description?: string | null
+          support_items?: any | null
+          map_embed_url?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          hero_title?: string | null
+          hero_background_image?: string | null
+          hero_background_image_alt?: string | null
+          contact_info_title?: string | null
+          contact_info_address?: string | null
+          contact_info_full_address?: string | null
+          contact_info_phone_1?: string | null
+          contact_info_phone_2?: string | null
+          contact_info_email?: string | null
+          form_fields?: any | null
+          other_offices_title?: string | null
+          other_offices?: any | null
+          support_title?: string | null
+          support_description?: string | null
+          support_items?: any | null
+          map_embed_url?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

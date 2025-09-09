@@ -169,7 +169,7 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label htmlFor="hero-bg">Background Image</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div>
+                <div className="hidden">
                   <Input
                     id="hero-bg"
                     value={formData.hero?.backgroundImage || ''}
@@ -206,7 +206,10 @@ export function HomeAdmin() {
                   {uploadingImages['hero-backgroundImage'] ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <Upload className="w-4 h-4" />
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose File
+                    </>
                   )}
                 </Button>
               </div>
@@ -255,7 +258,7 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label htmlFor="europe-booth">Booth Image</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div>
+                <div className="hidden">
                   <Input
                     id="europe-booth"
                     value={formData.exhibitionEurope?.boothImage || ''}
@@ -292,7 +295,10 @@ export function HomeAdmin() {
                   {uploadingImages['exhibition-boothImage'] ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <Upload className="w-4 h-4" />
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose File
+                    </>
                   )}
                 </Button>
               </div>
@@ -409,7 +415,7 @@ export function HomeAdmin() {
                     <div className="w-full">
                       <Label>Image</Label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                        <div>
+                        <div className="hidden">
                           <Input
                             value={item.image}
                             onChange={(e) => handleSolutionItemChange(index, 'image', e.target.value)}
@@ -447,7 +453,10 @@ export function HomeAdmin() {
                           {uploadingImages[`solution-item-${index}`] ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
-                            <Upload className="w-4 h-4" />
+                            <>
+                              <Upload className="w-4 h-4 mr-2" />
+                              Choose File
+                            </>
                           )}
                         </Button>
                       </div>

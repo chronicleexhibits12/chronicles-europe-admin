@@ -197,12 +197,14 @@ export function PavilionStandsAdmin() {
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Input
-                    id="benefits-image"
-                    value={getCurrentImageUrl('benefits', 'image')}
-                    onChange={(e) => handleInputChange('benefits', 'image', e.target.value)}
-                    placeholder="Image URL or upload below"
-                  />
+                  <div className="hidden">
+                    <Input
+                      id="benefits-image"
+                      value={getCurrentImageUrl('benefits', 'image')}
+                      onChange={(e) => handleInputChange('benefits', 'image', e.target.value)}
+                      placeholder="Image URL or upload below"
+                    />
+                  </div>
                   <input
                     ref={benefitsImageRef}
                     type="file"
@@ -221,9 +223,11 @@ export function PavilionStandsAdmin() {
                     {uploadingImages['benefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose File
+                      </>
                     )}
-                    Upload
                   </Button>
                 </div>
                 {getCurrentImageUrl('benefits', 'image') && (
@@ -306,12 +310,14 @@ export function PavilionStandsAdmin() {
               <Label htmlFor="advantages-image">Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Input
-                    id="advantages-image"
-                    value={getCurrentImageUrl('advantages', 'image')}
-                    onChange={(e) => handleInputChange('advantages', 'image', e.target.value)}
-                    placeholder="Image URL or upload below"
-                  />
+                  <div className="hidden">
+                    <Input
+                      id="advantages-image"
+                      value={getCurrentImageUrl('advantages', 'image')}
+                      onChange={(e) => handleInputChange('advantages', 'image', e.target.value)}
+                      placeholder="Image URL or upload below"
+                    />
+                  </div>
                   <input
                     ref={advantagesImageRef}
                     type="file"
@@ -330,9 +336,11 @@ export function PavilionStandsAdmin() {
                     {uploadingImages['advantages-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose File
+                      </>
                     )}
-                    Upload
                   </Button>
                 </div>
                 {getCurrentImageUrl('advantages', 'image') && (

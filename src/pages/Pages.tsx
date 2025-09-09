@@ -15,6 +15,7 @@ import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
 import { useTradeShowsPage } from '@/hooks/useTradeShowsContent'
 import { useBlogPage } from '@/hooks/useBlogContent'
 import { useTestimonialsPage } from '@/data/hooks/useTestimonialsContent'
+import { useContactPage } from '@/hooks/useContactContent'
 import { Edit, FileText, Eye } from 'lucide-react'
 
 interface PageInfo {
@@ -34,6 +35,7 @@ export function Pages() {
   const { data: tradeShowsPage, loading: tradeShowsLoading } = useTradeShowsPage()
   const { data: blogPage, loading: blogLoading } = useBlogPage()
   const { data: testimonialsPage, loading: testimonialsLoading } = useTestimonialsPage()
+  const { data: contactPage, loading: contactLoading } = useContactPage()
   const [pages, setPages] = useState<PageInfo[]>([])
 
   // Get website URL from environment variables, with fallback
@@ -88,10 +90,18 @@ export function Pages() {
         editPath: '/admin/testimonials',
         lastUpdated: testimonialsPage?.updatedAt ? new Date(testimonialsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Client testimonials and reviews'
+      },
+      {
+        id: 'contact',
+        name: 'Contact Page',
+        path: '/contact',
+        editPath: '/admin/contact',
+        lastUpdated: contactPage?.updatedAt ? new Date(contactPage.updatedAt).toLocaleDateString() : 'Never',
+        description: 'Contact information and inquiry form'
       }
     ]
     setPages(pagesData)
-  }, [homePage, aboutPage, customStandsPage, tradeShowsPage, blogPage, testimonialsPage])
+  }, [homePage, aboutPage, customStandsPage, tradeShowsPage, blogPage, testimonialsPage, contactPage])
 
   const handleEdit = (editPath: string) => {
     navigate(editPath)
@@ -102,7 +112,7 @@ export function Pages() {
     window.open(`${websiteUrl}${path}`, '_blank')
   }
 
-  const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading || blogLoading || testimonialsLoading
+  const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading || blogLoading || testimonialsLoading || contactLoading
 
   if (loading) {
     return (

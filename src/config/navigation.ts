@@ -1,4 +1,4 @@
-import { Home, Building, FileText, MapPin, Globe, Calendar, BookOpen } from 'lucide-react'
+import { Home, Building, FileText, MapPin, Globe, Calendar, BookOpen, Image } from 'lucide-react'
 import type { NavigationItem } from '@/data/commonTypes'
 
 export const navigationItems: NavigationItem[] = [
@@ -44,5 +44,11 @@ export const navigationItems: NavigationItem[] = [
     label: 'Countries',
     href: '/admin/countries',
     icon: Globe
+  },
+  {
+    id: 'portfolio',
+    label: 'Portfolio',
+    href: '/admin/portfolio',
+    icon: Image
   }
 ]

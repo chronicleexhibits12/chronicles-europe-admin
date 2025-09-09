@@ -1054,6 +1054,51 @@ export interface Database {
           updated_at?: string
         }
       }
+      // Add the portfolio_page table definition
+      portfolio_page: {
+        Row: {
+          id: string
+          hero_title: string | null
+          hero_background_image: string | null
+          portfolio_title: string | null
+          portfolio_subtitle: string | null
+          portfolio_items: any | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+          seo_title: string | null
+          seo_description: string | null
+          seo_keywords: string | null
+        }
+        Insert: {
+          id?: string
+          hero_title?: string | null
+          hero_background_image?: string | null
+          portfolio_title?: string | null
+          portfolio_subtitle?: string | null
+          portfolio_items?: any | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          seo_title?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+        }
+        Update: {
+          id?: string
+          hero_title?: string | null
+          hero_background_image?: string | null
+          portfolio_title?: string | null
+          portfolio_subtitle?: string | null
+          portfolio_items?: any | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          seo_title?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+        }
+      }
     }
   }
 }

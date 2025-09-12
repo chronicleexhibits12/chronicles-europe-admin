@@ -225,6 +225,11 @@ export class CitiesService {
       // Remove this city from all countries that reference it
       await this.removeCityFromCountries(cityToDelete.city_slug)
       
+      // Trigger revalidation for the deleted city page
+      if (cityToDelete.city_slug) {
+        await this.triggerRevalidation(`/${cityToDelete.country_slug}/${cityToDelete.city_slug}`)
+      }
+      
       return { data: true, error: null }
     } catch (error: any) {
       console.error('Error deleting city:', error)

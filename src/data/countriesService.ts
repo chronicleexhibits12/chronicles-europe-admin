@@ -238,12 +238,21 @@ export class CountriesService {
   // Delete country
   static async deleteCountry(id: string): Promise<{ data: boolean; error: string | null }> {
     try {
+      // First, get the country to be deleted to get its slug for revalidation
+      const { data: countryToDelete, error: fetchError } = await this.getCountryById(id)
+      if (fetchError) throw new Error(fetchError)
+
       const { error } = await (supabase as any)
         .from('countries')
         .delete()
         .eq('id', id)
 
       if (error) throw new Error(error.message)
+      
+      // Trigger revalidation for the deleted country page
+      if (countryToDelete) {
+        await this.triggerRevalidation(`/${countryToDelete.slug}`)
+      }
       
       return { data: true, error: null }
     } catch (error: any) {

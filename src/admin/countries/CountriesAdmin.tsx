@@ -2,11 +2,25 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table'
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Search, Plus, Trash2, Edit3, Globe } from 'lucide-react'
+import { Search, Plus, Trash2, Edit, Globe } from 'lucide-react'
 import { useCountries } from '@/hooks/useCountriesContent'
 import { CountriesService } from '@/data/countriesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
@@ -26,7 +40,6 @@ export function CountriesAdmin() {
   const [selectCountryDialogOpen, setSelectCountryDialogOpen] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
   const [creatingCountryPage, setCreatingCountryPage] = useState(false)
-
   const filteredCountries = useMemo(() => {
     if (!searchTerm) return countries
     
@@ -87,24 +100,24 @@ export function CountriesAdmin() {
         // Check if country already exists in the array (case-insensitive comparison)
         const countryExists = globalLocations.countries.some(country => 
           country.toLowerCase() === newCountryName.toLowerCase()
-        );
+        )
         
         if (!countryExists) {
           // Add new country to existing countries
-          const updatedCountries = [...globalLocations.countries, newCountryName];
+          const updatedCountries = [...globalLocations.countries, newCountryName]
           
           // Update the global locations with the new country list
           const { error: updateError } = await GlobalLocationsService.updateGlobalLocations(globalLocations.id, {
             ...globalLocations,
             countries: updatedCountries
-          });
+          })
           
           if (updateError) {
-            throw new Error(updateError);
+            throw new Error(updateError)
           }
           
           // Trigger revalidation
-          await GlobalLocationsService.triggerRevalidation('/trade-shows');
+          await GlobalLocationsService.triggerRevalidation('/trade-shows')
           
           toast.success('Country added successfully!')
         } else {
@@ -123,6 +136,24 @@ export function CountriesAdmin() {
     }
   }
 
+  // Filter existing countries for the add dialog
+  const existingCountries = useMemo(() => {
+    if (!globalLocations?.countries) return []
+    
+    return globalLocations.countries
+      .sort()
+  }, [globalLocations?.countries])
+
+  // Filter countries based on search term in add dialog
+  const filteredExistingCountries = useMemo(() => {
+    if (!addCountryDialogOpen || !existingCountries) return []
+    
+    const term = searchTerm.toLowerCase().trim()
+    return existingCountries.filter(country => 
+      country.toLowerCase().includes(term)
+    )
+  }, [existingCountries, searchTerm, addCountryDialogOpen])
+
   const openSelectCountryDialog = () => {
     setSelectCountryDialogOpen(true)
     setSelectedCountry(null)
@@ -137,11 +168,11 @@ export function CountriesAdmin() {
     // Check if country page already exists (case-insensitive comparison)
     const countryExists = countries?.some(country => 
       country.name.toLowerCase() === selectedCountry.toLowerCase()
-    );
+    )
 
     if (countryExists) {
-      toast.error(`Country page for "${selectedCountry}" already exists!`);
-      return;
+      toast.error(`Country page for "${selectedCountry}" already exists!`)
+      return
     }
 
     setCreatingCountryPage(true)
@@ -192,6 +223,9 @@ export function CountriesAdmin() {
         throw new Error(error)
       }
 
+      // Trigger revalidation for the new country page
+      await CountriesService.triggerRevalidation(`/${slug}`)
+
       toast.success('Country page created successfully!')
       setSelectCountryDialogOpen(false)
       setSelectedCountry(null)
@@ -203,6 +237,25 @@ export function CountriesAdmin() {
       setCreatingCountryPage(false)
     }
   }
+
+  // Filter available countries for the dialog
+  const availableCountries = useMemo(() => {
+    if (!globalLocations?.countries) return []
+    
+    return globalLocations.countries
+      .filter(country => !countries?.some(c => c.name.toLowerCase() === country.toLowerCase()))
+      .sort()
+  }, [globalLocations?.countries, countries])
+
+  // Filter countries based on search term in dialog
+  const filteredAvailableCountries = useMemo(() => {
+    if (!selectCountryDialogOpen || !availableCountries) return []
+    
+    const term = searchTerm.toLowerCase().trim()
+    return availableCountries.filter(country => 
+      country.toLowerCase().includes(term)
+    )
+  }, [availableCountries, searchTerm, selectCountryDialogOpen])
 
   if (loading) {
     return (
@@ -230,12 +283,23 @@ export function CountriesAdmin() {
   return (
     <div className="space-y-6 w-full">
       {/* Add Country Dialog */}
-      <Dialog open={addCountryDialogOpen} onOpenChange={setAddCountryDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog open={addCountryDialogOpen} onOpenChange={(open) => {
+        setAddCountryDialogOpen(open)
+        if (!open) {
+          setSearchTerm('')
+          setNewCountryName('')
+        }
+      }}>
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Add New Country</DialogTitle>
+            <DialogDescription>
+              Add a new country to the global locations list. This country will be available for creating country pages.
+            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          
+          {/* Add New Country Input */}
+          <div className="grid gap-4 py-2">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="countryName" className="text-right">
                 Country Name
@@ -250,11 +314,56 @@ export function CountriesAdmin() {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddCountryDialogOpen(false)}>
+          
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search existing countries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          
+          {/* Existing Countries List */}
+          <div className="flex-1 overflow-y-auto border rounded-md max-h-[300px] mt-2">
+            <div className="p-2 bg-gray-100 text-sm font-medium border-b">
+              Existing Countries ({existingCountries.length})
+            </div>
+            {filteredExistingCountries.length > 0 ? (
+              <div className="divide-y">
+                {filteredExistingCountries.map((country, index) => (
+                  <div 
+                    key={index}
+                    className="p-3 cursor-pointer hover:bg-gray-50"
+                  >
+                    <div className="flex items-center">
+                      <Globe className="h-4 w-4 text-gray-500 mr-2" />
+                      <span>{country}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                {searchTerm ? 'No countries match your search' : 'No existing countries'}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => {
+              setAddCountryDialogOpen(false)
+              setSearchTerm('')
+              setNewCountryName('')
+            }}>
               Cancel
             </Button>
-            <Button onClick={handleAddCountry} disabled={addingCountry || !newCountryName.trim()}>
+            <Button 
+              onClick={handleAddCountry} 
+              disabled={addingCountry || !newCountryName.trim()}
+            >
               {addingCountry ? 'Adding...' : 'Add Country'}
             </Button>
           </DialogFooter>
@@ -262,37 +371,70 @@ export function CountriesAdmin() {
       </Dialog>
 
       {/* Select Country Dialog */}
-      <Dialog open={selectCountryDialogOpen} onOpenChange={setSelectCountryDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog open={selectCountryDialogOpen} onOpenChange={(open) => {
+        setSelectCountryDialogOpen(open)
+        if (!open) {
+          setSearchTerm('')
+          setSelectedCountry(null)
+        }
+      }}>
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Create Country Page</DialogTitle>
+            <DialogDescription>
+              Select a country from the list below to create a new country page.
+            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="selectCountry" className="text-right">
-                Select Country
-              </Label>
-              <div className="col-span-3">
-                <select
-                  id="selectCountry"
-                  value={selectedCountry || ''}
-                  onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">Select a country</option>
-                  {globalLocations?.countries
-                    .filter(country => !countries?.some(c => c.name.toLowerCase() === country.toLowerCase()))
-                    .map((country, index) => (
-                      <option key={index} value={country}>
-                        {country}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </div>
+          
+          {/* Search Bar */}
+          <div className="relative mb-4">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search countries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectCountryDialogOpen(false)}>
+          
+          {/* Countries List */}
+          <div className="flex-1 overflow-y-auto border rounded-md max-h-[400px]">
+            {filteredAvailableCountries.length > 0 ? (
+              <div className="divide-y">
+                {filteredAvailableCountries.map((country) => (
+                  <div 
+                    key={country}
+                    className={`p-3 cursor-pointer hover:bg-gray-50 ${
+                      selectedCountry === country ? 'bg-green-50 border-l-4 border-green-500' : ''
+                    }`}
+                    onClick={() => setSelectedCountry(country)}
+                  >
+                    <div className="flex items-center">
+                      <div className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
+                        selectedCountry === country ? 'bg-green-500 border-green-500' : 'border-gray-300'
+                      }`}>
+                        {selectedCountry === country && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                      <span className={selectedCountry === country ? 'font-medium' : ''}>{country}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                {searchTerm ? 'No countries match your search' : 'No available countries'}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => {
+              setSelectCountryDialogOpen(false)
+              setSearchTerm('')
+              setSelectedCountry(null)
+            }}>
               Cancel
             </Button>
             <Button 
@@ -310,13 +452,11 @@ export function CountriesAdmin() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p>Are you sure you want to delete the country "{countryToDelete?.name}"?</p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <DialogDescription>
+              Are you sure you want to delete the country "{countryToDelete?.name}"? 
               This action cannot be undone.
-            </p>
-          </div>
+            </DialogDescription>
+          </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Cancel
@@ -329,14 +469,14 @@ export function CountriesAdmin() {
       </Dialog>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Countries Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Countries</h1>
           <p className="text-muted-foreground mt-2">
-            Manage countries for exhibition stand builder pages
+            Manage countries and exhibition stand builder pages
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex gap-2">
           <Button onClick={openAddCountryDialog}>
             <Plus className="h-4 w-4 mr-2" />
             Add Country
@@ -348,61 +488,95 @@ export function CountriesAdmin() {
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search Bar */}
       <div className="flex items-center gap-2">
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search countries..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search countries..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        {searchTerm && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSearchTerm('')}
+          >
+            Clear
+          </Button>
+        )}
       </div>
 
-      {/* Countries Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCountries.map((country) => (
-          <Card key={country.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {country.name}
-              </CardTitle>
-              <Globe className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xs text-muted-foreground mb-3">
-                Slug: {country.slug}
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEditCountry(country.id)}
-                >
-                  <Edit3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => confirmDeleteCountry(country.id, country.name)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredCountries.length === 0 && (
-        <div className="text-center py-12">
-          <Globe className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-medium">No countries found</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {searchTerm ? 'No countries match your search.' : 'Get started by adding a new country.'}
+      {/* Countries Table */}
+      <div className="bg-white rounded-lg border shadow-sm w-full">
+        <div className="px-6 py-4 border-b">
+          <h2 className="text-lg font-semibold text-gray-900">Countries</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            List of all countries in the system
           </p>
         </div>
-      )}
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Slug</TableHead>
+              <TableHead>Last Updated</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredCountries.map((country) => (
+              <TableRow key={country.id}>
+                <TableCell className="font-medium">{country.name}</TableCell>
+                <TableCell>{country.slug}</TableCell>
+                <TableCell>
+                  {country.updated_at 
+                    ? new Date(country.updated_at).toLocaleDateString() 
+                    : 'N/A'}
+                </TableCell>
+                <TableCell className="text-right space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditCountry(country.id)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => confirmDeleteCountry(country.id, country.name)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        {filteredCountries.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">
+              {searchTerm ? 'No countries found matching your search' : 'No countries found'}
+            </p>
+            {!searchTerm && (
+              <Button
+                variant="default"
+                className="mt-4"
+                onClick={openAddCountryDialog}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Country
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

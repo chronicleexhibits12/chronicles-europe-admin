@@ -2,11 +2,25 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table'
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Search, Plus, Trash2, Edit3, MapPin } from 'lucide-react'
+import { Search, Plus, Trash2, Edit, MapPin } from 'lucide-react'
 import { useCities } from '@/hooks/useCitiesContent'
 import { CitiesService } from '@/data/citiesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
@@ -26,7 +40,6 @@ export function CitiesAdmin() {
   const [selectCityDialogOpen, setSelectCityDialogOpen] = useState(false)
   const [selectedCity, setSelectedCity] = useState<string | null>(null)
   const [creatingCityPage, setCreatingCityPage] = useState(false)
-
   const filteredCities = useMemo(() => {
     if (!searchTerm) return cities
     
@@ -88,24 +101,24 @@ export function CitiesAdmin() {
         // Check if city already exists in the array (case-insensitive comparison)
         const cityExists = globalLocations.cities.some(city => 
           city.toLowerCase() === newCityName.toLowerCase()
-        );
+        )
         
         if (!cityExists) {
           // Add new city to existing cities
-          const updatedCities = [...globalLocations.cities, newCityName];
+          const updatedCities = [...globalLocations.cities, newCityName]
           
           // Update the global locations with the new city list
           const { error: updateError } = await GlobalLocationsService.updateGlobalLocations(globalLocations.id, {
             ...globalLocations,
             cities: updatedCities
-          });
+          })
           
           if (updateError) {
-            throw new Error(updateError);
+            throw new Error(updateError)
           }
           
           // Trigger revalidation for the trade shows page
-          await GlobalLocationsService.triggerRevalidation('/trade-shows');
+          await GlobalLocationsService.triggerRevalidation('/trade-shows')
           
           toast.success('City added successfully!')
         } else {
@@ -124,6 +137,24 @@ export function CitiesAdmin() {
     }
   }
 
+  // Filter existing cities for the add dialog
+  const existingCities = useMemo(() => {
+    if (!globalLocations?.cities) return []
+    
+    return globalLocations.cities
+      .sort()
+  }, [globalLocations?.cities])
+
+  // Filter cities based on search term in add dialog
+  const filteredExistingCities = useMemo(() => {
+    if (!addCityDialogOpen || !existingCities) return []
+    
+    const term = searchTerm.toLowerCase().trim()
+    return existingCities.filter(city => 
+      city.toLowerCase().includes(term)
+    )
+  }, [existingCities, searchTerm, addCityDialogOpen])
+
   const openSelectCityDialog = () => {
     setSelectCityDialogOpen(true)
     setSelectedCity(null)
@@ -138,11 +169,11 @@ export function CitiesAdmin() {
     // Check if city page already exists (case-insensitive comparison)
     const cityExists = cities?.some(city => 
       city.name.toLowerCase() === selectedCity.toLowerCase()
-    );
+    )
 
     if (cityExists) {
-      toast.error(`City page for "${selectedCity}" already exists!`);
-      return;
+      toast.error(`City page for "${selectedCity}" already exists!`)
+      return
     }
 
     setCreatingCityPage(true)
@@ -185,6 +216,9 @@ export function CitiesAdmin() {
         throw new Error(createError)
       }
 
+      // Trigger revalidation for the new city page (will be at root level until country is set)
+      await CitiesService.triggerRevalidation(`/${citySlug}`)
+
       toast.success('City page created successfully!')
       setSelectCityDialogOpen(false)
       setSelectedCity(null)
@@ -196,6 +230,25 @@ export function CitiesAdmin() {
       setCreatingCityPage(false)
     }
   }
+
+  // Filter available cities for the dialog
+  const availableCities = useMemo(() => {
+    if (!globalLocations?.cities) return []
+    
+    return globalLocations.cities
+      .filter(city => !cities?.some(c => c.name.toLowerCase() === city.toLowerCase()))
+      .sort()
+  }, [globalLocations?.cities, cities])
+
+  // Filter cities based on search term in dialog
+  const filteredAvailableCities = useMemo(() => {
+    if (!selectCityDialogOpen || !availableCities) return []
+    
+    const term = searchTerm.toLowerCase().trim()
+    return availableCities.filter(city => 
+      city.toLowerCase().includes(term)
+    )
+  }, [availableCities, searchTerm, selectCityDialogOpen])
 
   if (loading) {
     return (
@@ -223,12 +276,23 @@ export function CitiesAdmin() {
   return (
     <div className="space-y-6 w-full">
       {/* Add City Dialog */}
-      <Dialog open={addCityDialogOpen} onOpenChange={setAddCityDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog open={addCityDialogOpen} onOpenChange={(open) => {
+        setAddCityDialogOpen(open)
+        if (!open) {
+          setSearchTerm('')
+          setNewCityName('')
+        }
+      }}>
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Add New City</DialogTitle>
+            <DialogDescription>
+              Add a new city to the global locations list. This city will be available for creating city pages.
+            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          
+          {/* Add New City Input */}
+          <div className="grid gap-4 py-2">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="cityName" className="text-right">
                 City Name
@@ -243,11 +307,56 @@ export function CitiesAdmin() {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddCityDialogOpen(false)}>
+          
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search existing cities..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          
+          {/* Existing Cities List */}
+          <div className="flex-1 overflow-y-auto border rounded-md max-h-[300px] mt-2">
+            <div className="p-2 bg-gray-100 text-sm font-medium border-b">
+              Existing Cities ({existingCities.length})
+            </div>
+            {filteredExistingCities.length > 0 ? (
+              <div className="divide-y">
+                {filteredExistingCities.map((city, index) => (
+                  <div 
+                    key={index}
+                    className="p-3 cursor-pointer hover:bg-gray-50"
+                  >
+                    <div className="flex items-center">
+                      <MapPin className="h-4 w-4 text-gray-500 mr-2" />
+                      <span>{city}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                {searchTerm ? 'No cities match your search' : 'No existing cities'}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => {
+              setAddCityDialogOpen(false)
+              setSearchTerm('')
+              setNewCityName('')
+            }}>
               Cancel
             </Button>
-            <Button onClick={handleAddCity} disabled={addingCity || !newCityName.trim()}>
+            <Button 
+              onClick={handleAddCity} 
+              disabled={addingCity || !newCityName.trim()}
+            >
               {addingCity ? 'Adding...' : 'Add City'}
             </Button>
           </DialogFooter>
@@ -255,37 +364,70 @@ export function CitiesAdmin() {
       </Dialog>
 
       {/* Select City Dialog */}
-      <Dialog open={selectCityDialogOpen} onOpenChange={setSelectCityDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog open={selectCityDialogOpen} onOpenChange={(open) => {
+        setSelectCityDialogOpen(open)
+        if (!open) {
+          setSearchTerm('')
+          setSelectedCity(null)
+        }
+      }}>
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Create City Page</DialogTitle>
+            <DialogDescription>
+              Select a city from the list below to create a new city page.
+            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="selectCity" className="text-right">
-                Select City
-              </Label>
-              <div className="col-span-3">
-                <select
-                  id="selectCity"
-                  value={selectedCity || ''}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">Select a city</option>
-                  {globalLocations?.cities
-                    .filter(city => !cities?.some(c => c.name.toLowerCase() === city.toLowerCase()))
-                    .map((city, index) => (
-                      <option key={index} value={city}>
-                        {city}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </div>
+          
+          {/* Search Bar */}
+          <div className="relative mb-4">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search cities..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectCityDialogOpen(false)}>
+          
+          {/* Cities List */}
+          <div className="flex-1 overflow-y-auto border rounded-md max-h-[400px]">
+            {filteredAvailableCities.length > 0 ? (
+              <div className="divide-y">
+                {filteredAvailableCities.map((city) => (
+                  <div 
+                    key={city}
+                    className={`p-3 cursor-pointer hover:bg-gray-50 ${
+                      selectedCity === city ? 'bg-green-50 border-l-4 border-green-500' : ''
+                    }`}
+                    onClick={() => setSelectedCity(city)}
+                  >
+                    <div className="flex items-center">
+                      <div className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
+                        selectedCity === city ? 'bg-green-500 border-green-500' : 'border-gray-300'
+                      }`}>
+                        {selectedCity === city && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                      <span className={selectedCity === city ? 'font-medium' : ''}>{city}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                {searchTerm ? 'No cities match your search' : 'No available cities'}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => {
+              setSelectCityDialogOpen(false)
+              setSearchTerm('')
+              setSelectedCity(null)
+            }}>
               Cancel
             </Button>
             <Button 
@@ -303,13 +445,11 @@ export function CitiesAdmin() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p>Are you sure you want to delete the city "{cityToDelete?.name}"?</p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <DialogDescription>
+              Are you sure you want to delete the city "{cityToDelete?.name}"? 
               This action cannot be undone.
-            </p>
-          </div>
+            </DialogDescription>
+          </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Cancel
@@ -322,14 +462,14 @@ export function CitiesAdmin() {
       </Dialog>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Cities Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Cities</h1>
           <p className="text-muted-foreground mt-2">
-            Manage cities for exhibition stand builder pages
+            Manage cities and exhibition stand builder pages
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex gap-2">
           <Button onClick={openAddCityDialog}>
             <Plus className="h-4 w-4 mr-2" />
             Add City
@@ -341,62 +481,97 @@ export function CitiesAdmin() {
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search Bar */}
       <div className="flex items-center gap-2">
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search cities..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search cities..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        {searchTerm && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSearchTerm('')}
+          >
+            Clear
+          </Button>
+        )}
       </div>
 
-      {/* Cities Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCities.map((city) => (
-          <Card key={city.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {city.name}
-              </CardTitle>
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xs text-muted-foreground mb-3">
-                <div>Slug: {city.city_slug}</div>
-                <div>Country: {city.country_slug}</div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEditCity(city.id)}
-                >
-                  <Edit3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => confirmDeleteCity(city.id, city.name)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredCities.length === 0 && (
-        <div className="text-center py-12">
-          <MapPin className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-medium">No cities found</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {searchTerm ? 'No cities match your search.' : 'Get started by adding a new city.'}
+      {/* Cities Table */}
+      <div className="bg-white rounded-lg border shadow-sm w-full">
+        <div className="px-6 py-4 border-b">
+          <h2 className="text-lg font-semibold text-gray-900">Cities</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            List of all cities in the system
           </p>
         </div>
-      )}
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>City Slug</TableHead>
+              <TableHead>Country Slug</TableHead>
+              <TableHead>Last Updated</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredCities.map((city) => (
+              <TableRow key={city.id}>
+                <TableCell className="font-medium">{city.name}</TableCell>
+                <TableCell>{city.city_slug}</TableCell>
+                <TableCell>{city.country_slug}</TableCell>
+                <TableCell>
+                  {city.updated_at 
+                    ? new Date(city.updated_at).toLocaleDateString() 
+                    : 'N/A'}
+                </TableCell>
+                <TableCell className="text-right space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditCity(city.id)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => confirmDeleteCity(city.id, city.name)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        {filteredCities.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">
+              {searchTerm ? 'No cities found matching your search' : 'No cities found'}
+            </p>
+            {!searchTerm && (
+              <Button
+                variant="default"
+                className="mt-4"
+                onClick={openAddCityDialog}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add First City
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

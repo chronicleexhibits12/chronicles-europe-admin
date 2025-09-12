@@ -194,67 +194,97 @@ export function CreateTradeShowAdmin() {
                 </label>
               </div>
             </div>
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => handleInputChange('startDate', e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="endDate">End Date</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => handleInputChange('endDate', e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
-                  placeholder="e.g., London, UK"
+            {/* Logo fields added here, right after publish toggle */}
+            <div>
+              <Label htmlFor="logo">Logo Image</Label>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => document.getElementById('logo-upload')?.click()}
+                    disabled={uploading === 'logo'}
+                  >
+                    {uploading === 'logo' ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    Choose Logo
+                  </Button>
+                </div>
+                {formData.logo && (
+                  <div className="relative inline-block">
+                    <img 
+                      src={formData.logo} 
+                      alt="Logo preview" 
+                      className="h-20 w-32 object-cover rounded border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('logo')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+
+                <input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    e.preventDefault();
+                    const file = e.target.files?.[0]
+                    if (file) handleImageUpload(file, 'logo')
+                  }}
                 />
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Section 2: Content */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2: Content</h2>
-          <div className="space-y-4">
             <div>
-              <Label htmlFor="content">Content</Label>
-              <RichTextEditor
-                content={formData.content}
-                onChange={(value: string) => handleInputChange('content', value)}
+              <Label htmlFor="logoAlt">Logo Alt Text</Label>
+              <Input
+                id="logoAlt"
+                value={formData.logoAlt}
+                onChange={(e) => handleInputChange('logoAlt', e.target.value)}
+                placeholder="e.g., ESC Congress Logo"
               />
             </div>
-          </div>
-        </div>
-
-        {/* Section 3: Location */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3: Location</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Event Details fields added here */}
+            <div>
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => handleInputChange('startDate', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => handleInputChange('endDate', e.target.value)}
+              />
+            </div>
             <div>
               <Label htmlFor="country">Country</Label>
               <select
                 id="country"
                 value={formData.country}
                 onChange={(e) => handleInputChange('country', e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full p-2 border rounded-md"
               >
                 <option value="">Select a country</option>
-                {globalLocations?.countries.map((country, index) => (
-                  <option key={index} value={country}>
+                {globalLocations?.countries?.map((country) => (
+                  <option key={country} value={country}>
                     {country}
                   </option>
                 ))}
@@ -266,123 +296,52 @@ export function CreateTradeShowAdmin() {
                 id="city"
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full p-2 border rounded-md"
               >
                 <option value="">Select a city</option>
-                {globalLocations?.cities.map((city, index) => (
-                  <option key={index} value={city}>
+                {globalLocations?.cities?.map((city) => (
+                  <option key={city} value={city}>
                     {city}
                   </option>
                 ))}
               </select>
             </div>
-          </div>
-        </div>
-
-        {/* Section 4: Images */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4: Images</h2>
-          <div className="space-y-6">
-            {/* Logo Upload */}
-            <div className="space-y-2">
-              <Label htmlFor="logo">Logo</Label>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <Input
-                    id="logo"
-                    value={formData.logo}
-                    onChange={(e) => handleInputChange('logo', e.target.value)}
-                    placeholder="https://example.com/logo.jpg"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = 'image/*';
-                      input.onchange = (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) handleImageUpload(file, 'logo');
-                      };
-                      input.click();
-                    }}
-                    disabled={uploading === 'logo'}
-                  >
-                    {uploading === 'logo' ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Upload className="h-4 w-4 mr-2" />
-                    )}
-                    Upload
-                  </Button>
-                  {formData.logo && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => removeImage('logo')}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-              
-              {/* Logo Preview */}
-              {formData.logo && (
-                <div className="mt-2">
-                  <div className="border rounded-md overflow-hidden max-w-xs">
-                    <img 
-                      src={formData.logo} 
-                      alt="Logo preview" 
-                      className="w-full h-32 object-contain"
-                    />
-                  </div>
-                </div>
-              )}
-              
-              {/* Logo Alt Text */}
-              <div className="mt-2">
-                <Label htmlFor="logoAlt">Logo Alt Text</Label>
-                <Input
-                  id="logoAlt"
-                  value={formData.logoAlt}
-                  onChange={(e) => handleInputChange('logoAlt', e.target.value)}
-                  placeholder="Describe the logo image"
-                />
-              </div>
+            <div className="col-span-full">
+              <Label>Content (Rich Text)</Label>
+              <RichTextEditor
+                content={formData.content}
+                onChange={(newContent) => handleInputChange('content', newContent)}
+                controlled={true}
+              />
             </div>
           </div>
         </div>
 
-        {/* Section 5: SEO Metadata */}
+        {/* SEO Metadata */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5: SEO Metadata</h2>
-          <div className="space-y-4">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Metadata</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="metaTitle">Meta Title</Label>
+              <Label htmlFor="metaTitle">SEO Title</Label>
               <Input
                 id="metaTitle"
                 value={formData.metaTitle}
                 onChange={(e) => handleInputChange('metaTitle', e.target.value)}
-                placeholder="SEO title for the trade show"
+                placeholder="SEO title for the trade show page"
               />
             </div>
-            <div>
-              <Label htmlFor="metaDescription">Meta Description</Label>
+            <div className="col-span-full">
+              <Label htmlFor="metaDescription">SEO Description</Label>
               <Textarea
                 id="metaDescription"
                 value={formData.metaDescription}
                 onChange={(e) => handleInputChange('metaDescription', e.target.value)}
-                placeholder="SEO description for the trade show"
+                placeholder="SEO description for the trade show page"
                 rows={3}
               />
             </div>
-            <div>
-              <Label htmlFor="metaKeywords">Meta Keywords</Label>
+            <div className="col-span-full">
+              <Label htmlFor="metaKeywords">SEO Keywords</Label>
               <TagInput
                 tags={getKeywordsArray()}
                 onChange={handleKeywordsChange}

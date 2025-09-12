@@ -1180,6 +1180,30 @@ export interface Database {
           updated_at?: string
         }
       }
+      // Add the global_locations table definition
+      global_locations: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          cities: string[]
+          countries: string[]
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          cities?: string[]
+          countries?: string[]
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          cities?: string[]
+          countries?: string[]
+        }
+      }
     }
   }
 }

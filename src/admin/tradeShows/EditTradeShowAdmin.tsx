@@ -6,24 +6,19 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { TagInput } from '@/components/ui/tag-input'
-import { Loader2, Save, Upload, X, Plus } from 'lucide-react'
+import { Loader2, Save, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTradeShow } from '@/hooks/useTradeShowsContent'
 import { TradeShowsService } from '@/data/tradeShowsService'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { useGlobalLocations } from '@/hooks/useGlobalLocations'
 
 export function EditTradeShowAdmin() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: tradeShow, loading, error, refetch } = useTradeShow(id || '')
+  const { data: globalLocations } = useGlobalLocations()
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
-  const [availableCities, setAvailableCities] = useState<string[]>([])
-  const [availableCountries, setAvailableCountries] = useState<string[]>([])
-  const [newCity, setNewCity] = useState('')
-  const [newCountry, setNewCountry] = useState('')
-  const [isCityDialogOpen, setIsCityDialogOpen] = useState(false)
-  const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(false)
   
   // Form state
   const [formData, setFormData] = useState({
@@ -33,10 +28,9 @@ export function EditTradeShowAdmin() {
     content: '',
     startDate: '',
     endDate: '',
-    location: '',
+    location: '', // Keep location field for internal use
     country: '',
     city: '',
-    website: '',
     
     // Images
     logo: '',
@@ -51,31 +45,6 @@ export function EditTradeShowAdmin() {
     isActive: true
   })
 
-  // Fetch available cities and countries from trade_shows_page table
-  useEffect(() => {
-    const fetchAvailableLocations = async () => {
-      try {
-        const { data: pageData, error } = await TradeShowsService.getTradeShowsPage()
-        
-        if (error) {
-          console.error('Error fetching trade shows page data:', error)
-          toast.error(`Failed to fetch location data: ${error}`)
-          return
-        }
-        
-        if (pageData) {
-          setAvailableCities(pageData.cities || [])
-          setAvailableCountries(pageData.countries || [])
-        }
-      } catch (error: any) {
-        console.error('Error fetching available locations:', error)
-        toast.error(`Failed to fetch available locations: ${error.message || 'Unknown error'}`)
-      }
-    }
-    
-    fetchAvailableLocations()
-  }, [])
-
   // Initialize form with trade show data
   useEffect(() => {
     if (tradeShow) {
@@ -88,7 +57,6 @@ export function EditTradeShowAdmin() {
         location: tradeShow.location || '',
         country: tradeShow.country || '',
         city: tradeShow.city || '',
-        website: tradeShow.website || '',
         logo: tradeShow.logo || '',
         logoAlt: tradeShow.logoAlt || '',
         metaTitle: tradeShow.metaTitle || '',
@@ -98,6 +66,47 @@ export function EditTradeShowAdmin() {
       })
     }
   }, [tradeShow])
+
+  const handleInputChange = (field: string, value: string | number | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+
+    // Auto-fill location when city or country is changed
+    if (field === 'city' || field === 'country') {
+      const newCity = field === 'city' ? value : formData.city
+      const newCountry = field === 'country' ? value : formData.country
+      
+      // Only update location if both city and country have values
+      if (newCity && newCountry) {
+        setFormData(prev => ({
+          ...prev,
+          location: `${newCity}, ${newCountry}`
+        }))
+      } else if (newCity || newCountry) {
+        // If only one has a value, use that
+        setFormData(prev => ({
+          ...prev,
+          location: (newCity || newCountry) as string
+        }))
+      }
+    }
+  }
+
+  const handleKeywordsChange = (keywords: string[]) => {
+    handleInputChange('metaKeywords', keywords.join(', '))
+  }
+
+  const getKeywordsArray = () => {
+    return formData.metaKeywords ? formData.metaKeywords.split(',').map(k => k.trim()).filter(k => k) : []
+  }
+
+  // Get image URL for preview
+  const getImageUrl = (field: string): string => {
+    const value = formData[field as keyof typeof formData]
+    return typeof value === 'string' ? value : ''
+  }
 
   const handleSave = async () => {
     if (!id) return
@@ -114,7 +123,6 @@ export function EditTradeShowAdmin() {
         location: formData.location,
         country: formData.country,
         city: formData.city,
-        website: formData.website,
         logo: formData.logo,
         logoAlt: formData.logoAlt,
         metaTitle: formData.metaTitle,
@@ -168,157 +176,6 @@ export function EditTradeShowAdmin() {
       [field]: ''
     }))
     toast.success('Image removed successfully')
-  }
-
-  const handleInputChange = (field: string, value: string | number | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-
-    // Auto-fill location when city or country is changed
-    if (field === 'city' || field === 'country') {
-      const newCity = field === 'city' ? value : formData.city
-      const newCountry = field === 'country' ? value : formData.country
-      
-      // Only update location if both city and country have values
-      if (newCity && newCountry) {
-        setFormData(prev => ({
-          ...prev,
-          location: `${newCity}, ${newCountry}`
-        }))
-      } else if (newCity || newCountry) {
-        // If only one has a value, use that
-        setFormData(prev => ({
-          ...prev,
-          location: (newCity || newCountry) as string
-        }))
-      }
-    }
-  }
-
-  const handleKeywordsChange = (keywords: string[]) => {
-    handleInputChange('metaKeywords', keywords.join(', '))
-  }
-
-  const getKeywordsArray = () => {
-    return formData.metaKeywords ? formData.metaKeywords.split(',').map(k => k.trim()).filter(k => k) : []
-  }
-
-  // Get image URL for preview
-  const getImageUrl = (field: string): string => {
-    const value = formData[field as keyof typeof formData]
-    return typeof value === 'string' ? value : ''
-  }
-
-  // Add a new city to the available cities list
-  const addCity = async () => {
-    if (!newCity.trim()) return
-    
-    try {
-      // Get current page data
-      const { data: pageData, error: fetchError } = await TradeShowsService.getTradeShowsPage()
-      
-      if (fetchError) throw new Error(fetchError)
-      
-      if (pageData) {
-        // Check if city already exists in the array (case-insensitive comparison)
-        const cityExists = pageData.cities.some(city => 
-          city.toLowerCase() === newCity.trim().toLowerCase()
-        );
-        
-        if (!cityExists) {
-          // Add new city to existing cities
-          const updatedCities = [...(pageData.cities || []), newCity.trim()]
-          
-          // Update the trade shows page with the new city list
-          const { error: updateError } = await TradeShowsService.updateTradeShowsPage(pageData.id, {
-            ...pageData,
-            cities: updatedCities
-          })
-          
-          if (updateError) throw new Error(updateError)
-          
-          // Update local state
-          setAvailableCities(updatedCities)
-          // Auto-select the newly added city
-          handleInputChange('city', newCity.trim())
-          setNewCity('')
-          setIsCityDialogOpen(false)
-          toast.success('City added successfully!')
-        } else {
-          // Find the existing city with correct casing
-          const existingCity = pageData.cities.find(city => 
-            city.toLowerCase() === newCity.trim().toLowerCase()
-          );
-          // Auto-select the existing city
-          if (existingCity) {
-            handleInputChange('city', existingCity)
-          }
-          toast.error('City already exists!')
-          setNewCity('')
-          setIsCityDialogOpen(false)
-        }
-      }
-    } catch (error: any) {
-      console.error('Error adding city:', error)
-      toast.error(`Failed to add city: ${error.message || 'Unknown error'}`)
-    }
-  }
-
-  // Add a new country to the available countries list
-  const addCountry = async () => {
-    if (!newCountry.trim()) return
-    
-    try {
-      // Get current page data
-      const { data: pageData, error: fetchError } = await TradeShowsService.getTradeShowsPage()
-      
-      if (fetchError) throw new Error(fetchError)
-      
-      if (pageData) {
-        // Check if country already exists in the array (case-insensitive comparison)
-        const countryExists = pageData.countries.some(country => 
-          country.toLowerCase() === newCountry.trim().toLowerCase()
-        );
-        
-        if (!countryExists) {
-          // Add new country to existing countries
-          const updatedCountries = [...(pageData.countries || []), newCountry.trim()]
-          
-          // Update the trade shows page with the new country list
-          const { error: updateError } = await TradeShowsService.updateTradeShowsPage(pageData.id, {
-            ...pageData,
-            countries: updatedCountries
-          })
-          
-          if (updateError) throw new Error(updateError)
-          
-          // Update local state
-          setAvailableCountries(updatedCountries)
-          // Auto-select the newly added country
-          handleInputChange('country', newCountry.trim())
-          setNewCountry('')
-          setIsCountryDialogOpen(false)
-          toast.success('Country added successfully!')
-        } else {
-          // Find the existing country with correct casing
-          const existingCountry = pageData.countries.find(country => 
-            country.toLowerCase() === newCountry.trim().toLowerCase()
-          );
-          // Auto-select the existing country
-          if (existingCountry) {
-            handleInputChange('country', existingCountry)
-          }
-          toast.error('Country already exists!')
-          setNewCountry('')
-          setIsCountryDialogOpen(false)
-        }
-      }
-    } catch (error: any) {
-      console.error('Error adding country:', error)
-      toast.error(`Failed to add country: ${error.message || 'Unknown error'}`)
-    }
   }
 
   if (loading) {
@@ -485,123 +342,36 @@ export function EditTradeShowAdmin() {
               />
             </div>
             <div>
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                placeholder="e.g., Paris, France"
-                readOnly
-              />
-            </div>
-            <div>
               <Label htmlFor="country">Country</Label>
-              <div className="flex gap-2">
-                <select
-                  id="country"
-                  value={formData.country}
-                  onChange={(e) => handleInputChange('country', e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                >
-                  <option value="">Select a country</option>
-                  {availableCountries.map((country) => (
-                    <option key={country} value={country}>
-                      {country}
-                    </option>
-                  ))}
-                </select>
-                <Dialog open={isCountryDialogOpen} onOpenChange={setIsCountryDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button type="button" variant="outline" size="icon">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Add New Country</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="newCountryInput" className="text-right">
-                          Country
-                        </Label>
-                        <Input
-                          id="newCountryInput"
-                          value={newCountry}
-                          onChange={(e) => setNewCountry(e.target.value)}
-                          className="col-span-3"
-                          placeholder="Enter country name"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setIsCountryDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={addCountry}>Add Country</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+              <select
+                id="country"
+                value={formData.country}
+                onChange={(e) => handleInputChange('country', e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="">Select a country</option>
+                {globalLocations?.countries?.map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <Label htmlFor="city">City</Label>
-              <div className="flex gap-2">
-                <select
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                >
-                  <option value="">Select a city</option>
-                  {availableCities.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-                <Dialog open={isCityDialogOpen} onOpenChange={setIsCityDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button type="button" variant="outline" size="icon">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Add New City</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="newCityInput" className="text-right">
-                          City
-                        </Label>
-                        <Input
-                          id="newCityInput"
-                          value={newCity}
-                          onChange={(e) => setNewCity(e.target.value)}
-                          className="col-span-3"
-                          placeholder="Enter city name"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setIsCityDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={addCity}>Add City</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                value={formData.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
-                placeholder="e.g., https://www.escardio.org"
-              />
+              <select
+                id="city"
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="">Select a city</option>
+                {globalLocations?.cities?.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="col-span-full">
               <Label>Content (Rich Text)</Label>

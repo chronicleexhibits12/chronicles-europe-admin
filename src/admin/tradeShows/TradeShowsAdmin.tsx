@@ -45,7 +45,6 @@ export function TradeShowsAdmin() {
     const term = searchTerm.toLowerCase()
     return tradeShows.filter(show => 
       show.title.toLowerCase().includes(term) ||
-      (show.category && show.category.toLowerCase().includes(term)) ||
       (show.location && show.location.toLowerCase().includes(term)) ||
       (show.city && show.city.toLowerCase().includes(term)) ||
       (show.country && show.country.toLowerCase().includes(term))
@@ -320,7 +319,6 @@ export function TradeShowsAdmin() {
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
-              <TableHead>Category</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Date Range</TableHead>
               <TableHead>Published</TableHead>
@@ -331,7 +329,6 @@ export function TradeShowsAdmin() {
             {filteredTradeShows.map((tradeShow) => (
               <TableRow key={tradeShow.id}>
                 <TableCell className="font-medium">{tradeShow.title}</TableCell>
-                <TableCell>{tradeShow.category}</TableCell>
                 <TableCell>{tradeShow.location}</TableCell>
                 <TableCell>
                   {tradeShow.startDate && tradeShow.endDate 

@@ -1,6 +1,6 @@
 export interface PortfolioItem {
   image: string
-  featured: boolean
+  featured?: boolean // Make featured optional for backward compatibility
 }
 
 export interface PortfolioHero {

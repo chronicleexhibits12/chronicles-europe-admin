@@ -209,7 +209,7 @@ export class BlogService {
         title: blogPostData.title,
         excerpt: blogPostData.excerpt,
         content: blogPostData.content,
-        published_date: blogPostData.publishedDate,
+        published_date: new Date().toISOString(), // Auto-set published date
         featured_image: blogPostData.featuredImage,
         featured_image_alt: blogPostData.featuredImageAlt,
         author: blogPostData.author,

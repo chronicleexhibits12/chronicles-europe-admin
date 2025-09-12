@@ -23,6 +23,13 @@ export class PortfolioService {
       // Transform the data to match our PortfolioPage interface
       const rowData = data as Database['public']['Tables']['portfolio_page']['Row']
       
+      // Ensure all items have the featured property set to false for consistency
+      const items = (rowData.portfolio_items as PortfolioItem[]) || []
+      const normalizedItems = items.map(item => ({
+        ...item,
+        featured: false // Always set to false since we're not using this feature
+      }))
+      
       const portfolioPage: PortfolioPage = {
         id: rowData.id,
         hero: {
@@ -33,7 +40,7 @@ export class PortfolioService {
           title: rowData.portfolio_title || '',
           subtitle: rowData.portfolio_subtitle || ''
         },
-        items: (rowData.portfolio_items as PortfolioItem[]) || [],
+        items: normalizedItems,
         seo: {
           title: rowData.seo_title || '',
           description: rowData.seo_description || '',
@@ -81,9 +88,13 @@ export class PortfolioService {
         updateData.portfolio_subtitle = data.portfolio.subtitle
       }
 
-      // Portfolio items
+      // Portfolio items - ensure featured is set to false for all items
       if (data.items) {
-        updateData.portfolio_items = data.items
+        const normalizedItems = data.items.map(item => ({
+          ...item,
+          featured: false // Always set to false since we're not using this feature
+        }))
+        updateData.portfolio_items = normalizedItems
       }
 
       // SEO data
@@ -126,8 +137,12 @@ export class PortfolioService {
         return { data: null, error: 'No portfolio data found' }
       }
 
-      // Add the new item to the beginning of the array
-      const updatedItems = [item, ...currentPortfolio.items]
+      // Add the new item to the beginning of the array with featured set to false
+      const newItem = {
+        ...item,
+        featured: false // Always set to false since we're not using this feature
+      }
+      const updatedItems = [newItem, ...currentPortfolio.items]
 
       // Update the portfolio with the new items array
       return this.updatePortfolioPage({ items: updatedItems })
@@ -154,9 +169,13 @@ export class PortfolioService {
         return { data: null, error: 'No portfolio data found' }
       }
 
-      // Update the item at the specified index
+      // Update the item at the specified index with featured set to false
+      const updatedItem = {
+        ...item,
+        featured: false // Always set to false since we're not using this feature
+      }
       const updatedItems = [...currentPortfolio.items]
-      updatedItems[index] = item
+      updatedItems[index] = updatedItem
 
       // Update the portfolio with the new items array
       return this.updatePortfolioPage({ items: updatedItems })

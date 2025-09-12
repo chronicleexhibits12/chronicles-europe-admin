@@ -18,9 +18,7 @@ export function EditBlogPostAdmin() {
   const [formData, setFormData] = useState({
     slug: '',
     title: '',
-    excerpt: '',
     content: '',
-    publishedDate: '',
     featuredImage: '',
     featuredImageAlt: '',
     author: '',
@@ -40,9 +38,7 @@ export function EditBlogPostAdmin() {
       setFormData({
         slug: blogPost.slug,
         title: blogPost.title,
-        excerpt: blogPost.excerpt || '',
         content: blogPost.content || '',
-        publishedDate: blogPost.publishedDate || '',
         featuredImage: blogPost.featuredImage || '',
         featuredImageAlt: blogPost.featuredImageAlt || '',
         author: blogPost.author || '',
@@ -229,16 +225,6 @@ export function EditBlogPostAdmin() {
                 onChange={handleInputChange}
                 placeholder="Enter URL slug"
                 required
-              />
-            </div>
-            <div>
-              <Label htmlFor="publishedDate">Published Date</Label>
-              <Input
-                id="publishedDate"
-                name="publishedDate"
-                type="date"
-                value={formData.publishedDate}
-                onChange={handleInputChange}
               />
             </div>
             <div>

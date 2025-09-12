@@ -13,10 +13,8 @@ import { DoubleDeckStandsAdmin } from '@/admin/doubleDeckStands/DoubleDeckStands
 import { ModularStandsAdmin } from '@/admin/modularStands/ModularStandsAdmin'
 import { PavilionStandsAdmin } from '@/admin/pavilionStands/PavilionStandsAdmin'
 import { CitiesAdmin } from '@/admin/cities/CitiesAdmin'
-import { CreateCityAdmin } from '@/admin/cities/CreateCityAdmin'
 import { EditCityAdmin } from '@/admin/cities/EditCityAdmin'
 import { CountriesAdmin } from '@/admin/countries/CountriesAdmin'
-import { CreateCountryAdmin } from '@/admin/countries/CreateCountryAdmin'
 import { EditCountryAdmin } from '@/admin/countries/EditCountryAdmin'
 import { TradeShowsPageAdmin } from '@/admin/tradeShowsPage/TradeShowsPageAdmin'
 import { TradeShowsAdmin } from '@/admin/tradeShows/TradeShowsAdmin'
@@ -70,10 +68,8 @@ function App() {
             <Route path="admin/contact" element={<ContactAdmin />} />
             <Route path="admin/form-submissions" element={<FormSubmissionsAdmin />} />
             <Route path="admin/cities" element={<CitiesAdmin />} />
-            <Route path="admin/cities/create" element={<CreateCityAdmin />} />
             <Route path="admin/cities/:id/edit" element={<EditCityAdmin />} />
             <Route path="admin/countries" element={<CountriesAdmin />} />
-            <Route path="admin/countries/create" element={<CreateCountryAdmin />} />
             <Route path="admin/countries/:id/edit" element={<EditCountryAdmin />} />
           </Route>
         </Routes>

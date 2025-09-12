@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Upload, Trash2, Edit3 } from 'lucide-react'
+import { Plus, Upload, Trash2 } from 'lucide-react'
 import { PortfolioService } from '@/data/portfolioService'
 import type { PortfolioPage, PortfolioItem } from '@/data/portfolioTypes'
 import { TagInput } from '@/components/ui/tag-input'
@@ -28,12 +28,6 @@ export function PortfolioAdmin() {
   
   // New item form
   const [newItemImage, setNewItemImage] = useState('')
-  const [newItemFeatured, setNewItemFeatured] = useState(false)
-  
-  // Edit item form
-  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
-  const [editingItemImage, setEditingItemImage] = useState('')
-  const [editingItemFeatured, setEditingItemFeatured] = useState(false)
 
   // Load portfolio data
   useEffect(() => {
@@ -116,9 +110,10 @@ export function PortfolioAdmin() {
       setError(null)
       setSuccess(null)
       
+      // Always set featured to false since we're removing this functionality
       const newItem: PortfolioItem = {
         image: newItemImage,
-        featured: newItemFeatured
+        featured: false
       }
       
       const { error } = await PortfolioService.addPortfolioItem(newItem)
@@ -128,43 +123,10 @@ export function PortfolioAdmin() {
       } else {
         setSuccess('Portfolio item added successfully')
         setNewItemImage('')
-        setNewItemFeatured(false)
         loadPortfolioData() // Reload to get updated data
       }
     } catch (err) {
       setError('Failed to add portfolio item')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleUpdateItem = async (index: number) => {
-    if (!editingItemImage) {
-      setError('Please provide an image')
-      return
-    }
-    
-    try {
-      setSaving(true)
-      setError(null)
-      setSuccess(null)
-      
-      const updatedItem: PortfolioItem = {
-        image: editingItemImage,
-        featured: editingItemFeatured
-      }
-      
-      const { error } = await PortfolioService.updatePortfolioItem(index, updatedItem)
-      
-      if (error) {
-        setError(error)
-      } else {
-        setSuccess('Portfolio item updated successfully')
-        setEditingItemIndex(null)
-        loadPortfolioData() // Reload to get updated data
-      }
-    } catch (err) {
-      setError('Failed to update portfolio item')
     } finally {
       setSaving(false)
     }
@@ -227,21 +189,9 @@ export function PortfolioAdmin() {
     }
   }
 
-  const handleEditItemClick = (index: number) => {
-    if (!portfolio) return
-    
-    setEditingItemIndex(index)
-    setEditingItemImage(portfolio.items[index].image)
-    setEditingItemFeatured(portfolio.items[index].featured)
-  }
-
   const handleKeywordsChange = (keywords: string[]) => {
     setSeoKeywordsArray(keywords)
   }
-
-  // Count featured items
-  const featuredItemCount = portfolio?.items.filter(item => item.featured).length || 0
-  const canFeatureMore = featuredItemCount < 6
 
   if (loading) {
     return (
@@ -359,24 +309,21 @@ export function PortfolioAdmin() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Image</Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={newItemImage}
-                    onChange={(e) => setNewItemImage(e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                  <Button variant="outline" className="h-10 px-3" onClick={triggerFileInput}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </div>
+                <Button 
+                  variant="outline" 
+                  className="w-full h-10 px-3 justify-start text-left font-normal"
+                  onClick={triggerFileInput}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Choose Image
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
               </div>
               
               {/* Image Preview */}
@@ -393,30 +340,7 @@ export function PortfolioAdmin() {
                 </div>
               )}
               
-              <div className="flex items-center space-x-2">
-                <input
-                  id="newItemFeatured"
-                  type="checkbox"
-                  checked={newItemFeatured}
-                  onChange={(e) => {
-                    if (!canFeatureMore && e.target.checked) {
-                      setError('You can only make 6 images as featured. Remove featured status from existing items first.')
-                      return
-                    }
-                    setNewItemFeatured(e.target.checked)
-                  }}
-                  disabled={!canFeatureMore && !newItemFeatured}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <Label htmlFor="newItemFeatured">Featured Item</Label>
-                {!canFeatureMore && !newItemFeatured && (
-                  <span className="text-sm text-muted-foreground ml-2">
-                    (You can only make 6 images as featured)
-                  </span>
-                )}
-              </div>
-              
-              <Button onClick={handleAddItem} disabled={saving}>
+              <Button onClick={handleAddItem} disabled={saving || !newItemImage}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Item
               </Button>
@@ -427,109 +351,26 @@ export function PortfolioAdmin() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {portfolio.items.map((item, index) => (
               <div key={index} className="border rounded-lg overflow-hidden">
-                {editingItemIndex === index ? (
-                  // Edit Mode
-                  <div className="p-4 space-y-3">
-                    <div className="space-y-2">
-                      <Label>Image</Label>
-                      <Input
-                        value={editingItemImage}
-                        onChange={(e) => setEditingItemImage(e.target.value)}
-                        placeholder="https://example.com/image.jpg"
-                      />
-                    </div>
-                    
-                    {/* Image Preview */}
-                    {editingItemImage && (
-                      <div className="mt-2">
-                        <Label>Preview</Label>
-                        <div className="mt-1 border rounded-md overflow-hidden">
-                          <img 
-                            src={editingItemImage} 
-                            alt="Editing portfolio item preview" 
-                            className="w-full h-48 object-cover"
-                          />
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={editingItemFeatured}
-                        onChange={(e) => {
-                          if (!canFeatureMore && e.target.checked && !editingItemFeatured) {
-                            setError('You can only make 6 images as featured. Remove featured status from existing items first.')
-                            return
-                          }
-                          setEditingItemFeatured(e.target.checked)
-                        }}
-                        disabled={!canFeatureMore && !editingItemFeatured}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <Label>Featured</Label>
-                      {!canFeatureMore && !editingItemFeatured && (
-                        <span className="text-sm text-muted-foreground ml-2">
-                          (You can only make 6 images as featured)
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleUpdateItem(index)}
-                        disabled={saving}
-                      >
-                        Save
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => setEditingItemIndex(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
+                <div className="relative">
+                  <img 
+                    src={item.image} 
+                    alt={`Portfolio item ${index + 1}`}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+                <div className="p-3">
+                  <div className="flex justify-end">
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => handleDeleteItem(index)}
+                      disabled={saving}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
                   </div>
-                ) : (
-                  // View Mode
-                  <>
-                    <div className="relative">
-                      <img 
-                        src={item.image} 
-                        alt={`Portfolio item ${index + 1}`}
-                        className="w-full h-48 object-cover"
-                      />
-                      {item.featured && (
-                        <span className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
-                          Featured
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-3">
-                      <div className="flex justify-between items-center">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleEditItemClick(index)}
-                        >
-                          <Edit3 className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          onClick={() => handleDeleteItem(index)}
-                          disabled={saving}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                )}
+                </div>
               </div>
             ))}
           </div>

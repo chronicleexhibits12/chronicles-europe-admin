@@ -40,9 +40,7 @@ export function BlogPostsAdmin() {
     
     const term = searchTerm.toLowerCase()
     return blogPosts.filter(post => 
-      post.title.toLowerCase().includes(term) ||
-      (post.category && post.category.toLowerCase().includes(term)) ||
-      (post.author && post.author.toLowerCase().includes(term))
+      post.title.toLowerCase().includes(term)
     )
   }, [blogPosts, searchTerm])
 
@@ -208,9 +206,6 @@ export function BlogPostsAdmin() {
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Author</TableHead>
-              <TableHead>Published Date</TableHead>
               <TableHead>Published</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -219,13 +214,6 @@ export function BlogPostsAdmin() {
             {filteredBlogPosts.map((blogPost) => (
               <TableRow key={blogPost.id}>
                 <TableCell className="font-medium">{blogPost.title}</TableCell>
-                <TableCell>{blogPost.category || 'N/A'}</TableCell>
-                <TableCell>{blogPost.author || 'N/A'}</TableCell>
-                <TableCell>
-                  {blogPost.publishedDate 
-                    ? new Date(blogPost.publishedDate).toLocaleDateString()
-                    : 'Not published'}
-                </TableCell>
                 <TableCell>
                   <button
                     onClick={() => toggleBlogPostStatus(blogPost)}

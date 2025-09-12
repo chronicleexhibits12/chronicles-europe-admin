@@ -17,9 +17,7 @@ export function CreateBlogPostAdmin() {
   const [formData, setFormData] = useState({
     slug: '',
     title: '',
-    excerpt: '',
     content: '',
-    publishedDate: '',
     featuredImage: '',
     featuredImageAlt: '',
     author: '',
@@ -184,16 +182,6 @@ export function CreateBlogPostAdmin() {
                 onChange={handleInputChange}
                 placeholder="Enter URL slug"
                 required
-              />
-            </div>
-            <div>
-              <Label htmlFor="publishedDate">Published Date</Label>
-              <Input
-                id="publishedDate"
-                name="publishedDate"
-                type="date"
-                value={formData.publishedDate}
-                onChange={handleInputChange}
               />
             </div>
             <div>

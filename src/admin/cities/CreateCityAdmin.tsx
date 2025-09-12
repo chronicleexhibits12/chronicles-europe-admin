@@ -364,12 +364,6 @@ export function CreateCityAdmin() {
               <Label htmlFor="hero_background_image_url">Background Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Input
-                    id="hero_background_image_url"
-                    value={formData.hero_background_image_url}
-                    onChange={(e) => handleInputChange('hero_background_image_url', e.target.value)}
-                    placeholder="Image URL or upload below"
-                  />
                   <Button
                     type="button"
                     variant="outline"
@@ -377,10 +371,11 @@ export function CreateCityAdmin() {
                     disabled={uploading === 'hero_background_image_url'}
                   >
                     {uploading === 'hero_background_image_url' ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <Upload className="h-4 w-4 mr-2" />
                     )}
+                    Choose Image
                   </Button>
                 </div>
                 {getImageUrl('hero_background_image_url') && (
@@ -444,12 +439,6 @@ export function CreateCityAdmin() {
               <Label htmlFor="why_choose_us_main_image_url">Main Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Input
-                    id="why_choose_us_main_image_url"
-                    value={formData.why_choose_us_main_image_url}
-                    onChange={(e) => handleInputChange('why_choose_us_main_image_url', e.target.value)}
-                    placeholder="Image URL or upload below"
-                  />
                   <Button
                     type="button"
                     variant="outline"
@@ -457,10 +446,11 @@ export function CreateCityAdmin() {
                     disabled={uploading === 'why_choose_us_main_image_url'}
                   >
                     {uploading === 'why_choose_us_main_image_url' ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <Upload className="h-4 w-4 mr-2" />
                     )}
+                    Choose Image
                   </Button>
                 </div>
                 {getImageUrl('why_choose_us_main_image_url') && (

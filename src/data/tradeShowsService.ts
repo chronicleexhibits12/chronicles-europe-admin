@@ -109,23 +109,20 @@ export class TradeShowsService {
       const dbData: Record<string, any> = {
         slug: tradeShowData.slug,
         title: tradeShowData.title,
-        excerpt: tradeShowData.excerpt,
         content: tradeShowData.content,
         start_date: tradeShowData.startDate,
         end_date: tradeShowData.endDate,
         location: tradeShowData.location,
         country: tradeShowData.country,
         city: tradeShowData.city,
-        category: tradeShowData.category,
+        website: tradeShowData.website,
         logo: tradeShowData.logo,
         logo_alt: tradeShowData.logoAlt,
-        organizer: tradeShowData.organizer,
-        website: tradeShowData.website,
-        venue: tradeShowData.venue,
         meta_title: tradeShowData.metaTitle,
         meta_description: tradeShowData.metaDescription,
         meta_keywords: tradeShowData.metaKeywords,
-        is_active: true // Always set to true by default
+        is_active: tradeShowData.isActive !== undefined ? tradeShowData.isActive : true, // Use provided value or default to true
+        sort_order: tradeShowData.sortOrder || 0
       }
 
       const { data, error } = await (supabase as any)
@@ -141,19 +138,19 @@ export class TradeShowsService {
         id: data.id,
         slug: data.slug,
         title: data.title,
-        excerpt: data.excerpt,
+        excerpt: null,
         content: data.content,
         startDate: data.start_date,
         endDate: data.end_date,
         location: data.location,
         country: data.country,
         city: data.city,
-        category: data.category,
+        category: null,
         logo: data.logo,
         logoAlt: data.logo_alt,
-        organizer: data.organizer,
+        organizer: null,
         website: data.website,
-        venue: data.venue,
+        venue: null,
         metaTitle: data.meta_title,
         metaDescription: data.meta_description,
         metaKeywords: data.meta_keywords,
@@ -180,22 +177,19 @@ export class TradeShowsService {
       const dbData: Record<string, any> = {
         slug: tradeShowData.slug,
         title: tradeShowData.title,
-        excerpt: tradeShowData.excerpt,
         content: tradeShowData.content,
         start_date: tradeShowData.startDate,
         end_date: tradeShowData.endDate,
         location: tradeShowData.location,
         country: tradeShowData.country,
         city: tradeShowData.city,
-        category: tradeShowData.category,
+        website: tradeShowData.website,
         logo: tradeShowData.logo,
         logo_alt: tradeShowData.logoAlt,
-        organizer: tradeShowData.organizer,
-        website: tradeShowData.website,
-        venue: tradeShowData.venue,
         meta_title: tradeShowData.metaTitle,
         meta_description: tradeShowData.metaDescription,
         meta_keywords: tradeShowData.metaKeywords,
+        is_active: tradeShowData.isActive,
         updated_at: new Date().toISOString()
       }
 
@@ -213,19 +207,19 @@ export class TradeShowsService {
         id: data.id,
         slug: data.slug,
         title: data.title,
-        excerpt: data.excerpt,
+        excerpt: null,
         content: data.content,
         startDate: data.start_date,
         endDate: data.end_date,
         location: data.location,
         country: data.country,
         city: data.city,
-        category: data.category,
+        category: null,
         logo: data.logo,
         logoAlt: data.logo_alt,
-        organizer: data.organizer,
+        organizer: null,
         website: data.website,
-        venue: data.venue,
+        venue: null,
         metaTitle: data.meta_title,
         metaDescription: data.meta_description,
         metaKeywords: data.meta_keywords,
@@ -299,6 +293,8 @@ export class TradeShowsService {
           backgroundImageAlt: row.hero_background_image_alt
         },
         description: row.description,
+        cities: row.cities || [], // Added cities array
+        countries: row.countries || [], // Added countries array
         isActive: row.is_active,
         createdAt: row.created_at,
         updatedAt: row.updated_at
@@ -324,6 +320,8 @@ export class TradeShowsService {
         hero_background_image: pageData.hero?.backgroundImage,
         hero_background_image_alt: pageData.hero?.backgroundImageAlt,
         description: pageData.description,
+        cities: pageData.cities || [], // Added cities array
+        countries: pageData.countries || [], // Added countries array
         is_active: pageData.isActive,
         updated_at: new Date().toISOString()
       }
@@ -355,6 +353,8 @@ export class TradeShowsService {
           backgroundImageAlt: row.hero_background_image_alt
         },
         description: row.description,
+        cities: row.cities || [], // Added cities array
+        countries: row.countries || [], // Added countries array
         isActive: row.is_active,
         createdAt: row.created_at,
         updatedAt: row.updated_at

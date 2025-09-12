@@ -4,7 +4,13 @@ import { Button } from '@/components/ui/button'
 import { useHomePage } from '@/hooks/useHomeContent'
 import { useAboutPage } from '@/hooks/useAboutContent'
 import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
-import { FileText, Eye, Calendar } from 'lucide-react'
+import { FileText, Eye, Calendar, Mail, BookOpen, MapPin, Globe } from 'lucide-react'
+// Add the new hooks for statistics
+import { useFormSubmissions } from '@/hooks/useFormSubmissionsContent'
+import { useBlogPosts } from '@/hooks/useBlogContent'
+import { useTradeShows } from '@/hooks/useTradeShowsContent'
+import { useCities } from '@/hooks/useCitiesContent'
+import { useCountries } from '@/hooks/useCountriesContent'
 
 interface PageInfo {
   id: string
@@ -20,6 +26,14 @@ export function Dashboard() {
   const { data: homePage, loading: homeLoading } = useHomePage()
   const { data: aboutPage, loading: aboutLoading } = useAboutPage()
   const { data: customStandsPage, loading: customStandsLoading } = useCustomStandsPage()
+  
+  // Add hooks for statistics
+  const { data: formSubmissions, loading: formSubmissionsLoading } = useFormSubmissions()
+  const { data: blogPosts, loading: blogPostsLoading } = useBlogPosts()
+  const { data: tradeShows, loading: tradeShowsLoading } = useTradeShows()
+  const { data: cities, loading: citiesLoading } = useCities()
+  const { data: countries, loading: countriesLoading } = useCountries()
+  
   const [pages, setPages] = useState<PageInfo[]>([])
 
   useEffect(() => {
@@ -54,9 +68,15 @@ export function Dashboard() {
 
   // Calculate statistics
   const totalPages = pages.length
-  const recentlyUpdatedCount = pages.filter(page => page.lastUpdated !== 'Never').length
+  const totalFormSubmissions = formSubmissions?.length || 0
+  const totalBlogPosts = blogPosts?.length || 0
+  const totalTradeShows = tradeShows?.length || 0
+  const totalCities = cities?.length || 0
+  const totalCountries = countries?.length || 0
 
-  const loading = homeLoading || aboutLoading || customStandsLoading
+  const loading = homeLoading || aboutLoading || customStandsLoading || 
+                  formSubmissionsLoading || blogPostsLoading || tradeShowsLoading || 
+                  citiesLoading || countriesLoading
 
   if (loading) {
     return (
@@ -86,7 +106,7 @@ export function Dashboard() {
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border shadow-sm p-6">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -102,13 +122,115 @@ export function Dashboard() {
         <div className="bg-white rounded-lg border shadow-sm p-6">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-green-600" />
+              <Mail className="h-6 w-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Recently Updated</p>
-              <p className="text-2xl font-bold text-gray-900">{recentlyUpdatedCount}</p>
+              <p className="text-sm font-medium text-gray-600">Form Submissions</p>
+              <p className="text-2xl font-bold text-gray-900">{totalFormSubmissions}</p>
             </div>
           </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <BookOpen className="h-6 w-6 text-purple-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Blog Posts</p>
+              <p className="text-2xl font-bold text-gray-900">{totalBlogPosts}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <Calendar className="h-6 w-6 text-yellow-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Trade Shows</p>
+              <p className="text-2xl font-bold text-gray-900">{totalTradeShows}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-red-100 rounded-lg">
+              <MapPin className="h-6 w-6 text-red-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Cities</p>
+              <p className="text-2xl font-bold text-gray-900">{totalCities}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <Globe className="h-6 w-6 text-indigo-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Countries</p>
+              <p className="text-2xl font-bold text-gray-900">{totalCountries}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg border shadow-sm p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <Button 
+            onClick={() => navigate('/admin/form-submissions')} 
+            variant="outline" 
+            className="flex flex-col items-center justify-center h-24"
+          >
+            <Mail className="h-5 w-5 mb-1" />
+            <span>Form Submissions</span>
+          </Button>
+          
+          <Button 
+            onClick={() => navigate('/admin/blog-posts')} 
+            variant="outline" 
+            className="flex flex-col items-center justify-center h-24"
+          >
+            <BookOpen className="h-5 w-5 mb-1" />
+            <span>Blog Posts</span>
+          </Button>
+          
+          <Button 
+            onClick={() => navigate('/admin/trade-shows')} 
+            variant="outline" 
+            className="flex flex-col items-center justify-center h-24"
+          >
+            <Calendar className="h-5 w-5 mb-1" />
+            <span>Trade Shows</span>
+          </Button>
+          
+          <Button 
+            onClick={() => navigate('/admin/cities')} 
+            variant="outline" 
+            className="flex flex-col items-center justify-center h-24"
+          >
+            <MapPin className="h-5 w-5 mb-1" />
+            <span>Cities</span>
+          </Button>
+          
+          <Button 
+            onClick={() => navigate('/admin/countries')} 
+            variant="outline" 
+            className="flex flex-col items-center justify-center h-24"
+          >
+            <Globe className="h-5 w-5 mb-1" />
+            <span>Countries</span>
+          </Button>
         </div>
       </div>
 

@@ -169,6 +169,13 @@ export function AboutAdmin() {
     }
   }
 
+  // Remove image
+  const removeImage = (section: string, field: string) => {
+    handleInputChange(section as keyof AboutPage, field, '')
+    // Also clear alt text when removing image
+    handleInputChange(section as keyof AboutPage, `${field}Alt`, '')
+  }
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -220,35 +227,62 @@ export function AboutAdmin() {
             </div>
             
             <div>
-              <Label htmlFor="hero-bg">Background Image URL</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div>
-                  <Input
-                    id="hero-bg"
-                    value={formData.hero?.backgroundImage || ''}
-                    onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
-                    placeholder="Enter image URL"
-                    readOnly
-                  />
+              <Label htmlFor="hero-bg">Background Image</Label>
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      value={formData.hero?.backgroundImageAlt || ''}
+                      onChange={(e) => handleInputChange('hero', 'backgroundImageAlt', e.target.value)}
+                      placeholder="Alt text"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Input
-                    value={formData.hero?.backgroundImageAlt || ''}
-                    onChange={(e) => handleInputChange('hero', 'backgroundImageAlt', e.target.value)}
-                    placeholder="Enter alt text"
-                    readOnly
+                <div className="flex gap-2">
+                  <input
+                    ref={teamImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleImageUpload(file, 'hero', 'backgroundImage')
+                    }}
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => teamImageRef.current?.click()}
+                    disabled={uploadingImages['hero-backgroundImage']}
+                    className="flex items-center gap-2"
+                  >
+                    {uploadingImages['hero-backgroundImage'] ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Choose File
+                  </Button>
                 </div>
+                {formData.hero?.backgroundImage && (
+                  <div className="relative inline-block">
+                    <img
+                      src={formData.hero.backgroundImage}
+                      alt={formData.hero.backgroundImageAlt || "Hero background"}
+                      className="max-h-16 object-cover rounded border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('hero', 'backgroundImage')}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
               </div>
-              {formData.hero?.backgroundImage && (
-                <div className="relative inline-block mt-2">
-                  <img
-                    src={formData.hero.backgroundImage}
-                    alt={formData.hero.backgroundImageAlt || "Hero background"}
-                    className="h-32 object-cover rounded border"
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -468,57 +502,61 @@ export function AboutAdmin() {
             
             <div>
               <Label htmlFor="team-image">Team Image</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div>
-                  <Input
-                    id="team-image"
-                    value={formData.teamInfo?.teamImage || ''}
-                    onChange={(e) => handleInputChange('teamInfo', 'teamImage', e.target.value)}
-                    placeholder="Enter image URL"
-                  />
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      value={formData.teamInfo?.teamImageAlt || ''}
+                      onChange={(e) => handleInputChange('teamInfo', 'teamImageAlt', e.target.value)}
+                      placeholder="Alt text"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Input
-                    value={formData.teamInfo?.teamImageAlt || ''}
-                    onChange={(e) => handleInputChange('teamInfo', 'teamImageAlt', e.target.value)}
-                    placeholder="Enter alt text"
+                <div className="flex gap-2">
+                  <input
+                    ref={teamImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleImageUpload(file, 'team', 'teamImage')
+                    }}
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => teamImageRef.current?.click()}
+                    disabled={uploadingImages['team-teamImage']}
+                    className="flex items-center gap-2"
+                  >
+                    {uploadingImages['team-teamImage'] ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Choose File
+                  </Button>
                 </div>
+                {formData.teamInfo?.teamImage && (
+                  <div className="relative inline-block">
+                    <img
+                      src={formData.teamInfo.teamImage}
+                      alt={formData.teamInfo.teamImageAlt || "Team"}
+                      className="max-h-16 object-cover rounded border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('teamInfo', 'teamImage')}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2 mt-2">
-                <input
-                  ref={teamImageRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'team', 'teamImage')
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => teamImageRef.current?.click()}
-                  disabled={uploadingImages['team-teamImage']}
-                >
-                  {uploadingImages['team-teamImage'] ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
-              {formData.teamInfo?.teamImage && (
-                <div className="relative inline-block mt-2">
-                  <img
-                    src={formData.teamInfo.teamImage}
-                    alt={formData.teamInfo.teamImageAlt || "Team"}
-                    className="h-32 object-cover rounded border"
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -571,58 +609,66 @@ export function AboutAdmin() {
                   
                   <div>
                     <Label>Image</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                      <div>
-                        <Input
-                          value={service.image}
-                          onChange={(e) => handleServiceChange(index, 'image', e.target.value)}
-                          placeholder="Enter image URL"
-                        />
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Input
+                            value={service.imageAlt || ''}
+                            onChange={(e) => handleServiceChange(index, 'imageAlt', e.target.value)}
+                            placeholder="Alt text"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <Input
-                          value={service.imageAlt || ''}
-                          onChange={(e) => handleServiceChange(index, 'imageAlt', e.target.value)}
-                          placeholder="Enter alt text"
+                      <div className="flex gap-2">
+                        <input
+                          ref={(el) => {
+                            if (el) serviceImageRefs.current[index] = el
+                          }}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleServiceImageUpload(file, index)
+                          }}
                         />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => serviceImageRefs.current[index]?.click()}
+                          disabled={uploadingImages[`service-${index}`]}
+                          className="flex items-center gap-2"
+                        >
+                          {uploadingImages[`service-${index}`] ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Upload className="h-4 w-4" />
+                          )}
+                          Choose File
+                        </Button>
                       </div>
+                      {service.image && (
+                        <div className="relative inline-block">
+                          <img
+                            src={service.image}
+                            alt={service.imageAlt || `Service ${index + 1}`}
+                            className="max-h-16 object-cover rounded border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                            onClick={() => {
+                              handleServiceChange(index, 'image', '')
+                              handleServiceChange(index, 'imageAlt', '')
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex gap-2 mt-2">
-                      <input
-                        ref={(el) => {
-                          if (el) serviceImageRefs.current[index] = el
-                        }}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) handleServiceImageUpload(file, index)
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => serviceImageRefs.current[index]?.click()}
-                        disabled={uploadingImages[`service-${index}`]}
-                      >
-                        {uploadingImages[`service-${index}`] ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Upload className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </div>
-                    {service.image && (
-                      <div className="relative inline-block mt-2">
-                        <img
-                          src={service.image}
-                          alt={service.imageAlt || `Service ${index + 1}`}
-                          className="h-32 object-cover rounded border"
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}

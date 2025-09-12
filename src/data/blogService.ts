@@ -32,8 +32,7 @@ export class BlogService {
           title: data.hero_title,
           subtitle: data.hero_subtitle,
           backgroundImage: data.hero_background_image,
-          backgroundImageAlt: data.hero_background_image_alt,
-          heroImage: data.hero_image
+          backgroundImageAlt: data.hero_background_image_alt
         },
         description: data.description,
         isActive: data.is_active,
@@ -60,7 +59,6 @@ export class BlogService {
         hero_subtitle: pageData.hero?.subtitle,
         hero_background_image: pageData.hero?.backgroundImage,
         hero_background_image_alt: pageData.hero?.backgroundImageAlt,
-        hero_image: pageData.hero?.heroImage,
         description: pageData.description,
         is_active: pageData.isActive,
         updated_at: new Date().toISOString()
@@ -88,8 +86,7 @@ export class BlogService {
           title: data.hero_title,
           subtitle: data.hero_subtitle,
           backgroundImage: data.hero_background_image,
-          backgroundImageAlt: data.hero_background_image_alt,
-          heroImage: data.hero_image
+          backgroundImageAlt: data.hero_background_image_alt
         },
         description: data.description,
         isActive: data.is_active,
@@ -195,9 +192,16 @@ export class BlogService {
   // Create blog post
   static async createBlogPost(blogPostData: any): Promise<{ data: BlogPost | null; error: string | null }> {
     try {
-      // Get the current number of blog posts to set the sort order
-      const existingPostsResult = await this.getBlogPosts();
-      const nextSortOrder = existingPostsResult.data ? existingPostsResult.data.length + 1 : 1;
+      // Get the next sort order
+      const { data: existingPosts, error: fetchError } = await supabase
+        .from('blog_posts')
+        .select('sort_order')
+        .order('sort_order', { ascending: false })
+        .limit(1)
+      
+      if (fetchError) throw new Error(fetchError.message)
+      
+      const nextSortOrder = existingPosts && existingPosts.length > 0 ? (existingPosts[0] as any).sort_order + 1 : 1
 
       // Transform form data to database format
       const dbData: Record<string, any> = {
@@ -208,15 +212,13 @@ export class BlogService {
         published_date: blogPostData.publishedDate,
         featured_image: blogPostData.featuredImage,
         featured_image_alt: blogPostData.featuredImageAlt,
-        category: blogPostData.category,
         author: blogPostData.author,
         read_time: blogPostData.readTime,
-        tags: blogPostData.tags,
         meta_title: blogPostData.metaTitle,
         meta_description: blogPostData.metaDescription,
         meta_keywords: blogPostData.metaKeywords,
         sort_order: blogPostData.sortOrder || nextSortOrder,
-        is_active: true // Always set to true by default
+        is_active: blogPostData.isActive // Use the isActive value from form data instead of hardcoding to true
       }
 
       const { data, error } = await (supabase as any)
@@ -272,10 +274,8 @@ export class BlogService {
         published_date: blogPostData.publishedDate,
         featured_image: blogPostData.featuredImage,
         featured_image_alt: blogPostData.featuredImageAlt,
-        category: blogPostData.category,
         author: blogPostData.author,
         read_time: blogPostData.readTime,
-        tags: blogPostData.tags,
         meta_title: blogPostData.metaTitle,
         meta_description: blogPostData.metaDescription,
         meta_keywords: blogPostData.metaKeywords,

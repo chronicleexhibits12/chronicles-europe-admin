@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { Country, ProcessStep } from './countriesTypes'
 import { basicRevalidate } from './simpleRevalidation'
+import { TradeShowsService } from './tradeShowsService'
 
 // Define the Supabase country type (what Supabase returns)
 interface SupabaseCountry {
@@ -137,6 +138,11 @@ export class CountriesService {
         process_section_steps: (data as SupabaseCountry).process_section_steps || []
       } : null
       
+      // Add the country name to the trade_shows_page countries array
+      if (countryData.name) {
+        await this.addCountryToTradeShowsPage(countryData.name);
+      }
+      
       // Trigger revalidation for the new country page
       if (countryData.slug) {
         await this.triggerRevalidation(`/${countryData.slug}`)
@@ -146,6 +152,44 @@ export class CountriesService {
     } catch (error: any) {
       console.error('Error creating country:', error)
       return { data: null, error: error.message || 'Failed to create country' }
+    }
+  }
+
+  // Add country to trade_shows_page countries array
+  static async addCountryToTradeShowsPage(countryName: string): Promise<{ error: string | null }> {
+    try {
+      // Get current trade shows page data
+      const { data: tradeShowsPage, error: fetchError } = await TradeShowsService.getTradeShowsPage();
+      
+      if (fetchError) throw new Error(fetchError);
+      
+      if (tradeShowsPage) {
+        // Check if country already exists in the array (case-insensitive comparison)
+        const countryExists = tradeShowsPage.countries.some(country => 
+          country.toLowerCase() === countryName.toLowerCase()
+        );
+        
+        if (!countryExists) {
+          // Add new country to existing countries
+          const updatedCountries = [...tradeShowsPage.countries, countryName];
+          
+          // Update the trade shows page with the new country list
+          const { error: updateError } = await TradeShowsService.updateTradeShowsPage(tradeShowsPage.id, {
+            ...tradeShowsPage,
+            countries: updatedCountries
+          });
+          
+          if (updateError) throw new Error(updateError);
+          
+          // Trigger revalidation for the trade shows page
+          await TradeShowsService.triggerRevalidation('/trade-shows');
+        }
+      }
+      
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error adding country to trade shows page:', error);
+      return { error: error.message || 'Failed to add country to trade shows page' };
     }
   }
 

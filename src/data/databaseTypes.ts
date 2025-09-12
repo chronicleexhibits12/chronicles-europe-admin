@@ -681,6 +681,8 @@ export interface Database {
           hero_background_image: string | null
           hero_background_image_alt: string | null
           description: string | null
+          cities: string[] | null  // Added cities array
+          countries: string[] | null  // Added countries array
           is_active: boolean
           created_at: string
           updated_at: string
@@ -695,6 +697,8 @@ export interface Database {
           hero_background_image?: string | null
           hero_background_image_alt?: string | null
           description?: string | null
+          cities?: string[] | null  // Added cities array
+          countries?: string[] | null  // Added countries array
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -709,6 +713,8 @@ export interface Database {
           hero_background_image?: string | null
           hero_background_image_alt?: string | null
           description?: string | null
+          cities?: string[] | null  // Added cities array
+          countries?: string[] | null  // Added countries array
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -802,7 +808,6 @@ export interface Database {
           hero_subtitle: string | null
           hero_background_image: string | null
           hero_background_image_alt: string | null
-          hero_image: string | null
           description: string | null
           is_active: boolean
           created_at: string
@@ -817,7 +822,6 @@ export interface Database {
           hero_subtitle?: string | null
           hero_background_image?: string | null
           hero_background_image_alt?: string | null
-          hero_image?: string | null
           description?: string | null
           is_active?: boolean
           created_at?: string
@@ -832,7 +836,6 @@ export interface Database {
           hero_subtitle?: string | null
           hero_background_image?: string | null
           hero_background_image_alt?: string | null
-          hero_image?: string | null
           description?: string | null
           is_active?: boolean
           created_at?: string

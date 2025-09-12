@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Search, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useBlogPosts } from '@/hooks/useBlogContent'
 import { BlogService } from '@/data/blogService'
@@ -29,6 +29,7 @@ export function BlogPostsAdmin() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [blogPostToDelete, setBlogPostToDelete] = useState<{id: string, title: string} | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [updatingPostId, setUpdatingPostId] = useState<string | null>(null)
 
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
@@ -78,6 +79,27 @@ export function BlogPostsAdmin() {
     }
   }
 
+  const toggleBlogPostStatus = async (blogPost: any) => {
+    setUpdatingPostId(blogPost.id)
+    try {
+      // Toggle the isActive status
+      const { error } = await BlogService.updateBlogPost(blogPost.id, {
+        ...blogPost,
+        isActive: !blogPost.isActive
+      });
+      
+      if (error) throw new Error(error);
+      
+      toast.success(`Blog post ${!blogPost.isActive ? 'published' : 'unpublished'} successfully`);
+      refetch();
+    } catch (error: any) {
+      console.error('Error updating blog post status:', error);
+      toast.error('Failed to update blog post status');
+    } finally {
+      setUpdatingPostId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -121,6 +143,19 @@ export function BlogPostsAdmin() {
               Delete
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Updating Status Popup */}
+      <Dialog open={updatingPostId !== null}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center justify-center py-6">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
+            <DialogTitle className="text-center mb-2">Updating Status</DialogTitle>
+            <DialogDescription className="text-center">
+              Please wait while we update the blog post status...
+            </DialogDescription>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -176,6 +211,7 @@ export function BlogPostsAdmin() {
               <TableHead>Category</TableHead>
               <TableHead>Author</TableHead>
               <TableHead>Published Date</TableHead>
+              <TableHead>Published</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -189,6 +225,21 @@ export function BlogPostsAdmin() {
                   {blogPost.publishedDate 
                     ? new Date(blogPost.publishedDate).toLocaleDateString()
                     : 'Not published'}
+                </TableCell>
+                <TableCell>
+                  <button
+                    onClick={() => toggleBlogPostStatus(blogPost)}
+                    disabled={updatingPostId === blogPost.id}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      blogPost.isActive ? 'bg-blue-600' : 'bg-gray-200'
+                    } ${updatingPostId === blogPost.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        blogPost.isActive ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
                 </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button

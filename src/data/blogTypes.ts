@@ -11,7 +11,6 @@ export interface BlogPage {
     subtitle: string | null
     backgroundImage: string | null
     backgroundImageAlt: string | null
-    heroImage: string | null
   }
   description: string | null
   isActive: boolean

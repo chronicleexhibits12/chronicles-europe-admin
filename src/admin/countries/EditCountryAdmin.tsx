@@ -575,33 +575,11 @@ export function EditCountryAdmin() {
             </div>
             <div className="md:col-span-2">
               <Label htmlFor="hero_background_image_url">Background Image</Label>
-              <div className="flex items-start space-x-4">
-                <Input
-                  id="hero_background_image_url"
-                  value={formData.hero_background_image_url}
-                  onChange={(e) => handleInputChange('hero_background_image_url', e.target.value)}
-                  placeholder="Enter image URL or upload below"
-                  className="flex-1"
-                />
-                <div className="flex flex-col">
-                  <input
-                    id="hero-background-file-input"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      e.preventDefault()
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        handleImageUpload(file, 'hero_background_image_url')
-                      }
-                    }}
-                    disabled={uploading === 'hero_background_image_url'}
-                  />
+              <div className="space-y-2">
+                <div className="flex gap-2">
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
                     onClick={() => {
                       const fileInput = document.getElementById('hero-background-file-input')
                       if (fileInput) {
@@ -611,23 +589,25 @@ export function EditCountryAdmin() {
                     disabled={uploading === 'hero_background_image_url'}
                   >
                     {uploading === 'hero_background_image_url' ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Uploading...
-                      </>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Upload
-                      </>
+                      <Upload className="h-4 w-4 mr-2" />
                     )}
+                    Choose Image
                   </Button>
-                  {getImageUrl('hero_background_image_url') && (
+                </div>
+                {getImageUrl('hero_background_image_url') && (
+                  <div className="relative inline-block">
+                    <img 
+                      src={getImageUrl('hero_background_image_url')} 
+                      alt="Hero preview" 
+                      className="h-32 object-cover rounded border"
+                    />
                     <Button
                       type="button"
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                       onClick={() => {
                         // Check if it's an existing image (from formData) or a selected file
                         const isExistingImage = formData.hero_background_image_url && 
@@ -640,39 +620,25 @@ export function EditCountryAdmin() {
                         }
                       }}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3" />
                     </Button>
-                  )}
-                </div>
+                  </div>
+                )}
+                <input
+                  id="hero-background-file-input"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    e.preventDefault()
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      handleImageUpload(file, 'hero_background_image_url')
+                    }
+                  }}
+                  disabled={uploading === 'hero_background_image_url'}
+                />
               </div>
-              {getImageUrl('hero_background_image_url') && (
-                <div className="mt-2 relative inline-block">
-                  <img 
-                    src={getImageUrl('hero_background_image_url')} 
-                    alt="Hero preview" 
-                    className="h-32 object-cover rounded border"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                    onClick={() => {
-                      // Check if it's an existing image (from formData) or a selected file
-                      const isExistingImage = formData.hero_background_image_url && 
-                        getImageUrl('hero_background_image_url') === formData.hero_background_image_url;
-                      
-                      if (isExistingImage) {
-                        confirmImageDeletion('hero_background_image_url');
-                      } else {
-                        removeImage('hero_background_image_url');
-                      }
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -701,33 +667,11 @@ export function EditCountryAdmin() {
             </div>
             <div className="md:col-span-2">
               <Label htmlFor="why_choose_us_main_image_url">Main Image</Label>
-              <div className="flex items-start space-x-4">
-                <Input
-                  id="why_choose_us_main_image_url"
-                  value={formData.why_choose_us_main_image_url}
-                  onChange={(e) => handleInputChange('why_choose_us_main_image_url', e.target.value)}
-                  placeholder="Enter image URL or upload below"
-                  className="flex-1"
-                />
-                <div className="flex flex-col">
-                  <input
-                    id="why-choose-us-main-file-input"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      e.preventDefault()
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        handleImageUpload(file, 'why_choose_us_main_image_url')
-                      }
-                    }}
-                    disabled={uploading === 'why_choose_us_main_image_url'}
-                  />
+              <div className="space-y-2">
+                <div className="flex gap-2">
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
                     onClick={() => {
                       const fileInput = document.getElementById('why-choose-us-main-file-input')
                       if (fileInput) {
@@ -737,23 +681,25 @@ export function EditCountryAdmin() {
                     disabled={uploading === 'why_choose_us_main_image_url'}
                   >
                     {uploading === 'why_choose_us_main_image_url' ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Uploading...
-                      </>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Upload
-                      </>
+                      <Upload className="h-4 w-4 mr-2" />
                     )}
+                    Choose Image
                   </Button>
-                  {getImageUrl('why_choose_us_main_image_url') && (
+                </div>
+                {getImageUrl('why_choose_us_main_image_url') && (
+                  <div className="relative inline-block">
+                    <img 
+                      src={getImageUrl('why_choose_us_main_image_url')} 
+                      alt="Why choose us preview" 
+                      className="h-32 object-cover rounded border"
+                    />
                     <Button
                       type="button"
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                       onClick={() => {
                         // Check if it's an existing image (from formData) or a selected file
                         const isExistingImage = formData.why_choose_us_main_image_url && 
@@ -766,39 +712,25 @@ export function EditCountryAdmin() {
                         }
                       }}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3" />
                     </Button>
-                  )}
-                </div>
+                  </div>
+                )}
+                <input
+                  id="why-choose-us-main-file-input"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    e.preventDefault()
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      handleImageUpload(file, 'why_choose_us_main_image_url')
+                    }
+                  }}
+                  disabled={uploading === 'why_choose_us_main_image_url'}
+                />
               </div>
-              {getImageUrl('why_choose_us_main_image_url') && (
-                <div className="mt-2 relative inline-block">
-                  <img 
-                    src={getImageUrl('why_choose_us_main_image_url')} 
-                    alt="Why choose us preview" 
-                    className="h-32 object-cover rounded border"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                    onClick={() => {
-                      // Check if it's an existing image (from formData) or a selected file
-                      const isExistingImage = formData.why_choose_us_main_image_url && 
-                        getImageUrl('why_choose_us_main_image_url') === formData.why_choose_us_main_image_url;
-                      
-                      if (isExistingImage) {
-                        confirmImageDeletion('why_choose_us_main_image_url');
-                      } else {
-                        removeImage('why_choose_us_main_image_url');
-                      }
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
             </div>
             <div className="md:col-span-2">
               <Label>Benefits HTML Content</Label>

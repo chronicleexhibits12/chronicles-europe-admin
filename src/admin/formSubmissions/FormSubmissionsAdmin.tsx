@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import { useFormSubmissions } from '@/hooks/useFormSubmissionsContent'
 import { FormSubmissionsService } from '@/data/formSubmissionsService'
 import { format } from 'date-fns'
+import * as XLSX from 'xlsx'
 
 // Define types directly in the component file to avoid import issues
 interface FormSubmission {
@@ -183,6 +184,61 @@ export function FormSubmissionsAdmin() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
+  // Export to Excel functionality
+  const handleExportToExcel = () => {
+    if (!formSubmissions || formSubmissions.length === 0) {
+      toast.error('No data to export')
+      return
+    }
+
+    try {
+      // Prepare data for export
+      const exportData = formSubmissions.map(submission => {
+        // Flatten submission data
+        const flattenedData: Record<string, any> = {
+          id: submission.id,
+          formType: submission.formType,
+          createdAt: format(new Date(submission.createdAt), 'PPP p'),
+          updatedAt: format(new Date(submission.updatedAt), 'PPP p'),
+        }
+
+        // Add submission data fields
+        if (submission.submissionData) {
+          Object.entries(submission.submissionData).forEach(([key, value]) => {
+            // Handle complex objects by converting to JSON string
+            flattenedData[key] = typeof value === 'object' ? JSON.stringify(value) : value
+          })
+        }
+
+        // Add document info if exists
+        if (submission.documents && submission.documents.length > 0) {
+          flattenedData.documentCount = submission.documents.length
+          flattenedData.documentNames = submission.documents.map(doc => doc.file_name).join(', ')
+        } else {
+          flattenedData.documentCount = 0
+          flattenedData.documentNames = ''
+        }
+
+        return flattenedData
+      })
+
+      // Create worksheet
+      const ws = XLSX.utils.json_to_sheet(exportData)
+      
+      // Create workbook
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Form Submissions')
+      
+      // Export to Excel file
+      XLSX.writeFile(wb, 'form-submissions-export.xlsx')
+      
+      toast.success('Form submissions exported successfully')
+    } catch (error) {
+      console.error('Error exporting to Excel:', error)
+      toast.error('Failed to export form submissions')
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -308,6 +364,12 @@ export function FormSubmissionsAdmin() {
           <p className="text-muted-foreground mt-2">
             Manage form submissions
           </p>
+        </div>
+        <div>
+          <Button onClick={handleExportToExcel}>
+            <Download className="h-4 w-4 mr-2" />
+            Export to Excel
+          </Button>
         </div>
       </div>
 

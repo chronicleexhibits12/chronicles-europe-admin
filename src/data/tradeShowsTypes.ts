@@ -39,6 +39,8 @@ export interface TradeShowsPage {
     backgroundImageAlt: string | null
   }
   description: string | null
+  cities: string[] // Added cities array
+  countries: string[] // Added countries array
   isActive: boolean
   createdAt: string
   updatedAt: string

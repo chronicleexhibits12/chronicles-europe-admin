@@ -40,6 +40,7 @@ export function CKEditorComponent({ content, onChange, placeholder, className }:
           }
         }}
         onChange={(_event, editor) => {
+          // @ts-ignore - Fixing the type issue with editor.getData()
           const data = editor.getData();
           // Update the ref to track the current content
           previousContentRef.current = data;

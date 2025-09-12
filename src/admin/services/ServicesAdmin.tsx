@@ -229,7 +229,7 @@ export function ServicesAdmin() {
             </div>
             
             <div>
-              <Label>Intro Description</Label>
+              <Label htmlFor="intro-description">Intro Description</Label>
               <RichTextEditor
                 content={formData.intro?.descriptionHtml || ''}
                 onChange={(content) => handleInputChange('intro', 'descriptionHtml', content)}
@@ -278,7 +278,7 @@ export function ServicesAdmin() {
                   </div>
                   
                   <div>
-                    <Label>Service Description</Label>
+                    <Label htmlFor={`service-description-${index}`}>Service Description</Label>
                     <RichTextEditor
                       content={service.descriptionHtml || ''}
                       onChange={(content) => handleServiceChange(index, 'descriptionHtml', content)}

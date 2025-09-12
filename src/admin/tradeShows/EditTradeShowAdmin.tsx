@@ -6,11 +6,11 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { TagInput } from '@/components/ui/tag-input'
-import { Loader2, Save, Upload, X } from 'lucide-react'
+import { Loader2, Save, Upload, X, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTradeShow } from '@/hooks/useTradeShowsContent'
 import { TradeShowsService } from '@/data/tradeShowsService'
-import { slugify } from '@/utils/slugify'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 export function EditTradeShowAdmin() {
   const { id } = useParams()
@@ -18,23 +18,25 @@ export function EditTradeShowAdmin() {
   const { data: tradeShow, loading, error, refetch } = useTradeShow(id || '')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
+  const [availableCities, setAvailableCities] = useState<string[]>([])
+  const [availableCountries, setAvailableCountries] = useState<string[]>([])
+  const [newCity, setNewCity] = useState('')
+  const [newCountry, setNewCountry] = useState('')
+  const [isCityDialogOpen, setIsCityDialogOpen] = useState(false)
+  const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(false)
   
   // Form state
   const [formData, setFormData] = useState({
     // Basic information
     slug: '',
     title: '',
-    excerpt: '',
     content: '',
     startDate: '',
     endDate: '',
     location: '',
     country: '',
     city: '',
-    category: '',
-    organizer: '',
     website: '',
-    venue: '',
     
     // Images
     logo: '',
@@ -44,7 +46,35 @@ export function EditTradeShowAdmin() {
     metaTitle: '',
     metaDescription: '',
     metaKeywords: '',
+    
+    // Status
+    isActive: true
   })
+
+  // Fetch available cities and countries from trade_shows_page table
+  useEffect(() => {
+    const fetchAvailableLocations = async () => {
+      try {
+        const { data: pageData, error } = await TradeShowsService.getTradeShowsPage()
+        
+        if (error) {
+          console.error('Error fetching trade shows page data:', error)
+          toast.error(`Failed to fetch location data: ${error}`)
+          return
+        }
+        
+        if (pageData) {
+          setAvailableCities(pageData.cities || [])
+          setAvailableCountries(pageData.countries || [])
+        }
+      } catch (error: any) {
+        console.error('Error fetching available locations:', error)
+        toast.error(`Failed to fetch available locations: ${error.message || 'Unknown error'}`)
+      }
+    }
+    
+    fetchAvailableLocations()
+  }, [])
 
   // Initialize form with trade show data
   useEffect(() => {
@@ -52,22 +82,19 @@ export function EditTradeShowAdmin() {
       setFormData({
         slug: tradeShow.slug || '',
         title: tradeShow.title || '',
-        excerpt: tradeShow.excerpt || '',
         content: tradeShow.content || '',
         startDate: tradeShow.startDate || '',
         endDate: tradeShow.endDate || '',
         location: tradeShow.location || '',
         country: tradeShow.country || '',
         city: tradeShow.city || '',
-        category: tradeShow.category || '',
+        website: tradeShow.website || '',
         logo: tradeShow.logo || '',
         logoAlt: tradeShow.logoAlt || '',
-        organizer: tradeShow.organizer || '',
-        website: tradeShow.website || '',
-        venue: tradeShow.venue || '',
         metaTitle: tradeShow.metaTitle || '',
         metaDescription: tradeShow.metaDescription || '',
         metaKeywords: tradeShow.metaKeywords || '',
+        isActive: tradeShow.isActive
       })
     }
   }, [tradeShow])
@@ -81,22 +108,19 @@ export function EditTradeShowAdmin() {
       const { error } = await TradeShowsService.updateTradeShow(id, {
         slug: formData.slug,
         title: formData.title,
-        excerpt: formData.excerpt,
         content: formData.content,
         startDate: formData.startDate,
         endDate: formData.endDate,
         location: formData.location,
         country: formData.country,
         city: formData.city,
-        category: formData.category,
+        website: formData.website,
         logo: formData.logo,
         logoAlt: formData.logoAlt,
-        organizer: formData.organizer,
-        website: formData.website,
-        venue: formData.venue,
         metaTitle: formData.metaTitle,
         metaDescription: formData.metaDescription,
         metaKeywords: formData.metaKeywords,
+        isActive: formData.isActive
       })
 
       if (error) throw new Error(error)
@@ -152,13 +176,24 @@ export function EditTradeShowAdmin() {
       [field]: value
     }))
 
-    // Auto-generate slug when title is changed
-    if (field === 'title') {
-      const generatedSlug = slugify(value as string)
-      setFormData(prev => ({
-        ...prev,
-        slug: generatedSlug
-      }))
+    // Auto-fill location when city or country is changed
+    if (field === 'city' || field === 'country') {
+      const newCity = field === 'city' ? value : formData.city
+      const newCountry = field === 'country' ? value : formData.country
+      
+      // Only update location if both city and country have values
+      if (newCity && newCountry) {
+        setFormData(prev => ({
+          ...prev,
+          location: `${newCity}, ${newCountry}`
+        }))
+      } else if (newCity || newCountry) {
+        // If only one has a value, use that
+        setFormData(prev => ({
+          ...prev,
+          location: (newCity || newCountry) as string
+        }))
+      }
     }
   }
 
@@ -174,6 +209,116 @@ export function EditTradeShowAdmin() {
   const getImageUrl = (field: string): string => {
     const value = formData[field as keyof typeof formData]
     return typeof value === 'string' ? value : ''
+  }
+
+  // Add a new city to the available cities list
+  const addCity = async () => {
+    if (!newCity.trim()) return
+    
+    try {
+      // Get current page data
+      const { data: pageData, error: fetchError } = await TradeShowsService.getTradeShowsPage()
+      
+      if (fetchError) throw new Error(fetchError)
+      
+      if (pageData) {
+        // Check if city already exists in the array (case-insensitive comparison)
+        const cityExists = pageData.cities.some(city => 
+          city.toLowerCase() === newCity.trim().toLowerCase()
+        );
+        
+        if (!cityExists) {
+          // Add new city to existing cities
+          const updatedCities = [...(pageData.cities || []), newCity.trim()]
+          
+          // Update the trade shows page with the new city list
+          const { error: updateError } = await TradeShowsService.updateTradeShowsPage(pageData.id, {
+            ...pageData,
+            cities: updatedCities
+          })
+          
+          if (updateError) throw new Error(updateError)
+          
+          // Update local state
+          setAvailableCities(updatedCities)
+          // Auto-select the newly added city
+          handleInputChange('city', newCity.trim())
+          setNewCity('')
+          setIsCityDialogOpen(false)
+          toast.success('City added successfully!')
+        } else {
+          // Find the existing city with correct casing
+          const existingCity = pageData.cities.find(city => 
+            city.toLowerCase() === newCity.trim().toLowerCase()
+          );
+          // Auto-select the existing city
+          if (existingCity) {
+            handleInputChange('city', existingCity)
+          }
+          toast.error('City already exists!')
+          setNewCity('')
+          setIsCityDialogOpen(false)
+        }
+      }
+    } catch (error: any) {
+      console.error('Error adding city:', error)
+      toast.error(`Failed to add city: ${error.message || 'Unknown error'}`)
+    }
+  }
+
+  // Add a new country to the available countries list
+  const addCountry = async () => {
+    if (!newCountry.trim()) return
+    
+    try {
+      // Get current page data
+      const { data: pageData, error: fetchError } = await TradeShowsService.getTradeShowsPage()
+      
+      if (fetchError) throw new Error(fetchError)
+      
+      if (pageData) {
+        // Check if country already exists in the array (case-insensitive comparison)
+        const countryExists = pageData.countries.some(country => 
+          country.toLowerCase() === newCountry.trim().toLowerCase()
+        );
+        
+        if (!countryExists) {
+          // Add new country to existing countries
+          const updatedCountries = [...(pageData.countries || []), newCountry.trim()]
+          
+          // Update the trade shows page with the new country list
+          const { error: updateError } = await TradeShowsService.updateTradeShowsPage(pageData.id, {
+            ...pageData,
+            countries: updatedCountries
+          })
+          
+          if (updateError) throw new Error(updateError)
+          
+          // Update local state
+          setAvailableCountries(updatedCountries)
+          // Auto-select the newly added country
+          handleInputChange('country', newCountry.trim())
+          setNewCountry('')
+          setIsCountryDialogOpen(false)
+          toast.success('Country added successfully!')
+        } else {
+          // Find the existing country with correct casing
+          const existingCountry = pageData.countries.find(country => 
+            country.toLowerCase() === newCountry.trim().toLowerCase()
+          );
+          // Auto-select the existing country
+          if (existingCountry) {
+            handleInputChange('country', existingCountry)
+          }
+          toast.error('Country already exists!')
+          setNewCountry('')
+          setIsCountryDialogOpen(false)
+        }
+      }
+    } catch (error: any) {
+      console.error('Error adding country:', error)
+      toast.error(`Failed to add country: ${error.message || 'Unknown error'}`)
+    }
   }
 
   if (loading) {
@@ -244,140 +389,39 @@ export function EditTradeShowAdmin() {
                 required
               />
             </div>
-            <div className="col-span-full">
-              <Label htmlFor="excerpt">Excerpt</Label>
-              <Textarea
-                id="excerpt"
-                value={formData.excerpt}
-                onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                placeholder="Brief description of the trade show"
-                rows={3}
-              />
-            </div>
-            <div className="col-span-full">
-              <Label>Content (Rich Text)</Label>
-              <RichTextEditor
-                content={formData.content}
-                onChange={(newContent) => handleInputChange('content', newContent)}
-                controlled={true}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Event Details */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2: Event Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="startDate">Start Date</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => handleInputChange('startDate', e.target.value)}
-              />
+              <Label htmlFor="isActive">Published</Label>
+              <div className="mt-1">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={formData.isActive}
+                    onChange={(e) => handleInputChange('isActive', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="endDate">End Date</Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={formData.endDate}
-                onChange={(e) => handleInputChange('endDate', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                placeholder="e.g., Paris, France"
-              />
-            </div>
-            <div>
-              <Label htmlFor="country">Country</Label>
-              <Input
-                id="country"
-                value={formData.country}
-                onChange={(e) => handleInputChange('country', e.target.value)}
-                placeholder="e.g., France"
-              />
-            </div>
-            <div>
-              <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="e.g., Paris"
-              />
-            </div>
-            <div>
-              <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
-                placeholder="e.g., Medical & Healthcare"
-              />
-            </div>
-            <div>
-              <Label htmlFor="organizer">Organizer</Label>
-              <Input
-                id="organizer"
-                value={formData.organizer}
-                onChange={(e) => handleInputChange('organizer', e.target.value)}
-                placeholder="e.g., European Society of Cardiology"
-              />
-            </div>
-            <div>
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                value={formData.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
-                placeholder="e.g., https://www.escardio.org"
-              />
-            </div>
-            <div className="col-span-full">
-              <Label htmlFor="venue">Venue</Label>
-              <Input
-                id="venue"
-                value={formData.venue}
-                onChange={(e) => handleInputChange('venue', e.target.value)}
-                placeholder="e.g., ExCeL London"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: Logo */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3: Logo</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Logo fields added here, right after publish toggle */}
             <div>
               <Label htmlFor="logo">Logo Image</Label>
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Input
-                    id="logo"
-                    value={getImageUrl('logo')}
-                    onChange={(e) => handleInputChange('logo', e.target.value)}
-                    placeholder="Image URL or upload below"
-                  />
                   <Button
                     type="button"
                     variant="outline"
+                    className="w-full"
                     onClick={() => document.getElementById('logo-upload')?.click()}
                     disabled={uploading === 'logo'}
                   >
                     {uploading === 'logo' ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : (
-                      <Upload className="h-4 w-4" />
+                      <Upload className="h-4 w-4 mr-2" />
                     )}
+                    Choose Logo
                   </Button>
                 </div>
                 {getImageUrl('logo') && (
@@ -419,6 +463,152 @@ export function EditTradeShowAdmin() {
                 value={formData.logoAlt}
                 onChange={(e) => handleInputChange('logoAlt', e.target.value)}
                 placeholder="e.g., ESC Congress Logo"
+              />
+            </div>
+            {/* Event Details fields added here */}
+            <div>
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => handleInputChange('startDate', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => handleInputChange('endDate', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={formData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                placeholder="e.g., Paris, France"
+                readOnly
+              />
+            </div>
+            <div>
+              <Label htmlFor="country">Country</Label>
+              <div className="flex gap-2">
+                <select
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) => handleInputChange('country', e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  <option value="">Select a country</option>
+                  {availableCountries.map((country) => (
+                    <option key={country} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
+                <Dialog open={isCountryDialogOpen} onOpenChange={setIsCountryDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" size="icon">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New Country</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="newCountryInput" className="text-right">
+                          Country
+                        </Label>
+                        <Input
+                          id="newCountryInput"
+                          value={newCountry}
+                          onChange={(e) => setNewCountry(e.target.value)}
+                          className="col-span-3"
+                          placeholder="Enter country name"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setIsCountryDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={addCountry}>Add Country</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="city">City</Label>
+              <div className="flex gap-2">
+                <select
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  <option value="">Select a city</option>
+                  {availableCities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+                <Dialog open={isCityDialogOpen} onOpenChange={setIsCityDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" size="icon">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New City</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="newCityInput" className="text-right">
+                          City
+                        </Label>
+                        <Input
+                          id="newCityInput"
+                          value={newCity}
+                          onChange={(e) => setNewCity(e.target.value)}
+                          className="col-span-3"
+                          placeholder="Enter city name"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setIsCityDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={addCity}>Add City</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                value={formData.website}
+                onChange={(e) => handleInputChange('website', e.target.value)}
+                placeholder="e.g., https://www.escardio.org"
+              />
+            </div>
+            <div className="col-span-full">
+              <Label>Content (Rich Text)</Label>
+              <RichTextEditor
+                content={formData.content}
+                onChange={(newContent) => handleInputChange('content', newContent)}
+                controlled={true}
               />
             </div>
           </div>

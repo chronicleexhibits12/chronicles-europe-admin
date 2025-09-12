@@ -103,6 +103,23 @@ export function ModularStandsAdmin() {
     return formData[section]?.[field] || ''
   }
 
+  // Get current alt text for a field
+  const getCurrentImageAlt = (section: string, field: string): string => {
+    return formData[section]?.[`${field}Alt`] || ''
+  }
+
+  // Update alt text for an image
+  const updateImageAlt = (section: string, field: string, altText: string) => {
+    handleInputChange(section, `${field}Alt`, altText)
+  }
+
+  // Remove image
+  const removeImage = (section: string, field: string) => {
+    handleInputChange(section, field, '')
+    // Also clear alt text when removing image
+    handleInputChange(section, `${field}Alt`, '')
+  }
+
   if (loading) {
     return <ModularStandsAdminSkeleton />
   }
@@ -173,15 +190,16 @@ export function ModularStandsAdmin() {
             <div className="w-full">
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
-                <div className="flex gap-2">
-                  <div className="hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                     <Input
-                      id="benefits-image"
-                      value={getCurrentImageUrl('benefits', 'image')}
-                      onChange={(e) => handleInputChange('benefits', 'image', e.target.value)}
-                      placeholder="Image URL or upload below"
+                      value={getCurrentImageAlt('benefits', 'image')}
+                      onChange={(e) => updateImageAlt('benefits', 'image', e.target.value)}
+                      placeholder="Alt text"
                     />
                   </div>
+                </div>
+                <div className="flex gap-2">
                   <input
                     ref={benefitsImageRef}
                     type="file"
@@ -196,30 +214,29 @@ export function ModularStandsAdmin() {
                     variant="outline"
                     onClick={() => benefitsImageRef.current?.click()}
                     disabled={uploadingImages['benefits-image']}
+                    className="flex items-center gap-2"
                   >
                     {uploadingImages['benefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Choose File
-                      </>
+                      <Upload className="h-4 w-4" />
                     )}
+                    Choose File
                   </Button>
                 </div>
                 {getCurrentImageUrl('benefits', 'image') && (
                   <div className="relative inline-block">
                     <img 
                       src={getCurrentImageUrl('benefits', 'image')} 
-                      alt="Benefits preview" 
-                      className="h-20 w-32 object-cover rounded border"
+                      alt={getCurrentImageAlt('benefits', 'image') || "Benefits preview"} 
+                      className="max-h-16 object-cover rounded border"
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={() => handleInputChange('benefits', 'image', '')}
+                      onClick={() => removeImage('benefits', 'image')}
                     >
                       <X className="h-3 w-3" />
                     </Button>
@@ -319,15 +336,16 @@ export function ModularStandsAdmin() {
             <div className="w-full">
               <Label htmlFor="exhibition-benefits-image">Image</Label>
               <div className="space-y-2">
-                <div className="flex gap-2">
-                  <div className="hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                     <Input
-                      id="exhibition-benefits-image"
-                      value={getCurrentImageUrl('exhibitionBenefits', 'image')}
-                      onChange={(e) => handleInputChange('exhibitionBenefits', 'image', e.target.value)}
-                      placeholder="Image URL or upload below"
+                      value={getCurrentImageAlt('exhibitionBenefits', 'image')}
+                      onChange={(e) => updateImageAlt('exhibitionBenefits', 'image', e.target.value)}
+                      placeholder="Alt text"
                     />
                   </div>
+                </div>
+                <div className="flex gap-2">
                   <input
                     ref={exhibitionBenefitsImageRef}
                     type="file"
@@ -342,30 +360,29 @@ export function ModularStandsAdmin() {
                     variant="outline"
                     onClick={() => exhibitionBenefitsImageRef.current?.click()}
                     disabled={uploadingImages['exhibitionBenefits-image']}
+                    className="flex items-center gap-2"
                   >
                     {uploadingImages['exhibitionBenefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Choose File
-                      </>
+                      <Upload className="h-4 w-4" />
                     )}
+                    Choose File
                   </Button>
                 </div>
                 {getCurrentImageUrl('exhibitionBenefits', 'image') && (
                   <div className="relative inline-block">
                     <img 
                       src={getCurrentImageUrl('exhibitionBenefits', 'image')} 
-                      alt="Exhibition benefits preview" 
-                      className="h-20 w-32 object-cover rounded border"
+                      alt={getCurrentImageAlt('exhibitionBenefits', 'image') || "Exhibition benefits preview"} 
+                      className="max-h-16 object-cover rounded border"
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={() => handleInputChange('exhibitionBenefits', 'image', '')}
+                      onClick={() => removeImage('exhibitionBenefits', 'image')}
                     >
                       <X className="h-3 w-3" />
                     </Button>

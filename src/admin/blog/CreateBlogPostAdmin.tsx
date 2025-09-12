@@ -22,10 +22,8 @@ export function CreateBlogPostAdmin() {
     publishedDate: '',
     featuredImage: '',
     featuredImageAlt: '',
-    category: '',
     author: '',
     readTime: '',
-    tags: [] as string[],
     metaTitle: '',
     metaDescription: '',
     metaKeywords: [] as string[],
@@ -51,13 +49,6 @@ export function CreateBlogPostAdmin() {
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
-  }
-
-  const handleTagsChange = (tags: string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      tags
     }))
   }
 
@@ -137,8 +128,7 @@ export function CreateBlogPostAdmin() {
     try {
       const { error } = await BlogService.createBlogPost({
         ...formData,
-        metaKeywords: formData.metaKeywords.join(', '),
-        tags: formData.tags
+        metaKeywords: formData.metaKeywords.join(', ')
       })
 
       if (error) throw new Error(error)
@@ -196,47 +186,6 @@ export function CreateBlogPostAdmin() {
                 required
               />
             </div>
-            <div className="col-span-full">
-              <Label htmlFor="excerpt">Excerpt</Label>
-              <Textarea
-                id="excerpt"
-                name="excerpt"
-                value={formData.excerpt}
-                onChange={handleInputChange}
-                placeholder="Enter a short excerpt"
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                placeholder="Enter category"
-              />
-            </div>
-            <div>
-              <Label htmlFor="author">Author</Label>
-              <Input
-                id="author"
-                name="author"
-                value={formData.author}
-                onChange={handleInputChange}
-                placeholder="Enter author name"
-              />
-            </div>
-            <div>
-              <Label htmlFor="readTime">Read Time</Label>
-              <Input
-                id="readTime"
-                name="readTime"
-                value={formData.readTime}
-                onChange={handleInputChange}
-                placeholder="e.g., 5 min read"
-              />
-            </div>
             <div>
               <Label htmlFor="publishedDate">Published Date</Label>
               <Input
@@ -247,58 +196,65 @@ export function CreateBlogPostAdmin() {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="col-span-full">
-              <Label>Tags</Label>
-              <TagInput
-                tags={formData.tags}
-                onChange={handleTagsChange}
-                placeholder="Add tags and press Enter"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Featured Image */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2: Featured Image</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="featuredImage">Image URL</Label>
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    id="featuredImage"
-                    name="featuredImage"
-                    value={formData.featuredImage}
-                    onChange={handleInputChange}
-                    placeholder="Image URL or upload below"
-                  />
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => triggerFileInput(fileInputRef)}
-                    disabled={uploading}
-                  >
-                    {uploading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
-                  </Button>
+              <Label htmlFor="isActive">Published</Label>
+              <div className="mt-1">
+                <label className="relative inline-flex items-center cursor-pointer">
                   <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleFileChange}
+                    type="checkbox"
+                    id="isActive"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                    className="sr-only peer"
                   />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+            {/* Blog Banner Image Section merged into Section 1 */}
+            <div className="col-span-full">
+              <Label htmlFor="featuredImage">Blog Banner Image</Label>
+              <div className="space-y-2">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-none">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => triggerFileInput(fileInputRef)}
+                      disabled={uploading}
+                      className="flex items-center gap-2"
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                      Choose File(s)
+                    </Button>
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      id="featuredImageAlt"
+                      name="featuredImageAlt"
+                      value={formData.featuredImageAlt}
+                      onChange={handleInputChange}
+                      placeholder="Enter image alt text"
+                    />
+                  </div>
                 </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
                 {formData.featuredImage && (
-                  <div className="relative inline-block">
+                  <div className="relative inline-block mt-2">
                     <img 
                       src={formData.featuredImage} 
-                      alt="Featured preview" 
-                      className="h-20 w-32 object-cover rounded border"
+                      alt={formData.featuredImageAlt || "Blog banner preview"} 
+                      className="max-h-16 object-cover rounded border"
                     />
                     <Button
                       type="button"
@@ -313,22 +269,12 @@ export function CreateBlogPostAdmin() {
                 )}
               </div>
             </div>
-            <div>
-              <Label htmlFor="featuredImageAlt">Image Alt Text</Label>
-              <Input
-                id="featuredImageAlt"
-                name="featuredImageAlt"
-                value={formData.featuredImageAlt}
-                onChange={handleInputChange}
-                placeholder="Enter image alt text"
-              />
-            </div>
           </div>
         </div>
 
-        {/* Section 3: Content */}
+        {/* Section 2: Content */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3: Content</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2: Content</h2>
           <div className="w-full">
             <RichTextEditor
               content={formData.content}
@@ -338,9 +284,9 @@ export function CreateBlogPostAdmin() {
           </div>
         </div>
 
-        {/* SEO Metadata - Moved to the end */}
+        {/* Section 3: SEO Metadata */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Metadata</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3: SEO Metadata</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="metaTitle">Meta Title</Label>

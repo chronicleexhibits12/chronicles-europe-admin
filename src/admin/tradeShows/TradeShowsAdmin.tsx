@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Edit, Trash2, Eye, Download, Search } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Download, Search, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTradeShows } from '@/hooks/useTradeShowsContent'
 import { TradeShowsService } from '@/data/tradeShowsService'
@@ -30,6 +30,10 @@ export function TradeShowsAdmin() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [tradeShowToDelete, setTradeShowToDelete] = useState<{id: string, title: string} | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [updatingShowId, setUpdatingShowId] = useState<string | null>(null)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [startDateFilter, setStartDateFilter] = useState('')
+  const [endDateFilter, setEndDateFilter] = useState('')
 
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
@@ -81,10 +85,54 @@ export function TradeShowsAdmin() {
     }
   }
 
+  const toggleTradeShowStatus = async (tradeShow: any) => {
+    setUpdatingShowId(tradeShow.id)
+    try {
+      // Toggle the isActive status
+      const { error } = await TradeShowsService.updateTradeShow(tradeShow.id, {
+        ...tradeShow,
+        isActive: !tradeShow.isActive
+      });
+      
+      if (error) throw new Error(error);
+      
+      toast.success(!tradeShow.isActive ? 'Trade show published successfully' : 'Trade show unpublished successfully');
+      refetch();
+    } catch (error: any) {
+      console.error('Error updating trade show status:', error);
+      toast.error('Failed to update trade show status');
+    } finally {
+      setUpdatingShowId(null)
+    }
+  }
+
   const exportToExcel = () => {
     try {
+      // Filter trade shows based on date range if provided
+      let exportData = tradeShows || []
+      
+      if (startDateFilter || endDateFilter) {
+        exportData = exportData.filter(show => {
+          // If start date filter is set, check if show's end date is after the filter start date
+          if (startDateFilter && show.endDate) {
+            const filterStartDate = new Date(startDateFilter)
+            const showEndDate = new Date(show.endDate)
+            if (showEndDate < filterStartDate) return false
+          }
+          
+          // If end date filter is set, check if show's start date is before the filter end date
+          if (endDateFilter && show.startDate) {
+            const filterEndDate = new Date(endDateFilter)
+            const showStartDate = new Date(show.startDate)
+            if (showStartDate > filterEndDate) return false
+          }
+          
+          return true
+        })
+      }
+      
       // Prepare data for export
-      const exportData = tradeShows.map(show => ({
+      const exportDataFormatted = exportData.map(show => ({
         Slug: show.slug,
         Title: show.title,
         'Start Date': show.startDate ? new Date(show.startDate).toLocaleDateString() : '',
@@ -94,7 +142,7 @@ export function TradeShowsAdmin() {
       }))
 
       // Create worksheet
-      const ws = XLSX.utils.json_to_sheet(exportData)
+      const ws = XLSX.utils.json_to_sheet(exportDataFormatted)
       
       // Create workbook
       const wb = XLSX.utils.book_new()
@@ -104,6 +152,10 @@ export function TradeShowsAdmin() {
       XLSX.writeFile(wb, 'trade-shows-export.xlsx')
       
       toast.success('Excel file exported successfully')
+      setExportDialogOpen(false)
+      // Reset filters after export
+      setStartDateFilter('')
+      setEndDateFilter('')
     } catch (error: any) {
       console.error('Error exporting to Excel:', error)
       toast.error('Failed to export Excel file')
@@ -156,6 +208,63 @@ export function TradeShowsAdmin() {
         </DialogContent>
       </Dialog>
 
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Trade Shows</DialogTitle>
+            <DialogDescription>
+              Select a date range to filter the export data
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <div>
+              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Start Date
+              </label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDateFilter}
+                onChange={(e) => setStartDateFilter(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                End Date
+              </label>
+              <Input
+                id="endDate"
+                type="date"
+                value={endDateFilter}
+                onChange={(e) => setEndDateFilter(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={exportToExcel}>
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Updating Status Popup */}
+      <Dialog open={updatingShowId !== null}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center justify-center py-6">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
+            <DialogTitle className="text-center mb-2">Updating Status</DialogTitle>
+            <DialogDescription className="text-center">
+              Please wait while we update the trade show status...
+            </DialogDescription>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -165,7 +274,7 @@ export function TradeShowsAdmin() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={exportToExcel}>
+          <Button onClick={() => setExportDialogOpen(true)}>
             <Download className="h-4 w-4 mr-2" />
             Export to Excel
           </Button>
@@ -214,6 +323,7 @@ export function TradeShowsAdmin() {
               <TableHead>Category</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Date Range</TableHead>
+              <TableHead>Published</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -225,14 +335,29 @@ export function TradeShowsAdmin() {
                 <TableCell>{tradeShow.location}</TableCell>
                 <TableCell>
                   {tradeShow.startDate && tradeShow.endDate 
-                    ? `${new Date(tradeShow.startDate).toLocaleDateString()} - ${new Date(tradeShow.endDate).toLocaleDateString()}`
+                    ? new Date(tradeShow.startDate).toLocaleDateString() + ' - ' + new Date(tradeShow.endDate).toLocaleDateString()
                     : 'Not specified'}
+                </TableCell>
+                <TableCell>
+                  <button
+                    onClick={() => toggleTradeShowStatus(tradeShow)}
+                    disabled={updatingShowId === tradeShow.id}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      tradeShow.isActive ? 'bg-blue-600' : 'bg-gray-200'
+                    } ${updatingShowId === tradeShow.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        tradeShow.isActive ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
                 </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(`${websiteUrl}/top-trade-shows-in-europe/${tradeShow.slug}`, '_blank')}
+                    onClick={() => window.open(websiteUrl + '/top-trade-shows-in-europe/' + tradeShow.slug, '_blank')}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>

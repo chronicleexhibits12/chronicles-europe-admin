@@ -22,19 +22,17 @@ export function BlogPageAdmin() {
       title: '',
       subtitle: '',
       backgroundImage: '',
-      backgroundImageAlt: '',
-      heroImage: ''
+      backgroundImageAlt: ''
     },
-    description: ''
+    description: '',
+    isActive: true
   })
   const [isSaving, setIsSaving] = useState(false)
   const [uploading, setUploading] = useState({
-    backgroundImage: false,
-    heroImage: false
+    backgroundImage: false
   })
   
   const backgroundImageInputRef = useRef<HTMLInputElement>(null)
-  const heroImageInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (blogPage) {
@@ -48,10 +46,10 @@ export function BlogPageAdmin() {
           title: blogPage.hero.title || '',
           subtitle: blogPage.hero.subtitle || '',
           backgroundImage: blogPage.hero.backgroundImage || '',
-          backgroundImageAlt: blogPage.hero.backgroundImageAlt || '',
-          heroImage: blogPage.hero.heroImage || ''
+          backgroundImageAlt: blogPage.hero.backgroundImageAlt || ''
         },
-        description: blogPage.description || ''
+        description: blogPage.description || '',
+        isActive: blogPage.isActive
       })
     }
   }, [blogPage])
@@ -95,7 +93,7 @@ export function BlogPageAdmin() {
     }))
   }
 
-  const handleImageUpload = async (file: File, fieldName: 'backgroundImage' | 'heroImage') => {
+  const handleImageUpload = async (file: File, fieldName: 'backgroundImage') => {
     setUploading(prev => ({ ...prev, [fieldName]: true }))
     try {
       const { data, error } = await BlogService.uploadImage(file)
@@ -120,7 +118,7 @@ export function BlogPageAdmin() {
     }
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'backgroundImage' | 'heroImage') => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'backgroundImage') => {
     const file = e.target.files?.[0]
     if (!file) return
     
@@ -156,11 +154,10 @@ export function BlogPageAdmin() {
           title: formData.hero.title,
           subtitle: formData.hero.subtitle,
           backgroundImage: formData.hero.backgroundImage,
-          backgroundImageAlt: formData.hero.backgroundImageAlt,
-          heroImage: formData.hero.heroImage
+          backgroundImageAlt: formData.hero.backgroundImageAlt
         },
         description: formData.description,
-        isActive: true
+        isActive: formData.isActive
       })
 
       if (error) throw new Error(error)
@@ -173,6 +170,19 @@ export function BlogPageAdmin() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  // Remove image
+  const removeImage = (fieldName: 'backgroundImage') => {
+    setFormData(prev => ({
+      ...prev,
+      hero: {
+        ...prev.hero,
+        [fieldName]: '',
+        [`${fieldName}Alt`]: ''
+      }
+    }))
+    toast.success('Image removed successfully')
   }
 
   if (loading) {
@@ -209,7 +219,19 @@ export function BlogPageAdmin() {
       <form className="space-y-8">
         {/* Hero Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Hero Section</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold border-b pb-2 mb-4">Hero Section</h2>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="isActive">Active</Label>
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={formData.isActive}
+                onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            </div>
+          </div>
           <div className="grid gap-4">
             <div className="w-full">
               <Label htmlFor="hero-title">Hero Title</Label>
@@ -234,106 +256,61 @@ export function BlogPageAdmin() {
               />
             </div>
             <div className="w-full">
-              <Label htmlFor="hero-background-image">Background Image</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div>
-                  <Input
-                    id="hero-background-image"
-                    name="backgroundImage"
-                    value={formData.hero.backgroundImage}
-                    onChange={handleHeroChange}
-                    placeholder="Enter background image URL"
-                  />
+              <Label htmlFor="hero-background-image">Background Image Alt text</Label>
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      name="backgroundImageAlt"
+                      value={formData.hero.backgroundImageAlt}
+                      onChange={handleHeroChange}
+                      placeholder="Enter background image alt text"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Input
-                    name="backgroundImageAlt"
-                    value={formData.hero.backgroundImageAlt}
-                    onChange={handleHeroChange}
-                    placeholder="Enter background image alt text"
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    ref={backgroundImageInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'backgroundImage')}
                   />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => backgroundImageInputRef.current?.click()}
+                    disabled={uploading.backgroundImage}
+                    className="flex items-center gap-2"
+                  >
+                    {uploading.backgroundImage ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Choose File(s)
+                  </Button>
                 </div>
+                {formData.hero.backgroundImage && (
+                  <div className="relative inline-block">
+                    <img 
+                      src={formData.hero.backgroundImage} 
+                      alt={formData.hero.backgroundImageAlt || "Background preview"} 
+                      className="max-h-16 object-cover rounded border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('backgroundImage')}
+                    >
+                      <span className="sr-only">Remove image</span>
+                      ×
+                    </Button>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2 mt-2">
-                <input
-                  type="file"
-                  ref={backgroundImageInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, 'backgroundImage')}
-                />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => backgroundImageInputRef.current?.click()}
-                  disabled={uploading.backgroundImage}
-                >
-                  {uploading.backgroundImage ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              {formData.hero.backgroundImage && (
-                <div className="mt-2">
-                  <img 
-                    src={formData.hero.backgroundImage} 
-                    alt={formData.hero.backgroundImageAlt || "Background preview"} 
-                    className="h-20 w-32 object-cover rounded border"
-                  />
-                </div>
-              )}
-            </div>
-            <div className="w-full">
-              <Label htmlFor="hero-image">Hero Image</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div>
-                  <Input
-                    id="hero-image"
-                    name="heroImage"
-                    value={formData.hero.heroImage}
-                    onChange={handleHeroChange}
-                    placeholder="Enter hero image URL"
-                  />
-                </div>
-                <div>
-                  {/* Empty div for spacing consistency */}
-                  <div></div>
-                </div>
-              </div>
-              <div className="flex gap-2 mt-2">
-                <input
-                  type="file"
-                  ref={heroImageInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, 'heroImage')}
-                />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => heroImageInputRef.current?.click()}
-                  disabled={uploading.heroImage}
-                >
-                  {uploading.heroImage ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              {formData.hero.heroImage && (
-                <div className="mt-2">
-                  <img 
-                    src={formData.hero.heroImage} 
-                    alt="Hero preview" 
-                    className="h-20 w-32 object-cover rounded border"
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>

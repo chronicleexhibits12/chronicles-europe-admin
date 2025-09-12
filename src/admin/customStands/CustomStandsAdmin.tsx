@@ -113,6 +113,13 @@ export function CustomStandsAdmin() {
     handleInputChange(section, `${field}Alt`, altText)
   }
 
+  // Remove image
+  const removeImage = (section: string, field: string) => {
+    handleInputChange(section, field, '')
+    // Also clear alt text when removing image
+    handleInputChange(section, `${field}Alt`, '')
+  }
+
   if (loading) {
     return <CustomStandsAdminSkeleton />
   }
@@ -184,14 +191,6 @@ export function CustomStandsAdmin() {
               <Label htmlFor="benefits-image">Benefits Image</Label>
               <div className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="hidden">
-                    <Input
-                      id="benefits-image"
-                      value={getCurrentImageUrl('benefits', 'image')}
-                      onChange={(e) => handleInputChange('benefits', 'image', e.target.value)}
-                      placeholder="Image URL"
-                    />
-                  </div>
                   <div>
                     <Input
                       value={getCurrentImageAlt('benefits', 'image')}
@@ -215,15 +214,14 @@ export function CustomStandsAdmin() {
                     variant="outline"
                     onClick={() => benefitsImageRef.current?.click()}
                     disabled={uploadingImages['benefits-image']}
+                    className="flex items-center gap-2"
                   >
                     {uploadingImages['benefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Choose File
-                      </>
+                      <Upload className="h-4 w-4" />
                     )}
+                    Choose File
                   </Button>
                 </div>
                 {getCurrentImageUrl('benefits', 'image') && (
@@ -231,14 +229,14 @@ export function CustomStandsAdmin() {
                     <img 
                       src={getCurrentImageUrl('benefits', 'image')} 
                       alt={getCurrentImageAlt('benefits', 'image') || "Benefits preview"} 
-                      className="h-20 w-32 object-cover rounded border"
+                      className="max-h-16 object-cover rounded border"
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={() => handleInputChange('benefits', 'image', '')}
+                      onClick={() => removeImage('benefits', 'image')}
                     >
                       <X className="h-3 w-3" />
                     </Button>
@@ -339,14 +337,6 @@ export function CustomStandsAdmin() {
               <Label htmlFor="exhibition-benefits-image">Image</Label>
               <div className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="hidden">
-                    <Input
-                      id="exhibition-benefits-image"
-                      value={getCurrentImageUrl('exhibitionBenefits', 'image')}
-                      onChange={(e) => handleInputChange('exhibitionBenefits', 'image', e.target.value)}
-                      placeholder="Image URL"
-                    />
-                  </div>
                   <div>
                     <Input
                       value={getCurrentImageAlt('exhibitionBenefits', 'image')}
@@ -370,15 +360,14 @@ export function CustomStandsAdmin() {
                     variant="outline"
                     onClick={() => exhibitionBenefitsImageRef.current?.click()}
                     disabled={uploadingImages['exhibitionBenefits-image']}
+                    className="flex items-center gap-2"
                   >
                     {uploadingImages['exhibitionBenefits-image'] ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Choose File
-                      </>
+                      <Upload className="h-4 w-4" />
                     )}
+                    Choose File
                   </Button>
                 </div>
                 {getCurrentImageUrl('exhibitionBenefits', 'image') && (
@@ -386,14 +375,14 @@ export function CustomStandsAdmin() {
                     <img 
                       src={getCurrentImageUrl('exhibitionBenefits', 'image')} 
                       alt={getCurrentImageAlt('exhibitionBenefits', 'image') || "Exhibition benefits preview"} 
-                      className="h-20 w-32 object-cover rounded border"
+                      className="max-h-16 object-cover rounded border"
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={() => handleInputChange('exhibitionBenefits', 'image', '')}
+                      onClick={() => removeImage('exhibitionBenefits', 'image')}
                     >
                       <X className="h-3 w-3" />
                     </Button>

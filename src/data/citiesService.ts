@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { City } from './citiesTypes'
 import { basicRevalidate } from './simpleRevalidation'
+import { TradeShowsService } from './tradeShowsService'
 import { CountriesService } from './countriesService'
 
 export class CitiesService {
@@ -39,32 +40,99 @@ export class CitiesService {
     }
   }
 
-  // Create city with default is_active = true
+  // Create city
   static async createCity(cityData: any): Promise<{ data: City | null; error: string | null }> {
     try {
-      // Ensure is_active is set to true by default
-      const cityDataWithActive = {
-        ...cityData,
-        is_active: true
-      };
-
       const { data, error } = await (supabase as any)
         .from('cities')
-        .insert([cityDataWithActive])
+        .insert([cityData])
         .select()
         .single()
 
       if (error) throw new Error(error.message)
       
+      const city: City = {
+        id: data.id,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        name: data.name,
+        city_slug: data.city_slug,
+        country_slug: data.country_slug,
+        is_active: data.is_active,
+        seo_title: data.seo_title,
+        seo_description: data.seo_description,
+        seo_keywords: data.seo_keywords,
+        hero_title: data.hero_title,
+        hero_subtitle: data.hero_subtitle,
+        hero_background_image_url: data.hero_background_image_url,
+        why_choose_us_title: data.why_choose_us_title,
+        why_choose_us_subtitle: data.why_choose_us_subtitle,
+        why_choose_us_main_image_url: data.why_choose_us_main_image_url,
+        why_choose_us_benefits_html: data.why_choose_us_benefits_html,
+        what_we_do_title: data.what_we_do_title,
+        what_we_do_subtitle: data.what_we_do_subtitle,
+        what_we_do_description_html: data.what_we_do_description_html,
+        portfolio_title_template: data.portfolio_title_template,
+        exhibiting_experience_title: data.exhibiting_experience_title,
+        exhibiting_experience_subtitle: data.exhibiting_experience_subtitle,
+        exhibiting_experience_benefits_html: data.exhibiting_experience_benefits_html,
+        exhibiting_experience_excellence_title: data.exhibiting_experience_excellence_title,
+        exhibiting_experience_excellence_subtitle: data.exhibiting_experience_excellence_subtitle,
+        exhibiting_experience_excellence_points_html: data.exhibiting_experience_excellence_points_html,
+      }
+      
+      // Add the city name to the trade_shows_page cities array
+      if (cityData.name) {
+        await this.addCityToTradeShowsPage(cityData.name);
+      }
+      
       // Trigger revalidation for the new city page
-      if (cityData.country_slug && cityData.city_slug) {
+      if (cityData.city_slug) {
         await this.triggerRevalidation(`/${cityData.country_slug}/${cityData.city_slug}`)
       }
       
-      return { data: data as City, error: null }
+      return { data: city, error: null }
     } catch (error: any) {
       console.error('Error creating city:', error)
       return { data: null, error: error.message || 'Failed to create city' }
+    }
+  }
+
+  // Add city to trade_shows_page cities array
+  static async addCityToTradeShowsPage(cityName: string): Promise<{ error: string | null }> {
+    try {
+      // Get current trade shows page data
+      const { data: tradeShowsPage, error: fetchError } = await TradeShowsService.getTradeShowsPage();
+      
+      if (fetchError) throw new Error(fetchError);
+      
+      if (tradeShowsPage) {
+        // Check if city already exists in the array (case-insensitive comparison)
+        const cityExists = tradeShowsPage.cities.some(city => 
+          city.toLowerCase() === cityName.toLowerCase()
+        );
+        
+        if (!cityExists) {
+          // Add new city to existing cities
+          const updatedCities = [...tradeShowsPage.cities, cityName];
+          
+          // Update the trade shows page with the new cities list
+          const { error: updateError } = await TradeShowsService.updateTradeShowsPage(tradeShowsPage.id, {
+            ...tradeShowsPage,
+            cities: updatedCities
+          });
+          
+          if (updateError) throw new Error(updateError);
+          
+          // Trigger revalidation for the trade shows page
+          await TradeShowsService.triggerRevalidation('/trade-shows');
+        }
+      }
+      
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error adding city to trade shows page:', error);
+      return { error: error.message || 'Failed to add city to trade shows page' };
     }
   }
 

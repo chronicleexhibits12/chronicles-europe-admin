@@ -70,6 +70,9 @@ export function FormSubmissionsAdmin() {
   const [formTypeFilter, setFormTypeFilter] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [exportDateFrom, setExportDateFrom] = useState('')
+  const [exportDateTo, setExportDateTo] = useState('')
 
   // Get unique form types for filter dropdown
   const formTypes = useMemo(() => {
@@ -184,16 +187,42 @@ export function FormSubmissionsAdmin() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  // Export to Excel functionality
+  // Export to Excel functionality with date filter
   const handleExportToExcel = () => {
-    if (!formSubmissions || formSubmissions.length === 0) {
-      toast.error('No data to export')
-      return
-    }
+    // Open the export dialog to select date range
+    setExportDialogOpen(true)
+  }
 
+  const performExport = () => {
     try {
+      // Filter form submissions based on export date range if provided
+      let exportData = formSubmissions || []
+      
+      if (exportDateFrom || exportDateTo) {
+        exportData = exportData.filter(submission => {
+          const submissionDate = new Date(submission.createdAt)
+          
+          // If start date filter is set, check if submission date is after the filter start date
+          if (exportDateFrom && submissionDate < new Date(exportDateFrom)) {
+            return false
+          }
+          
+          // If end date filter is set, check if submission date is before the filter end date
+          if (exportDateTo && submissionDate > new Date(exportDateTo)) {
+            return false
+          }
+          
+          return true
+        })
+      }
+      
+      if (exportData.length === 0) {
+        toast.error('No data to export for the selected date range')
+        return
+      }
+
       // Prepare data for export
-      const exportData = formSubmissions.map(submission => {
+      const exportDataFormatted = exportData.map(submission => {
         // Flatten submission data
         const flattenedData: Record<string, any> = {
           id: submission.id,
@@ -223,7 +252,7 @@ export function FormSubmissionsAdmin() {
       })
 
       // Create worksheet
-      const ws = XLSX.utils.json_to_sheet(exportData)
+      const ws = XLSX.utils.json_to_sheet(exportDataFormatted)
       
       // Create workbook
       const wb = XLSX.utils.book_new()
@@ -233,6 +262,10 @@ export function FormSubmissionsAdmin() {
       XLSX.writeFile(wb, 'form-submissions-export.xlsx')
       
       toast.success('Form submissions exported successfully')
+      setExportDialogOpen(false)
+      // Reset export date filters
+      setExportDateFrom('')
+      setExportDateTo('')
     } catch (error) {
       console.error('Error exporting to Excel:', error)
       toast.error('Failed to export form submissions')
@@ -352,6 +385,54 @@ export function FormSubmissionsAdmin() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Form Submissions</DialogTitle>
+            <DialogDescription>
+              Select a date range to filter the export data
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <div>
+              <label htmlFor="exportDateFrom" className="block text-sm font-medium text-gray-700 mb-1">
+                From Date
+              </label>
+              <Input
+                id="exportDateFrom"
+                type="date"
+                value={exportDateFrom}
+                onChange={(e) => setExportDateFrom(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="exportDateTo" className="block text-sm font-medium text-gray-700 mb-1">
+                To Date
+              </label>
+              <Input
+                id="exportDateTo"
+                type="date"
+                value={exportDateTo}
+                onChange={(e) => setExportDateTo(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setExportDialogOpen(false)
+              setExportDateFrom('')
+              setExportDateTo('')
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={performExport}>
+              Export
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -5,10 +5,18 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Upload, Trash2 } from 'lucide-react'
+import { Plus, Upload, Trash2, Image } from 'lucide-react'
 import { PortfolioService } from '@/data/portfolioService'
 import type { PortfolioPage, PortfolioItem } from '@/data/portfolioTypes'
 import { TagInput } from '@/components/ui/tag-input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export function PortfolioAdmin() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -347,32 +355,58 @@ export function PortfolioAdmin() {
             </div>
           </div>
 
-          {/* Portfolio Items List */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {portfolio.items.map((item, index) => (
-              <div key={index} className="border rounded-lg overflow-hidden">
-                <div className="relative">
-                  <img 
-                    src={item.image} 
-                    alt={`Portfolio item ${index + 1}`}
-                    className="w-full h-48 object-cover"
-                  />
-                </div>
-                <div className="p-3">
-                  <div className="flex justify-end">
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => handleDeleteItem(index)}
-                      disabled={saving}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Portfolio Items List - Updated to Table/List View */}
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Image</TableHead>
+                  <TableHead>Image URL</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {portfolio.items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                      <Image className="h-12 w-12 mx-auto text-gray-400" />
+                      <p className="mt-2">No portfolio items found</p>
+                      <p className="text-sm">Add your first portfolio item using the form above</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  portfolio.items.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <div className="flex items-center justify-center">
+                          <img 
+                            src={item.image} 
+                            alt={`Portfolio item ${index + 1}`}
+                            className="w-16 h-16 object-cover rounded-md border"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-xs truncate text-sm text-muted-foreground">
+                          {item.image}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => handleDeleteItem(index)}
+                          disabled={saving}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>

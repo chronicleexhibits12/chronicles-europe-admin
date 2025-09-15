@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Search, Plus, Trash2, Edit, Globe } from 'lucide-react'
+import { Search, Plus, Trash2, Edit, Globe, Eye } from 'lucide-react'
 import { useCountries } from '@/hooks/useCountriesContent'
 import { CountriesService } from '@/data/countriesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
@@ -49,6 +49,11 @@ export function CountriesAdmin() {
       country.slug.toLowerCase().includes(term)
     )
   }, [countries, searchTerm])
+
+  const handleViewCountry = (slug: string) => {
+    const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app';
+    window.open(`${websiteUrl}/${slug}`, '_blank');
+  };
 
   const handleEditCountry = (id: string) => {
     navigate(`/admin/countries/${id}/edit`)
@@ -539,6 +544,13 @@ export function CountriesAdmin() {
                     : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewCountry(country.slug)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

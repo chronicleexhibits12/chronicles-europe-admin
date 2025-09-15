@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Upload, Trash2, Image } from 'lucide-react'
+import { Plus, Upload, Trash2, Image, Edit, Check, X } from 'lucide-react'
 import { PortfolioService } from '@/data/portfolioService'
 import type { PortfolioPage, PortfolioItem } from '@/data/portfolioTypes'
 import { TagInput } from '@/components/ui/tag-input'
@@ -28,6 +28,7 @@ export function PortfolioAdmin() {
   
   // Form fields
   const [heroTitle, setHeroTitle] = useState('')
+  const [heroBackgroundImageAlt, setHeroBackgroundImageAlt] = useState('')
   const [portfolioTitle, setPortfolioTitle] = useState('')
   const [portfolioSubtitle, setPortfolioSubtitle] = useState('')
   const [seoTitle, setSeoTitle] = useState('')
@@ -36,6 +37,11 @@ export function PortfolioAdmin() {
   
   // New item form
   const [newItemImage, setNewItemImage] = useState('')
+  const [newItemAlt, setNewItemAlt] = useState('')
+  
+  // Edit item dialog
+  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
+  const [editingItemAlt, setEditingItemAlt] = useState('')
 
   // Load portfolio data
   useEffect(() => {
@@ -55,6 +61,7 @@ export function PortfolioAdmin() {
       if (data) {
         setPortfolio(data)
         setHeroTitle(data.hero.title)
+        setHeroBackgroundImageAlt(data.hero.backgroundImageAlt || '')
         setPortfolioTitle(data.portfolio.title)
         setPortfolioSubtitle(data.portfolio.subtitle)
         setSeoTitle(data.seo.title)
@@ -79,7 +86,8 @@ export function PortfolioAdmin() {
       const updatedData = {
         hero: {
           title: heroTitle,
-          backgroundImage: portfolio.hero.backgroundImage // Keep existing background image
+          backgroundImage: portfolio.hero.backgroundImage, // Keep existing background image
+          backgroundImageAlt: heroBackgroundImageAlt
         },
         portfolio: {
           title: portfolioTitle,
@@ -124,14 +132,32 @@ export function PortfolioAdmin() {
         featured: false
       }
       
-      const { error } = await PortfolioService.addPortfolioItem(newItem)
+      const { error: addItemError } = await PortfolioService.addPortfolioItem(newItem)
       
-      if (error) {
-        setError(error)
-      } else {
-        setSuccess('Portfolio item added successfully')
-        setNewItemImage('')
-        loadPortfolioData() // Reload to get updated data
+      if (addItemError) {
+        setError(addItemError)
+        setSaving(false)
+        return
+      }
+      
+      // Update alt texts to include the new alt text
+      const { data: updatedPortfolio } = await PortfolioService.getPortfolioPage()
+      if (updatedPortfolio) {
+        const currentItemsAlt = updatedPortfolio.itemsAlt || []
+        const updatedItemsAlt = [newItemAlt, ...currentItemsAlt]
+        
+        const { error: updateAltError } = await PortfolioService.updatePortfolioPage({
+          itemsAlt: updatedItemsAlt
+        })
+        
+        if (updateAltError) {
+          setError(updateAltError)
+        } else {
+          setSuccess('Portfolio item added successfully')
+          setNewItemImage('')
+          setNewItemAlt('')
+          loadPortfolioData() // Reload to get updated data
+        }
       }
     } catch (err) {
       setError('Failed to add portfolio item')
@@ -199,6 +225,40 @@ export function PortfolioAdmin() {
 
   const handleKeywordsChange = (keywords: string[]) => {
     setSeoKeywordsArray(keywords)
+  }
+  
+  // Handle edit item alt text
+  const handleEditItemAlt = async (index: number, newAltText: string) => {
+    try {
+      setSaving(true)
+      setError(null)
+      setSuccess(null)
+      
+      // Update the alt text for the specific item
+      const updatedItemsAlt = [...(portfolio?.itemsAlt || [])]
+      updatedItemsAlt[index] = newAltText
+      
+      const { error } = await PortfolioService.updatePortfolioPage({
+        itemsAlt: updatedItemsAlt
+      })
+      
+      if (error) {
+        setError(error)
+      } else {
+        setSuccess('Alt text updated successfully')
+        // Update the local state to reflect the change
+        setPortfolio(prev => {
+          if (!prev) return prev
+          const newItemsAlt = [...(prev.itemsAlt || [])]
+          newItemsAlt[index] = newAltText
+          return { ...prev, itemsAlt: newItemsAlt }
+        })
+      }
+    } catch (err) {
+      setError('Failed to update alt text')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) {
@@ -272,6 +332,15 @@ export function PortfolioAdmin() {
               value={heroTitle}
               onChange={(e) => setHeroTitle(e.target.value)}
               placeholder="Portfolio"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="heroBackgroundImageAlt">Hero Background Image Alt Text</Label>
+            <Input
+              id="heroBackgroundImageAlt"
+              value={heroBackgroundImageAlt}
+              onChange={(e) => setHeroBackgroundImageAlt(e.target.value)}
+              placeholder="Describe the hero background image"
             />
           </div>
         </CardContent>
@@ -348,6 +417,17 @@ export function PortfolioAdmin() {
                 </div>
               )}
               
+              {/* Alt Text for New Item */}
+              <div className="space-y-2">
+                <Label htmlFor="newItemAlt">Alt Text</Label>
+                <Input
+                  id="newItemAlt"
+                  value={newItemAlt}
+                  onChange={(e) => setNewItemAlt(e.target.value)}
+                  placeholder="Describe the portfolio item image"
+                />
+              </div>
+              
               <Button onClick={handleAddItem} disabled={saving || !newItemImage}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Item
@@ -361,7 +441,7 @@ export function PortfolioAdmin() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[100px]">Image</TableHead>
-                  <TableHead>Image URL</TableHead>
+                  <TableHead>Alt Text</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -381,15 +461,55 @@ export function PortfolioAdmin() {
                         <div className="flex items-center justify-center">
                           <img 
                             src={item.image} 
-                            alt={`Portfolio item ${index + 1}`}
+                            alt={portfolio.itemsAlt?.[index] || `Portfolio item ${index + 1}`}
                             className="w-16 h-16 object-cover rounded-md border"
                           />
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="max-w-xs truncate text-sm text-muted-foreground">
-                          {item.image}
-                        </div>
+                        {editingItemIndex === index ? (
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              value={editingItemAlt}
+                              onChange={(e) => setEditingItemAlt(e.target.value)}
+                              placeholder="Enter alt text"
+                              className="flex-1"
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                handleEditItemAlt(index, editingItemAlt)
+                                setEditingItemIndex(null)
+                              }}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingItemIndex(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <span className="max-w-xs truncate text-sm text-muted-foreground">
+                              {portfolio.itemsAlt?.[index] || 'No alt text'}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditingItemIndex(index)
+                                setEditingItemAlt(portfolio.itemsAlt?.[index] || '')
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 

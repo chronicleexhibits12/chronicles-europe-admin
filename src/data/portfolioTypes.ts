@@ -6,6 +6,7 @@ export interface PortfolioItem {
 export interface PortfolioHero {
   title: string
   backgroundImage: string
+  backgroundImageAlt?: string // Add alt text for hero background image
 }
 
 export interface PortfolioSection {
@@ -24,6 +25,7 @@ export interface PortfolioPage {
   hero: PortfolioHero
   portfolio: PortfolioSection
   items: PortfolioItem[]
+  itemsAlt?: string[] // Add alt texts for portfolio items
   seo: PortfolioSEO
   isActive: boolean
   createdAt: string

@@ -34,13 +34,15 @@ export class PortfolioService {
         id: rowData.id,
         hero: {
           title: rowData.hero_title || '',
-          backgroundImage: rowData.hero_background_image || ''
+          backgroundImage: rowData.hero_background_image || '',
+          backgroundImageAlt: rowData.hero_background_image_alt || undefined
         },
         portfolio: {
           title: rowData.portfolio_title || '',
           subtitle: rowData.portfolio_subtitle || ''
         },
         items: normalizedItems,
+        itemsAlt: (rowData.portfolio_items_alt as string[]) || undefined,
         seo: {
           title: rowData.seo_title || '',
           description: rowData.seo_description || '',
@@ -80,6 +82,9 @@ export class PortfolioService {
       if (data.hero) {
         updateData.hero_title = data.hero.title
         updateData.hero_background_image = data.hero.backgroundImage
+        if (data.hero.backgroundImageAlt !== undefined) {
+          updateData.hero_background_image_alt = data.hero.backgroundImageAlt
+        }
       }
 
       // Portfolio section
@@ -95,6 +100,11 @@ export class PortfolioService {
           featured: false // Always set to false since we're not using this feature
         }))
         updateData.portfolio_items = normalizedItems
+      }
+
+      // Portfolio items alt texts
+      if (data.itemsAlt !== undefined) {
+        updateData.portfolio_items_alt = data.itemsAlt
       }
 
       // SEO data
@@ -203,9 +213,13 @@ export class PortfolioService {
 
       // Remove the item at the specified index
       const updatedItems = currentPortfolio.items.filter((_, i) => i !== index)
+      
+      // Remove the corresponding alt text at the same index
+      const currentItemsAlt = currentPortfolio.itemsAlt || []
+      const updatedItemsAlt = currentItemsAlt.filter((_, i) => i !== index)
 
-      // Update the portfolio with the new items array
-      return this.updatePortfolioPage({ items: updatedItems })
+      // Update the portfolio with both updated items array and updated alt texts array
+      return this.updatePortfolioPage({ items: updatedItems, itemsAlt: updatedItemsAlt })
     } catch (error) {
       console.error('Error deleting portfolio item:', error)
       return { data: null, error: 'Failed to delete portfolio item' }

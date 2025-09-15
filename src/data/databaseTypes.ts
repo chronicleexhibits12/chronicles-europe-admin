@@ -1063,9 +1063,11 @@ export interface Database {
           id: string
           hero_title: string | null
           hero_background_image: string | null
+          hero_background_image_alt: string | null // Add alt text for hero background image
           portfolio_title: string | null
           portfolio_subtitle: string | null
           portfolio_items: any | null
+          portfolio_items_alt: any | null // Add alt texts for portfolio items
           is_active: boolean
           created_at: string
           updated_at: string
@@ -1077,9 +1079,11 @@ export interface Database {
           id?: string
           hero_title?: string | null
           hero_background_image?: string | null
+          hero_background_image_alt?: string | null // Add alt text for hero background image
           portfolio_title?: string | null
           portfolio_subtitle?: string | null
           portfolio_items?: any | null
+          portfolio_items_alt?: any | null // Add alt texts for portfolio items
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -1091,9 +1095,11 @@ export interface Database {
           id?: string
           hero_title?: string | null
           hero_background_image?: string | null
+          hero_background_image_alt?: string | null // Add alt text for hero background image
           portfolio_title?: string | null
           portfolio_subtitle?: string | null
           portfolio_items?: any | null
+          portfolio_items_alt?: any | null // Add alt texts for portfolio items
           is_active?: boolean
           created_at?: string
           updated_at?: string

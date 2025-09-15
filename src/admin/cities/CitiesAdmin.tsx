@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Search, Plus, Trash2, Edit, MapPin } from 'lucide-react'
+import { Search, Plus, Trash2, Edit, MapPin, Eye } from 'lucide-react'
 import { useCities } from '@/hooks/useCitiesContent'
 import { CitiesService } from '@/data/citiesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
@@ -272,6 +272,11 @@ export function CitiesAdmin() {
       </div>
     )
   }
+
+  const handleViewCity = (citySlug: string) => {
+    const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app';
+    window.open(`${websiteUrl}/${citySlug}`, '_blank');
+  };
 
   return (
     <div className="space-y-6 w-full">
@@ -534,6 +539,13 @@ export function CitiesAdmin() {
                     : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewCity(city.city_slug)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

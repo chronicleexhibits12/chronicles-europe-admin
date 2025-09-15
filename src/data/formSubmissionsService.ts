@@ -48,6 +48,46 @@ export class FormSubmissionsService {
     }
   }
 
+  // Get all form submissions with pagination
+  static async getFormSubmissionsWithPagination(page: number = 1, pageSize: number = 10): Promise<{ data: FormSubmission[] | null; error: string | null; totalCount: number }> {
+    try {
+      // Calculate the range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      // Get the total count first
+      const { count: totalCount, error: countError } = await supabase
+        .from('form_submissions')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) throw new Error(countError.message);
+
+      // Get the paginated data
+      const { data, error } = await supabase
+        .from('form_submissions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) throw new Error(error.message);
+      
+      // Transform database rows to FormSubmission interface
+      const formSubmissions: FormSubmission[] = (data || []).map((row: any) => ({
+        id: row.id,
+        formType: row.form_type,
+        submissionData: row.submission_data,
+        documents: row.documents,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+      
+      return { data: formSubmissions, error: null, totalCount: totalCount || 0 };
+    } catch (error: any) {
+      console.error('Error fetching form submissions:', error);
+      return { data: null, error: error.message || 'Failed to fetch form submissions', totalCount: 0 };
+    }
+  }
+
   // Get form submission by ID
   static async getFormSubmissionById(id: string): Promise<{ data: FormSubmission | null; error: string | null }> {
     try {

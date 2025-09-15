@@ -33,6 +33,10 @@ interface SupabaseCountry {
   process_section_steps: ProcessStep[] | null
   cities_section_title: string | null
   cities_section_subtitle: string | null
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
   selected_cities: any
 }
 
@@ -58,6 +62,36 @@ export class CountriesService {
     } catch (error: any) {
       console.error('Error fetching countries:', error)
       return { data: null, error: error.message || 'Failed to fetch countries' }
+    }
+  }
+
+  // Get all countries with pagination
+  static async getCountriesWithPagination(page: number = 1, pageSize: number = 10): Promise<{ data: Country[] | null; error: string | null; totalCount: number }> {
+    try {
+      // Calculate the range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      // Get the total count first
+      const { count: totalCount, error: countError } = await supabase
+        .from('countries')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) throw new Error(countError.message);
+
+      // Get the paginated data
+      const { data, error } = await supabase
+        .from('countries')
+        .select('*')
+        .order('name')
+        .range(from, to);
+
+      if (error) throw new Error(error.message);
+      
+      return { data: data as Country[] || [], error: null, totalCount: totalCount || 0 };
+    } catch (error: any) {
+      console.error('Error fetching countries:', error);
+      return { data: null, error: error.message || 'Failed to fetch countries', totalCount: 0 };
     }
   }
 

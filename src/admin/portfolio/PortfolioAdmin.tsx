@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,6 +17,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 
 export function PortfolioAdmin() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -25,6 +34,10 @@ export function PortfolioAdmin() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 10
   
   // Form fields
   const [heroTitle, setHeroTitle] = useState('')
@@ -42,6 +55,20 @@ export function PortfolioAdmin() {
   // Edit item dialog
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
   const [editingItemAlt, setEditingItemAlt] = useState('')
+
+  // Calculate total pages for pagination
+  const totalPages = useMemo(() => {
+    if (!portfolio?.items) return 0
+    return Math.ceil(portfolio.items.length / pageSize)
+  }, [portfolio?.items, pageSize])
+
+  // Get current page items
+  const currentItems = useMemo(() => {
+    if (!portfolio?.items) return []
+    const startIndex = (currentPage - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    return portfolio.items.slice(startIndex, endIndex)
+  }, [portfolio?.items, currentPage, pageSize])
 
   // Load portfolio data
   useEffect(() => {
@@ -186,6 +213,10 @@ export function PortfolioAdmin() {
       } else {
         setSuccess('Portfolio item deleted successfully')
         loadPortfolioData() // Reload to get updated data
+        // Reset to first page if we're on the last page and it becomes empty
+        if (currentPage > 1 && currentItems.length === 1 && totalPages === currentPage) {
+          setCurrentPage(currentPage - 1)
+        }
       }
     } catch (err) {
       setError('Failed to delete portfolio item')
@@ -259,6 +290,82 @@ export function PortfolioAdmin() {
     } finally {
       setSaving(false)
     }
+  }
+
+  // Pagination functions
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+    }
+  }
+
+  const renderPaginationItems = () => {
+    const items = []
+    
+    // Always show first page
+    items.push(
+      <PaginationItem key={1}>
+        <PaginationLink 
+          onClick={() => goToPage(1)} 
+          isActive={currentPage === 1}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    )
+    
+    if (totalPages <= 1) return items
+    
+    // Show ellipsis if there are pages between first and current range
+    if (currentPage > 3) {
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      )
+    }
+    
+    // Show pages around current page
+    const startPage = Math.max(2, currentPage - 1)
+    const endPage = Math.min(totalPages - 1, currentPage + 1)
+    
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink 
+            onClick={() => goToPage(i)} 
+            isActive={currentPage === i}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      )
+    }
+    
+    // Show ellipsis if there are pages between current range and last
+    if (currentPage < totalPages - 2) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      )
+    }
+    
+    // Always show last page if there's more than one page
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink 
+            onClick={() => goToPage(totalPages)} 
+            isActive={currentPage === totalPages}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      )
+    }
+    
+    return items
   }
 
   if (loading) {
@@ -446,7 +553,7 @@ export function PortfolioAdmin() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {portfolio.items.length === 0 ? (
+                {currentItems.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
                       <Image className="h-12 w-12 mx-auto text-gray-400" />
@@ -455,79 +562,106 @@ export function PortfolioAdmin() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  portfolio.items.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <div className="flex items-center justify-center">
-                          <img 
-                            src={item.image} 
-                            alt={portfolio.itemsAlt?.[index] || `Portfolio item ${index + 1}`}
-                            className="w-16 h-16 object-cover rounded-md border"
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {editingItemIndex === index ? (
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              value={editingItemAlt}
-                              onChange={(e) => setEditingItemAlt(e.target.value)}
-                              placeholder="Enter alt text"
-                              className="flex-1"
+                  currentItems.map((item, index) => {
+                    // Calculate the global index for the item in the entire portfolio
+                    const globalIndex = (currentPage - 1) * pageSize + index
+                    return (
+                      <TableRow key={globalIndex}>
+                        <TableCell>
+                          <div className="flex items-center justify-center">
+                            <img 
+                              src={item.image} 
+                              alt={portfolio.itemsAlt?.[globalIndex] || `Portfolio item ${globalIndex + 1}`}
+                              className="w-16 h-16 object-cover rounded-md border"
                             />
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                handleEditItemAlt(index, editingItemAlt)
-                                setEditingItemIndex(null)
-                              }}
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setEditingItemIndex(null)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
                           </div>
-                        ) : (
-                          <div className="flex items-center space-x-2">
-                            <span className="max-w-xs truncate text-sm text-muted-foreground">
-                              {portfolio.itemsAlt?.[index] || 'No alt text'}
-                            </span>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                setEditingItemIndex(index)
-                                setEditingItemAlt(portfolio.itemsAlt?.[index] || '')
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          onClick={() => handleDeleteItem(index)}
-                          disabled={saving}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        </TableCell>
+                        <TableCell>
+                          {editingItemIndex === globalIndex ? (
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                value={editingItemAlt}
+                                onChange={(e) => setEditingItemAlt(e.target.value)}
+                                placeholder="Enter alt text"
+                                className="flex-1"
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  handleEditItemAlt(globalIndex, editingItemAlt)
+                                  setEditingItemIndex(null)
+                                }}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingItemIndex(null)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <span className="max-w-xs truncate text-sm text-muted-foreground">
+                                {portfolio.itemsAlt?.[globalIndex] || 'No alt text'}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setEditingItemIndex(globalIndex)
+                                  setEditingItemAlt(portfolio.itemsAlt?.[globalIndex] || '')
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => handleDeleteItem(globalIndex)}
+                            disabled={saving}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
                 )}
               </TableBody>
             </Table>
           </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination className="mt-6">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  />
+                </PaginationItem>
+                
+                {renderPaginationItems()}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </CardContent>
       </Card>
 

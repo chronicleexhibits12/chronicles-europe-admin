@@ -18,6 +18,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import { Plus, Edit, Trash2, Eye, Download, Search, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTradeShows } from '@/hooks/useTradeShowsContent'
@@ -26,7 +35,9 @@ import * as XLSX from 'xlsx'
 
 export function TradeShowsAdmin() {
   const navigate = useNavigate()
-  const { data: tradeShows, loading, error, refetch } = useTradeShows()
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 10
+  const { data: tradeShows, totalCount, loading, error, refetch } = useTradeShows(currentPage, pageSize)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [tradeShowToDelete, setTradeShowToDelete] = useState<{id: string, title: string} | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -34,6 +45,9 @@ export function TradeShowsAdmin() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [startDateFilter, setStartDateFilter] = useState('')
   const [endDateFilter, setEndDateFilter] = useState('')
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalCount / pageSize)
 
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
@@ -159,6 +173,82 @@ export function TradeShowsAdmin() {
       console.error('Error exporting to Excel:', error)
       toast.error('Failed to export Excel file')
     }
+  }
+
+  // Pagination functions
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+    }
+  }
+
+  const renderPaginationItems = () => {
+    const items = []
+    
+    // Always show first page
+    items.push(
+      <PaginationItem key={1}>
+        <PaginationLink 
+          onClick={() => goToPage(1)} 
+          isActive={currentPage === 1}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    )
+    
+    if (totalPages <= 1) return items
+    
+    // Show ellipsis if there are pages between first and current range
+    if (currentPage > 3) {
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      )
+    }
+    
+    // Show pages around current page
+    const startPage = Math.max(2, currentPage - 1)
+    const endPage = Math.min(totalPages - 1, currentPage + 1)
+    
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink 
+            onClick={() => goToPage(i)} 
+            isActive={currentPage === i}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      )
+    }
+    
+    // Show ellipsis if there are pages between current range and last
+    if (currentPage < totalPages - 2) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      )
+    }
+    
+    // Always show last page if there's more than one page
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink 
+            onClick={() => goToPage(totalPages)} 
+            isActive={currentPage === totalPages}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      )
+    }
+    
+    return items
   }
 
   if (loading) {
@@ -396,6 +486,29 @@ export function TradeShowsAdmin() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              />
+            </PaginationItem>
+            
+            {renderPaginationItems()}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   )
 }

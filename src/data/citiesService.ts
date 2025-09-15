@@ -22,6 +22,36 @@ export class CitiesService {
     }
   }
 
+  // Get all cities with pagination
+  static async getCitiesWithPagination(page: number = 1, pageSize: number = 10): Promise<{ data: City[] | null; error: string | null; totalCount: number }> {
+    try {
+      // Calculate the range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      // Get the total count first
+      const { count: totalCount, error: countError } = await supabase
+        .from('cities')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) throw new Error(countError.message);
+
+      // Get the paginated data
+      const { data, error } = await supabase
+        .from('cities')
+        .select('*')
+        .order('name')
+        .range(from, to);
+
+      if (error) throw new Error(error.message);
+      
+      return { data: data as City[] || [], error: null, totalCount: totalCount || 0 };
+    } catch (error: any) {
+      console.error('Error fetching cities:', error);
+      return { data: null, error: error.message || 'Failed to fetch cities', totalCount: 0 };
+    }
+  }
+
   // Get city by ID
   static async getCityById(id: string): Promise<{ data: City | null; error: string | null }> {
     try {
@@ -72,7 +102,10 @@ export class CitiesService {
         what_we_do_title: data.what_we_do_title,
         what_we_do_subtitle: data.what_we_do_subtitle,
         what_we_do_description_html: data.what_we_do_description_html,
-        portfolio_title_template: data.portfolio_title_template,
+        portfolio_section_title: data.portfolio_section_title,
+        portfolio_section_subtitle: data.portfolio_section_subtitle,
+        portfolio_section_cta_text: data.portfolio_section_cta_text,
+        portfolio_section_cta_link: data.portfolio_section_cta_link,
         exhibiting_experience_title: data.exhibiting_experience_title,
         exhibiting_experience_subtitle: data.exhibiting_experience_subtitle,
         exhibiting_experience_benefits_html: data.exhibiting_experience_benefits_html,

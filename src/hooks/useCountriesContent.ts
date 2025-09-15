@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { CountriesService } from '@/data/countriesService'
 import type { Country } from '@/data/countriesTypes'
 
-export function useCountries() {
+export function useCountries(page?: number, pageSize?: number) {
   const [data, setData] = useState<Country[]>([])
+  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -11,13 +12,29 @@ export function useCountries() {
     try {
       setLoading(true)
       setError(null)
-      const { data: countries, error: fetchError } = await CountriesService.getCountries()
+      
+      let countries, fetchError, totalCount;
+      
+      // If page and pageSize are provided, use pagination
+      if (page !== undefined && pageSize !== undefined) {
+        const result = await CountriesService.getCountriesWithPagination(page, pageSize)
+        countries = result.data
+        fetchError = result.error
+        totalCount = result.totalCount
+      } else {
+        // Otherwise, fetch all posts
+        const result = await CountriesService.getCountries()
+        countries = result.data
+        fetchError = result.error
+        totalCount = countries?.length || 0
+      }
       
       if (fetchError) {
         throw new Error(fetchError)
       }
       
       setData(countries || [])
+      setTotalCount(totalCount)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch countries')
       console.error('Error in useCountries:', err)
@@ -28,9 +45,9 @@ export function useCountries() {
 
   useEffect(() => {
     fetchCountries()
-  }, [])
+  }, [page, pageSize])
 
-  return { data, loading, error, refetch: fetchCountries }
+  return { data, totalCount, loading, error, refetch: fetchCountries }
 }
 
 export function useCountry(id: string) {

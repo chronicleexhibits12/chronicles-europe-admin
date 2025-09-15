@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { TradeShowsService } from '@/data/tradeShowsService'
 import type { TradeShow, TradeShowsPage } from '@/data/tradeShowsTypes'
 
-export function useTradeShows() {
+export function useTradeShows(page?: number, pageSize?: number) {
   const [data, setData] = useState<TradeShow[]>([])
+  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -11,13 +12,29 @@ export function useTradeShows() {
     try {
       setLoading(true)
       setError(null)
-      const { data: tradeShows, error: fetchError } = await TradeShowsService.getTradeShows()
+      
+      let tradeShows, fetchError, totalCount;
+      
+      // If page and pageSize are provided, use pagination
+      if (page !== undefined && pageSize !== undefined) {
+        const result = await TradeShowsService.getTradeShowsWithPagination(page, pageSize)
+        tradeShows = result.data
+        fetchError = result.error
+        totalCount = result.totalCount
+      } else {
+        // Otherwise, fetch all posts
+        const result = await TradeShowsService.getTradeShows()
+        tradeShows = result.data
+        fetchError = result.error
+        totalCount = tradeShows?.length || 0
+      }
       
       if (fetchError) {
         throw new Error(fetchError)
       }
       
       setData(tradeShows || [])
+      setTotalCount(totalCount)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch trade shows')
       console.error('Error in useTradeShows:', err)
@@ -28,9 +45,9 @@ export function useTradeShows() {
 
   useEffect(() => {
     fetchTradeShows()
-  }, [])
+  }, [page, pageSize])
 
-  return { data, loading, error, refetch: fetchTradeShows }
+  return { data, totalCount, loading, error, refetch: fetchTradeShows }
 }
 
 export function useTradeShow(id: string) {

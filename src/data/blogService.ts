@@ -144,6 +144,59 @@ export class BlogService {
     }
   }
 
+  // Get all blog posts with pagination
+  static async getBlogPostsWithPagination(page: number = 1, pageSize: number = 10): Promise<{ data: BlogPost[] | null; error: string | null; totalCount: number }> {
+    try {
+      // Calculate the range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      // Get the total count first
+      const { count: totalCount, error: countError } = await (supabase as any)
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) throw new Error(countError.message);
+
+      // Get the paginated data
+      const { data, error } = await (supabase as any)
+        .from('blog_posts')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .range(from, to);
+
+      if (error) throw new Error(error.message);
+      
+      // Transform database rows to BlogPost interface
+      const blogPosts: BlogPost[] = (data || []).map((row: Database['public']['Tables']['blog_posts']['Row']) => ({
+        id: row.id,
+        slug: row.slug,
+        title: row.title,
+        excerpt: row.excerpt,
+        content: row.content,
+        publishedDate: row.published_date,
+        featuredImage: row.featured_image,
+        featuredImageAlt: row.featured_image_alt,
+        category: row.category,
+        author: row.author,
+        readTime: row.read_time,
+        tags: row.tags,
+        metaTitle: row.meta_title,
+        metaDescription: row.meta_description,
+        metaKeywords: row.meta_keywords,
+        sortOrder: row.sort_order,
+        isActive: row.is_active,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+      
+      return { data: blogPosts, error: null, totalCount: totalCount || 0 };
+    } catch (error: any) {
+      console.error('Error fetching blog posts:', error);
+      return { data: null, error: error.message || 'Failed to fetch blog posts', totalCount: 0 };
+    }
+  }
+
   // Get blog post by ID
   static async getBlogPostById(id: string): Promise<{ data: BlogPost | null; error: string | null }> {
     try {

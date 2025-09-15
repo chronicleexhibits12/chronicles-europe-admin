@@ -33,7 +33,10 @@ export interface City {
   what_we_do_description_html: string | null
   
   // Portfolio Section
-  portfolio_title_template: string | null
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
   
   // Exhibiting Experience Section
   exhibiting_experience_title: string | null

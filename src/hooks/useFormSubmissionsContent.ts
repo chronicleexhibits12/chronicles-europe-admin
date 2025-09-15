@@ -18,8 +18,9 @@ interface FormSubmission {
   updatedAt: string
 }
 
-export const useFormSubmissions = () => {
+export const useFormSubmissions = (page?: number, pageSize?: number) => {
   const [data, setData] = useState<FormSubmission[]>([])
+  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -27,13 +28,29 @@ export const useFormSubmissions = () => {
     try {
       setLoading(true)
       setError(null)
-      const { data: formSubmissions, error: fetchError } = await FormSubmissionsService.getFormSubmissions()
+      
+      let formSubmissions, fetchError, totalCount;
+      
+      // If page and pageSize are provided, use pagination
+      if (page !== undefined && pageSize !== undefined) {
+        const result = await FormSubmissionsService.getFormSubmissionsWithPagination(page, pageSize)
+        formSubmissions = result.data
+        fetchError = result.error
+        totalCount = result.totalCount
+      } else {
+        // Otherwise, fetch all posts
+        const result = await FormSubmissionsService.getFormSubmissions()
+        formSubmissions = result.data
+        fetchError = result.error
+        totalCount = formSubmissions?.length || 0
+      }
       
       if (fetchError) {
         throw new Error(fetchError)
       }
       
       setData(formSubmissions || [])
+      setTotalCount(totalCount)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch form submissions')
     } finally {
@@ -43,9 +60,9 @@ export const useFormSubmissions = () => {
 
   useEffect(() => {
     fetchFormSubmissions()
-  }, [])
+  }, [page, pageSize])
 
-  return { data, loading, error, refetch: fetchFormSubmissions }
+  return { data, totalCount, loading, error, refetch: fetchFormSubmissions }
 }
 
 export const useFormSubmission = (id: string) => {

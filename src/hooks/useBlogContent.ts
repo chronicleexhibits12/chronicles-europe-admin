@@ -32,8 +32,9 @@ export const useBlogPage = () => {
   return { data, loading, error, refetch: fetchBlogPage }
 }
 
-export const useBlogPosts = () => {
+export const useBlogPosts = (page?: number, pageSize?: number) => {
   const [data, setData] = useState<BlogPost[]>([])
+  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,13 +42,29 @@ export const useBlogPosts = () => {
     try {
       setLoading(true)
       setError(null)
-      const { data: blogPosts, error: fetchError } = await BlogService.getBlogPosts()
+      
+      let blogPosts, fetchError, totalCount;
+      
+      // If page and pageSize are provided, use pagination
+      if (page !== undefined && pageSize !== undefined) {
+        const result = await BlogService.getBlogPostsWithPagination(page, pageSize)
+        blogPosts = result.data
+        fetchError = result.error
+        totalCount = result.totalCount
+      } else {
+        // Otherwise, fetch all posts
+        const result = await BlogService.getBlogPosts()
+        blogPosts = result.data
+        fetchError = result.error
+        totalCount = blogPosts?.length || 0
+      }
       
       if (fetchError) {
         throw new Error(fetchError)
       }
       
       setData(blogPosts || [])
+      setTotalCount(totalCount)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch blog posts')
     } finally {
@@ -57,9 +74,9 @@ export const useBlogPosts = () => {
 
   useEffect(() => {
     fetchBlogPosts()
-  }, [])
+  }, [page, pageSize])
 
-  return { data, loading, error, refetch: fetchBlogPosts }
+  return { data, totalCount, loading, error, refetch: fetchBlogPosts }
 }
 
 export const useBlogPost = (id: string) => {

@@ -47,17 +47,18 @@ interface CityData {
   
   // Why Choose Us Section
   why_choose_us_title: string
-  why_choose_us_subtitle: string
   why_choose_us_main_image_url: string
   why_choose_us_benefits_html: string
   
   // What We Do Section
   what_we_do_title: string
-  what_we_do_subtitle: string
   what_we_do_description_html: string
   
   // Portfolio Section
-  portfolio_title_template: string
+  portfolio_section_title: string
+  portfolio_section_subtitle: string
+  portfolio_section_cta_text: string
+  portfolio_section_cta_link: string
   
   // Exhibiting Experience Section
   exhibiting_experience_title: string
@@ -97,17 +98,18 @@ export function EditCityAdmin() {
     
     // Why Choose Us Section
     why_choose_us_title: '',
-    why_choose_us_subtitle: '',
     why_choose_us_main_image_url: '',
     why_choose_us_benefits_html: '',
     
     // What We Do Section
     what_we_do_title: '',
-    what_we_do_subtitle: '',
     what_we_do_description_html: '',
     
     // Portfolio Section
-    portfolio_title_template: '',
+    portfolio_section_title: 'OUR PORTFOLIO',
+    portfolio_section_subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+    portfolio_section_cta_text: 'View All Projects',
+    portfolio_section_cta_link: '/portfolio',
     
     // Exhibiting Experience Section
     exhibiting_experience_title: '',
@@ -157,13 +159,14 @@ export function EditCityAdmin() {
         hero_subtitle: city.hero_subtitle || '',
         hero_background_image_url: city.hero_background_image_url || '',
         why_choose_us_title: city.why_choose_us_title || '',
-        why_choose_us_subtitle: city.why_choose_us_subtitle || '',
         why_choose_us_main_image_url: city.why_choose_us_main_image_url || '',
         why_choose_us_benefits_html: city.why_choose_us_benefits_html || '',
         what_we_do_title: city.what_we_do_title || '',
-        what_we_do_subtitle: city.what_we_do_subtitle || '',
         what_we_do_description_html: city.what_we_do_description_html || '',
-        portfolio_title_template: city.portfolio_title_template || '',
+        portfolio_section_title: city.portfolio_section_title || 'OUR PORTFOLIO',
+        portfolio_section_subtitle: city.portfolio_section_subtitle || 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        portfolio_section_cta_text: city.portfolio_section_cta_text || 'View All Projects',
+        portfolio_section_cta_link: city.portfolio_section_cta_link || '/portfolio',
         exhibiting_experience_title: city.exhibiting_experience_title || '',
         exhibiting_experience_subtitle: city.exhibiting_experience_subtitle || '',
         exhibiting_experience_benefits_html: city.exhibiting_experience_benefits_html || '',
@@ -332,13 +335,14 @@ export function EditCityAdmin() {
           hero_subtitle: updatedFormData.hero_subtitle,
           hero_background_image_url: updatedFormData.hero_background_image_url,
           why_choose_us_title: updatedFormData.why_choose_us_title,
-          why_choose_us_subtitle: updatedFormData.why_choose_us_subtitle,
           why_choose_us_main_image_url: updatedFormData.why_choose_us_main_image_url,
           why_choose_us_benefits_html: updatedFormData.why_choose_us_benefits_html,
           what_we_do_title: updatedFormData.what_we_do_title,
-          what_we_do_subtitle: updatedFormData.what_we_do_subtitle,
           what_we_do_description_html: updatedFormData.what_we_do_description_html,
-          portfolio_title_template: updatedFormData.portfolio_title_template,
+          portfolio_section_title: updatedFormData.portfolio_section_title,
+          portfolio_section_subtitle: updatedFormData.portfolio_section_subtitle,
+          portfolio_section_cta_text: updatedFormData.portfolio_section_cta_text,
+          portfolio_section_cta_link: '/portfolio', // Fixed to /portfolio as requested
           exhibiting_experience_title: updatedFormData.exhibiting_experience_title,
           exhibiting_experience_subtitle: updatedFormData.exhibiting_experience_subtitle,
           exhibiting_experience_benefits_html: updatedFormData.exhibiting_experience_benefits_html,
@@ -633,12 +637,12 @@ export function EditCityAdmin() {
               />
             </div>
             <div>
-              <Label htmlFor="hero_subtitle">Hero Subtitle</Label>
+              <Label htmlFor="hero_subtitle">Button</Label>
               <Input
                 id="hero_subtitle"
                 value={formData.hero_subtitle}
                 onChange={(e) => handleInputChange('hero_subtitle', e.target.value)}
-                placeholder="Hero subtitle"
+                placeholder="Button text"
               />
             </div>
             <div className="col-span-full">
@@ -714,15 +718,6 @@ export function EditCityAdmin() {
                 value={formData.why_choose_us_title}
                 onChange={(e) => handleInputChange('why_choose_us_title', e.target.value)}
                 placeholder="Title"
-              />
-            </div>
-            <div>
-              <Label htmlFor="why_choose_us_subtitle">Subtitle</Label>
-              <Input
-                id="why_choose_us_subtitle"
-                value={formData.why_choose_us_subtitle}
-                onChange={(e) => handleInputChange('why_choose_us_subtitle', e.target.value)}
-                placeholder="Subtitle"
               />
             </div>
             <div className="col-span-full">
@@ -808,15 +803,6 @@ export function EditCityAdmin() {
                 placeholder="Title"
               />
             </div>
-            <div>
-              <Label htmlFor="what_we_do_subtitle">Subtitle</Label>
-              <Input
-                id="what_we_do_subtitle"
-                value={formData.what_we_do_subtitle}
-                onChange={(e) => handleInputChange('what_we_do_subtitle', e.target.value)}
-                placeholder="Subtitle"
-              />
-            </div>
             <div className="col-span-full">
               <Label>Description (Rich Text)</Label>
               <RichTextEditor
@@ -831,15 +817,45 @@ export function EditCityAdmin() {
         {/* Section 5: Portfolio Section */}
         <div className="admin-section">
           <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5: Portfolio Section</h2>
-          <div className="w-full">
-            <div>
-              <Label htmlFor="portfolio_title_template">Portfolio Title Template</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <Label htmlFor="portfolio_section_title">Title</Label>
               <Input
-                id="portfolio_title_template"
-                value={formData.portfolio_title_template}
-                onChange={(e) => handleInputChange('portfolio_title_template', e.target.value)}
-                placeholder="e.g., Our Portfolio in {city_name}"
+                id="portfolio_section_title"
+                value={formData.portfolio_section_title}
+                onChange={(e) => handleInputChange('portfolio_section_title', e.target.value)}
+                placeholder="e.g., OUR PORTFOLIO"
               />
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="portfolio_section_subtitle">Subtitle</Label>
+              <Input
+                id="portfolio_section_subtitle"
+                value={formData.portfolio_section_subtitle}
+                onChange={(e) => handleInputChange('portfolio_section_subtitle', e.target.value)}
+                placeholder="e.g., Explore our extensive portfolio..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="portfolio_section_cta_text">CTA Text</Label>
+              <Input
+                id="portfolio_section_cta_text"
+                value={formData.portfolio_section_cta_text}
+                onChange={(e) => handleInputChange('portfolio_section_cta_text', e.target.value)}
+                placeholder="e.g., View All Projects"
+              />
+            </div>
+            <div>
+              <Label htmlFor="portfolio_section_cta_link">CTA Link</Label>
+              <Input
+                id="portfolio_section_cta_link"
+                value="/portfolio"
+                readOnly
+                placeholder="/portfolio"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                This link is fixed to "/portfolio"
+              </p>
             </div>
           </div>
         </div>

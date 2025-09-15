@@ -51,6 +51,63 @@ export class TradeShowsService {
     }
   }
 
+  // Get all trade shows with pagination
+  static async getTradeShowsWithPagination(page: number = 1, pageSize: number = 10): Promise<{ data: TradeShow[] | null; error: string | null; totalCount: number }> {
+    try {
+      // Calculate the range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      // Get the total count first
+      const { count: totalCount, error: countError } = await supabase
+        .from('trade_shows')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) throw new Error(countError.message);
+
+      // Get the paginated data
+      const { data, error } = await supabase
+        .from('trade_shows')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .range(from, to);
+
+      if (error) throw new Error(error.message);
+      
+      // Transform database rows to TradeShow interface
+      const tradeShows: TradeShow[] = (data || []).map((row: TradeShowsRow) => ({
+        id: row.id,
+        slug: row.slug,
+        title: row.title,
+        excerpt: row.excerpt,
+        content: row.content,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        location: row.location,
+        country: row.country,
+        city: row.city,
+        category: row.category,
+        logo: row.logo,
+        logoAlt: row.logo_alt,
+        organizer: row.organizer,
+        website: row.website,
+        venue: row.venue,
+        metaTitle: row.meta_title,
+        metaDescription: row.meta_description,
+        metaKeywords: row.meta_keywords,
+        sortOrder: row.sort_order,
+        isActive: row.is_active,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+      
+      return { data: tradeShows, error: null, totalCount: totalCount || 0 };
+    } catch (error: any) {
+      console.error('Error fetching trade shows:', error);
+      return { data: null, error: error.message || 'Failed to fetch trade shows', totalCount: 0 };
+    }
+  }
+
   // Get trade show by ID
   static async getTradeShowById(id: string): Promise<{ data: TradeShow | null; error: string | null }> {
     try {

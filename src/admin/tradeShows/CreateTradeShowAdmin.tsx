@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { TagInput } from '@/components/ui/tag-input'
+import { DatePicker } from '@/components/ui/date-picker'
+import { SearchableSelect } from '@/components/ui/searchable-select'
 import { Loader2, Save, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { TradeShowsService } from '@/data/tradeShowsService'
@@ -48,10 +50,24 @@ export function CreateTradeShowAdmin() {
       [field]: value
     }))
 
+    // Auto-set end date to start date + 1 day when start date changes
+    if (field === 'startDate') {
+      const startDate = new Date(value as string);
+      if (!isNaN(startDate.getTime())) {
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 1);
+        const endDateString = endDate.toISOString().split('T')[0];
+        setFormData(prev => ({
+          ...prev,
+          endDate: endDateString
+        }));
+      }
+    }
+
     // Auto-fill location when city or country is changed
     if (field === 'city' || field === 'country') {
-      const newCity = field === 'city' ? value : formData.city
-      const newCountry = field === 'country' ? value : formData.country
+      const newCity = field === 'city' ? value : formData.city;
+      const newCountry = field === 'country' ? value : formData.country;
       
       // Only update location if both city and country have values
       if (newCity && newCountry) {
@@ -258,53 +274,35 @@ export function CreateTradeShowAdmin() {
             {/* Event Details fields added here */}
             <div>
               <Label htmlFor="startDate">Start Date</Label>
-              <Input
-                id="startDate"
-                type="date"
+              <DatePicker
                 value={formData.startDate}
-                onChange={(e) => handleInputChange('startDate', e.target.value)}
+                onChange={(date) => handleInputChange('startDate', date)}
               />
             </div>
             <div>
               <Label htmlFor="endDate">End Date</Label>
-              <Input
-                id="endDate"
-                type="date"
+              <DatePicker
                 value={formData.endDate}
-                onChange={(e) => handleInputChange('endDate', e.target.value)}
+                onChange={(date) => handleInputChange('endDate', date)}
               />
             </div>
             <div>
               <Label htmlFor="country">Country</Label>
-              <select
-                id="country"
+              <SearchableSelect
                 value={formData.country}
-                onChange={(e) => handleInputChange('country', e.target.value)}
-                className="w-full p-2 border rounded-md"
-              >
-                <option value="">Select a country</option>
-                {globalLocations?.countries?.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleInputChange('country', value)}
+                options={globalLocations?.countries || []}
+                placeholder="Select a country"
+              />
             </div>
             <div>
               <Label htmlFor="city">City</Label>
-              <select
-                id="city"
+              <SearchableSelect
                 value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                className="w-full p-2 border rounded-md"
-              >
-                <option value="">Select a city</option>
-                {globalLocations?.cities?.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleInputChange('city', value)}
+                options={globalLocations?.cities || []}
+                placeholder="Select a city"
+              />
             </div>
             <div className="col-span-full">
               <Label>Content (Rich Text)</Label>

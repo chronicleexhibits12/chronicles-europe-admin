@@ -51,14 +51,18 @@ interface CountryData {
   
   // Why Choose Us Section
   why_choose_us_title: string
-  why_choose_us_subtitle: string
   why_choose_us_main_image_url: string
   why_choose_us_benefits_html: string
   
   // What We Do Section
   what_we_do_title: string
-  what_we_do_subtitle: string
   what_we_do_description_html: string
+  
+  // Portfolio Section
+  portfolio_section_title: string
+  portfolio_section_subtitle: string
+  portfolio_section_cta_text: string
+  portfolio_section_cta_link: string
   
   // Company Info Section
   company_info_title: string
@@ -104,14 +108,18 @@ export function EditCountryAdmin() {
     
     // Why Choose Us Section
     why_choose_us_title: '',
-    why_choose_us_subtitle: '',
     why_choose_us_main_image_url: '',
     why_choose_us_benefits_html: '',
     
     // What We Do Section
     what_we_do_title: '',
-    what_we_do_subtitle: '',
     what_we_do_description_html: '',
+    
+    // Portfolio Section
+    portfolio_section_title: '',
+    portfolio_section_subtitle: '',
+    portfolio_section_cta_text: '',
+    portfolio_section_cta_link: '/portfolio',
     
     // Company Info Section
     company_info_title: '',
@@ -190,12 +198,14 @@ export function EditCountryAdmin() {
         hero_subtitle: country.hero_subtitle || '',
         hero_background_image_url: country.hero_background_image_url || '',
         why_choose_us_title: country.why_choose_us_title || '',
-        why_choose_us_subtitle: country.why_choose_us_subtitle || '',
         why_choose_us_main_image_url: country.why_choose_us_main_image_url || '',
         why_choose_us_benefits_html: country.why_choose_us_benefits_html || '',
         what_we_do_title: country.what_we_do_title || '',
-        what_we_do_subtitle: country.what_we_do_subtitle || '',
         what_we_do_description_html: country.what_we_do_description_html || '',
+        portfolio_section_title: country.portfolio_section_title || 'OUR PORTFOLIO',
+        portfolio_section_subtitle: country.portfolio_section_subtitle || 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        portfolio_section_cta_text: country.portfolio_section_cta_text || 'View All Projects',
+        portfolio_section_cta_link: country.portfolio_section_cta_link || '/portfolio',
         company_info_title: country.company_info_title || '',
         company_info_content_html: country.company_info_content_html || '',
         best_company_title: country.best_company_title || '',
@@ -358,12 +368,14 @@ export function EditCountryAdmin() {
         hero_subtitle: updatedFormData.hero_subtitle,
         hero_background_image_url: updatedFormData.hero_background_image_url,
         why_choose_us_title: updatedFormData.why_choose_us_title,
-        why_choose_us_subtitle: updatedFormData.why_choose_us_subtitle,
         why_choose_us_main_image_url: updatedFormData.why_choose_us_main_image_url,
         why_choose_us_benefits_html: updatedFormData.why_choose_us_benefits_html,
         what_we_do_title: updatedFormData.what_we_do_title,
-        what_we_do_subtitle: updatedFormData.what_we_do_subtitle,
         what_we_do_description_html: updatedFormData.what_we_do_description_html,
+        portfolio_section_title: updatedFormData.portfolio_section_title,
+        portfolio_section_subtitle: updatedFormData.portfolio_section_subtitle,
+        portfolio_section_cta_text: updatedFormData.portfolio_section_cta_text,
+        portfolio_section_cta_link: '/portfolio', // Fixed to /portfolio as requested
         company_info_title: updatedFormData.company_info_title,
         company_info_content_html: updatedFormData.company_info_content_html,
         best_company_title: updatedFormData.best_company_title,
@@ -565,7 +577,7 @@ export function EditCountryAdmin() {
               />
             </div>
             <div>
-              <Label htmlFor="hero_subtitle">Hero Subtitle</Label>
+              <Label htmlFor="hero_subtitle">Button Title</Label>
               <Input
                 id="hero_subtitle"
                 value={formData.hero_subtitle}
@@ -654,15 +666,6 @@ export function EditCountryAdmin() {
                 value={formData.why_choose_us_title}
                 onChange={(e) => handleInputChange('why_choose_us_title', e.target.value)}
                 placeholder="e.g., Why Choose Us for Exhibition Stands in"
-              />
-            </div>
-            <div>
-              <Label htmlFor="why_choose_us_subtitle">Subtitle</Label>
-              <Input
-                id="why_choose_us_subtitle"
-                value={formData.why_choose_us_subtitle}
-                onChange={(e) => handleInputChange('why_choose_us_subtitle', e.target.value)}
-                placeholder="e.g., France?"
               />
             </div>
             <div className="md:col-span-2">
@@ -756,15 +759,6 @@ export function EditCountryAdmin() {
                 placeholder="e.g., WHAT WE DO?"
               />
             </div>
-            <div>
-              <Label htmlFor="what_we_do_subtitle">Subtitle</Label>
-              <Input
-                id="what_we_do_subtitle"
-                value={formData.what_we_do_subtitle}
-                onChange={(e) => handleInputChange('what_we_do_subtitle', e.target.value)}
-                placeholder="e.g., WE DO?"
-              />
-            </div>
             <div className="md:col-span-2">
               <Label>Description HTML Content</Label>
               <RichTextEditor
@@ -772,6 +766,52 @@ export function EditCountryAdmin() {
                 onChange={(content) => handleRichTextChange('what_we_do_description_html', content)}
                 controlled={true} // Enable controlled mode
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Portfolio Section */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Portfolio Section</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <Label htmlFor="portfolio_section_title">Title</Label>
+              <Input
+                id="portfolio_section_title"
+                value={formData.portfolio_section_title}
+                onChange={(e) => handleInputChange('portfolio_section_title', e.target.value)}
+                placeholder="e.g., OUR PORTFOLIO"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="portfolio_section_subtitle">Subtitle</Label>
+              <Input
+                id="portfolio_section_subtitle"
+                value={formData.portfolio_section_subtitle}
+                onChange={(e) => handleInputChange('portfolio_section_subtitle', e.target.value)}
+                placeholder="e.g., Explore our extensive portfolio..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="portfolio_section_cta_text">CTA Text</Label>
+              <Input
+                id="portfolio_section_cta_text"
+                value={formData.portfolio_section_cta_text}
+                onChange={(e) => handleInputChange('portfolio_section_cta_text', e.target.value)}
+                placeholder="e.g., View All Projects"
+              />
+            </div>
+            <div>
+              <Label htmlFor="portfolio_section_cta_link">CTA Link</Label>
+              <Input
+                id="portfolio_section_cta_link"
+                value="/portfolio"
+                readOnly
+                placeholder="/portfolio"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                This link is fixed to "/portfolio"
+              </p>
             </div>
           </div>
         </div>

@@ -55,6 +55,12 @@ export interface Country {
   cities_section_title: string | null
   cities_section_subtitle: string | null
   
+  // Portfolio Section
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
+  
   // Selected Cities (JSONB array of city slugs)
   selected_cities: string[]
 }

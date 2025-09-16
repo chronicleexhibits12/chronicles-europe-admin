@@ -8,6 +8,8 @@ export interface DoubleDeckStandsHero {
   title?: string
   subtitle?: string
   backgroundImage?: string
+  // Add button title field
+  buttonTitle?: string
 }
 
 export interface DoubleDeckStandsBenefits {
@@ -46,6 +48,14 @@ export interface DoubleDeckStandsBoldStatement {
   description?: string
 }
 
+// Add the new Portfolio interface
+export interface DoubleDeckStandsPortfolio {
+  title?: string
+  subtitle?: string
+  ctaText?: string
+  ctaLink?: string
+}
+
 export interface DoubleDeckStandsPage {
   id: string
   meta?: DoubleDeckStandsMeta
@@ -56,6 +66,8 @@ export interface DoubleDeckStandsPage {
   exhibitionBenefits?: DoubleDeckStandsExhibitionBenefits
   boothPartner?: DoubleDeckStandsBoothPartner
   boldStatement?: DoubleDeckStandsBoldStatement
+  // Add the portfolio section
+  portfolio?: DoubleDeckStandsPortfolio
   slug: string
   isActive: boolean
   createdAt: string
@@ -71,6 +83,8 @@ export interface DoubleDeckStandsPageData {
   hero_title: string | null
   hero_subtitle: string | null
   hero_background_image: string | null
+  // Add hero button title field
+  hero_button_title: string | null
   benefits_title: string | null
   benefits_image: string | null
   benefits_content: string | null
@@ -89,6 +103,11 @@ export interface DoubleDeckStandsPageData {
   bold_statement_title: string | null
   bold_statement_subtitle: string | null
   bold_statement_description: string | null
+  // Add portfolio fields
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
   is_active: boolean
   created_at: string
   updated_at: string

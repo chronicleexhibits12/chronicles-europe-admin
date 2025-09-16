@@ -46,6 +46,13 @@ export class PavilionStandsPageService {
         title: 'RADON SP Z.O.O. AND ITS STAND-BUILDING SERVICES',
         content: '<ul><li>As a premier exhibition stand builder in Europe, we offer a range of services and solutions in all the major exhibiting countries across Europe, including the Netherlands, Germany, Spain, and others.</li><li>We always aim to understand the client\'s marketing goals and deliver a perfect exhibition position.</li><li>We use an integrated approach and methodology that ensures outstanding results every time we take up a project.</li><li>Since 2003, we have been providing project-only solutions with a deep understanding of client\'s marketing goals.</li><li>Our team consists of certified architects, interior designers, and project managers who understand the nuances of different industries.</li><li>We maintain strategic partnerships with leading material suppliers and logistics companies to ensure cost-effective solutions without compromising on quality standards.</li></ul>'
       },
+      // Add portfolio section with default values
+      portfolio: {
+        title: 'OUR PORTFOLIO',
+        subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        ctaText: 'View All Projects',
+        ctaLink: '/portfolio'
+      },
       slug: 'pavilion-stands',
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -84,7 +91,11 @@ export class PavilionStandsPageService {
         hero: {
           title: row.hero_title || '',
           subtitle: row.hero_subtitle || '',
-          backgroundImage: row.hero_background_image || ''
+          backgroundImage: row.hero_background_image || '',
+          // Add background image alt text field
+          backgroundImageAlt: row.hero_background_image_alt || undefined,
+          // Add button title field
+          buttonTitle: row.hero_button_title || undefined
         },
         whyChoose: {
           title: row.why_choose_title || '',
@@ -93,6 +104,8 @@ export class PavilionStandsPageService {
         benefits: {
           title: row.benefits_title || '',
           image: row.benefits_image || '',
+          // Add image alt text field
+          imageAlt: row.benefits_image_alt || undefined,
           content: row.benefits_content || ''
         },
         standProjectText: {
@@ -103,6 +116,8 @@ export class PavilionStandsPageService {
         advantages: {
           title: row.advantages_title || '',
           image: row.advantages_image || '',
+          // Add image alt text field
+          imageAlt: row.advantages_image_alt || undefined,
           content: row.advantages_content || ''
         },
         ourExpertise: {
@@ -112,6 +127,13 @@ export class PavilionStandsPageService {
         companyInfo: {
           title: row.company_info_title || '',
           content: row.company_info_content || ''
+        },
+        // Add portfolio section
+        portfolio: {
+          title: row.portfolio_section_title || undefined,
+          subtitle: row.portfolio_section_subtitle || undefined,
+          ctaText: row.portfolio_section_cta_text || undefined,
+          ctaLink: row.portfolio_section_cta_link || undefined
         },
         slug: row.slug || 'pavilion-stands',
         isActive: row.is_active,
@@ -149,6 +171,14 @@ export class PavilionStandsPageService {
       if (data.hero?.backgroundImage !== undefined) {
         updateData.hero_background_image = data.hero.backgroundImage
       }
+      // Add hero background image alt text
+      if (data.hero?.backgroundImageAlt !== undefined) {
+        updateData.hero_background_image_alt = data.hero.backgroundImageAlt
+      }
+      // Add hero button title
+      if (data.hero?.buttonTitle !== undefined) {
+        updateData.hero_button_title = data.hero.buttonTitle
+      }
 
       // Why Choose section
       if (data.whyChoose?.title !== undefined) {
@@ -164,6 +194,10 @@ export class PavilionStandsPageService {
       }
       if (data.benefits?.image !== undefined) {
         updateData.benefits_image = data.benefits.image
+      }
+      // Add benefits image alt text
+      if (data.benefits?.imageAlt !== undefined) {
+        updateData.benefits_image_alt = data.benefits.imageAlt
       }
       if (data.benefits?.content !== undefined) {
         updateData.benefits_content = data.benefits.content
@@ -187,6 +221,10 @@ export class PavilionStandsPageService {
       if (data.advantages?.image !== undefined) {
         updateData.advantages_image = data.advantages.image
       }
+      // Add advantages image alt text
+      if (data.advantages?.imageAlt !== undefined) {
+        updateData.advantages_image_alt = data.advantages.imageAlt
+      }
       if (data.advantages?.content !== undefined) {
         updateData.advantages_content = data.advantages.content
       }
@@ -206,6 +244,19 @@ export class PavilionStandsPageService {
       if (data.companyInfo?.content !== undefined) {
         updateData.company_info_content = data.companyInfo.content
       }
+
+      // Add portfolio section fields
+      if (data.portfolio?.title !== undefined) {
+        updateData.portfolio_section_title = data.portfolio.title
+      }
+      if (data.portfolio?.subtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolio.subtitle
+      }
+      if (data.portfolio?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolio.ctaText
+      }
+      // Fixed ctaLink to /portfolio as requested
+      updateData.portfolio_section_cta_link = '/portfolio'
 
       const { error } = await (supabase as any)
         .from('pavilion_design_page')
@@ -292,7 +343,7 @@ export class PavilionStandsPageService {
   // Trigger revalidation in Next.js website - simplified version
   static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
     // Use the simple revalidation approach
-    return basicRevalidate('/pavilion-stands');
+    return basicRevalidate('/pavilion-design');
   }
 }
 

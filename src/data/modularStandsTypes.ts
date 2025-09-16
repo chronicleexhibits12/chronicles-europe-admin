@@ -1,4 +1,11 @@
 // Frontend types for Modular Stands page
+export interface ModularStandsPortfolio {
+  title?: string
+  subtitle?: string
+  ctaText?: string
+  ctaLink?: string
+}
+
 export interface ModularStandsPage {
   id: string
   slug: string
@@ -13,6 +20,8 @@ export interface ModularStandsPage {
     title: string
     subtitle: string
     backgroundImage: string
+    // Add button title field
+    buttonTitle?: string
   }
   benefits: {
     title: string
@@ -49,6 +58,8 @@ export interface ModularStandsPage {
     subtitle: string
     description: string
   }
+  // Add portfolio section
+  portfolio?: ModularStandsPortfolio
 }
 
 // Database types for Modular Stands page (matches database schema)
@@ -63,6 +74,8 @@ export interface ModularStandsPageData {
   hero_title: string
   hero_subtitle: string
   hero_background_image: string
+  // Add hero button title field
+  hero_button_title: string | null
   benefits_title: string
   benefits_image: string
   benefits_content: string
@@ -84,4 +97,9 @@ export interface ModularStandsPageData {
   experts_title: string
   experts_subtitle: string
   experts_description: string
+  // Add portfolio fields
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
 }

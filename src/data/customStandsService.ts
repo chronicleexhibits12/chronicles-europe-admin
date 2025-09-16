@@ -55,6 +55,13 @@ export class CustomStandsPageService {
         title: 'Key Benefits of Our Custom Stands',
         content: '<ul><li><strong>Tailor-made designs</strong> to match your brand identity with our expert designers</li><li><strong>High-quality materials</strong> ensuring durability and elegant appearance</li><li><strong>Cost-effective solutions</strong> with maximum visual impact and ROI</li></ul>'
       },
+      // Add the portfolio section with default values
+      portfolio: {
+        title: 'OUR PORTFOLIO',
+        subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        ctaText: 'View All Projects',
+        ctaLink: '/portfolio'
+      },
       slug: 'custom-stands',
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -93,7 +100,9 @@ export class CustomStandsPageService {
           title: row.hero_title || undefined,
           subtitle: row.hero_subtitle || undefined,
           backgroundImage: row.hero_background_image || undefined,
-          backgroundImageAlt: row.hero_background_image_alt || undefined
+          backgroundImageAlt: row.hero_background_image_alt || undefined,
+          // Add the button title field
+          buttonTitle: row.hero_button_title || undefined
         },
         benefits: {
           title: row.benefits_title || undefined,
@@ -131,6 +140,13 @@ export class CustomStandsPageService {
         pointsTable: {
           title: row.points_table_title || undefined,
           content: row.points_table_content || undefined
+        },
+        // Add the portfolio section
+        portfolio: {
+          title: row.portfolio_section_title || undefined,
+          subtitle: row.portfolio_section_subtitle || undefined,
+          ctaText: row.portfolio_section_cta_text || undefined,
+          ctaLink: row.portfolio_section_cta_link || undefined
         },
         slug: row.slug || 'custom-stands',
         isActive: row.is_active,
@@ -170,6 +186,10 @@ export class CustomStandsPageService {
       }
       if (data.hero?.backgroundImageAlt !== undefined) {
         updateData.hero_background_image_alt = data.hero.backgroundImageAlt
+      }
+      // Add hero button title
+      if (data.hero?.buttonTitle !== undefined) {
+        updateData.hero_button_title = data.hero.buttonTitle
       }
 
       // Benefits section
@@ -254,6 +274,19 @@ export class CustomStandsPageService {
       if (data.pointsTable?.content !== undefined) {
         updateData.points_table_content = data.pointsTable.content
       }
+
+      // Portfolio section
+      if (data.portfolio?.title !== undefined) {
+        updateData.portfolio_section_title = data.portfolio.title
+      }
+      if (data.portfolio?.subtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolio.subtitle
+      }
+      if (data.portfolio?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolio.ctaText
+      }
+      // Fixed ctaLink to /portfolio as requested
+      updateData.portfolio_section_cta_link = '/portfolio'
 
       if (data.isActive !== undefined) {
         updateData.is_active = data.isActive

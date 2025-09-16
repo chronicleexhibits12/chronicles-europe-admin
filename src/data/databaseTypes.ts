@@ -166,6 +166,8 @@ export interface Database {
           hero_subtitle: string | null
           hero_background_image: string | null
           hero_background_image_alt: string | null
+          // Add hero button title field
+          hero_button_title: string | null
           benefits_title: string | null
           benefits_image: string | null
           benefits_image_alt: string | null
@@ -189,6 +191,11 @@ export interface Database {
           cost_section_description: string | null
           points_table_title: string | null
           points_table_content: string | null
+          // Add portfolio fields
+          portfolio_section_title: string | null
+          portfolio_section_subtitle: string | null
+          portfolio_section_cta_text: string | null
+          portfolio_section_cta_link: string | null
           is_active: boolean
           created_at: string
           updated_at: string
@@ -202,6 +209,8 @@ export interface Database {
           hero_subtitle?: string | null
           hero_background_image?: string | null
           hero_background_image_alt?: string | null
+          // Add hero button title field
+          hero_button_title?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
           benefits_image_alt?: string | null
@@ -225,6 +234,11 @@ export interface Database {
           cost_section_description?: string | null
           points_table_title?: string | null
           points_table_content?: string | null
+          // Add portfolio fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -238,6 +252,8 @@ export interface Database {
           hero_subtitle?: string | null
           hero_background_image?: string | null
           hero_background_image_alt?: string | null
+          // Add hero button title field
+          hero_button_title?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
           benefits_image_alt?: string | null
@@ -261,6 +277,11 @@ export interface Database {
           cost_section_description?: string | null
           points_table_title?: string | null
           points_table_content?: string | null
+          // Add portfolio fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -275,16 +296,24 @@ export interface Database {
           hero_title: string | null
           hero_subtitle: string | null
           hero_background_image: string | null
+          // Add hero background image alt text field
+          hero_background_image_alt: string | null
+          // Add hero button title field
+          hero_button_title: string | null
           why_choose_title: string | null
           why_choose_content: string | null
           benefits_title: string | null
           benefits_image: string | null
+          // Add benefits image alt text field
+          benefits_image_alt: string | null
           benefits_content: string | null
           stand_project_title: string | null
           stand_project_highlight: string | null
           stand_project_description: string | null
           advantages_title: string | null
           advantages_image: string | null
+          // Add advantages image alt text field
+          advantages_image_alt: string | null
           advantages_content: string | null
           our_expertise_title: string | null
           our_expertise_content: string | null
@@ -293,6 +322,11 @@ export interface Database {
           is_active: boolean
           created_at: string
           updated_at: string
+          // Add portfolio fields
+          portfolio_section_title: string | null
+          portfolio_section_subtitle: string | null
+          portfolio_section_cta_text: string | null
+          portfolio_section_cta_link: string | null
         }
         Insert: {
           id?: string
@@ -302,16 +336,24 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image?: string | null
+          // Add hero background image alt text field
+          hero_background_image_alt?: string | null
+          // Add hero button title field
+          hero_button_title?: string | null
           why_choose_title?: string | null
           why_choose_content?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
+          // Add benefits image alt text field
+          benefits_image_alt?: string | null
           benefits_content?: string | null
           stand_project_title?: string | null
           stand_project_highlight?: string | null
           stand_project_description?: string | null
           advantages_title?: string | null
           advantages_image?: string | null
+          // Add advantages image alt text field
+          advantages_image_alt?: string | null
           advantages_content?: string | null
           our_expertise_title?: string | null
           our_expertise_content?: string | null
@@ -320,6 +362,11 @@ export interface Database {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          // Add portfolio fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
         }
         Update: {
           id?: string
@@ -329,16 +376,24 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image?: string | null
+          // Add hero background image alt text field
+          hero_background_image_alt?: string | null
+          // Add hero button title field
+          hero_button_title?: string | null
           why_choose_title?: string | null
           why_choose_content?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
+          // Add benefits image alt text field
+          benefits_image_alt?: string | null
           benefits_content?: string | null
           stand_project_title?: string | null
           stand_project_highlight?: string | null
           stand_project_description?: string | null
           advantages_title?: string | null
           advantages_image?: string | null
+          // Add advantages image alt text field
+          advantages_image_alt?: string | null
           advantages_content?: string | null
           our_expertise_title?: string | null
           our_expertise_content?: string | null
@@ -347,6 +402,11 @@ export interface Database {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          // Add portfolio fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
         }
       }
       modular_stands_page: {
@@ -361,6 +421,8 @@ export interface Database {
           hero_title: string | null
           hero_subtitle: string | null
           hero_background_image: string | null
+          // Add hero button title field
+          hero_button_title: string | null
           benefits_title: string | null
           benefits_image: string | null
           benefits_content: string | null
@@ -382,6 +444,11 @@ export interface Database {
           experts_title: string | null
           experts_subtitle: string | null
           experts_description: string | null
+          // Add portfolio fields
+          portfolio_section_title: string | null
+          portfolio_section_subtitle: string | null
+          portfolio_section_cta_text: string | null
+          portfolio_section_cta_link: string | null
         }
         Insert: {
           id?: string
@@ -394,6 +461,8 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image?: string | null
+          // Add hero button title field
+          hero_button_title?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
           benefits_content?: string | null
@@ -415,6 +484,11 @@ export interface Database {
           experts_title?: string | null
           experts_subtitle?: string | null
           experts_description?: string | null
+          // Add portfolio fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
         }
         Update: {
           id?: string
@@ -427,6 +501,8 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image?: string | null
+          // Add hero button title field
+          hero_button_title?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
           benefits_content?: string | null
@@ -448,6 +524,11 @@ export interface Database {
           experts_title?: string | null
           experts_subtitle?: string | null
           experts_description?: string | null
+          // Add portfolio fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
         }
       }
       double_decker_stands_page: {
@@ -459,6 +540,8 @@ export interface Database {
           hero_title: string | null
           hero_subtitle: string | null
           hero_background_image: string | null
+          // Add hero button title field
+          hero_button_title: string | null
           benefits_title: string | null
           benefits_image: string | null
           benefits_content: string | null
@@ -480,6 +563,11 @@ export interface Database {
           is_active: boolean
           created_at: string
           updated_at: string
+          // Add portfolio fields
+          portfolio_section_title: string | null
+          portfolio_section_subtitle: string | null
+          portfolio_section_cta_text: string | null
+          portfolio_section_cta_link: string | null
         }
         Insert: {
           id?: string
@@ -489,6 +577,8 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image?: string | null
+          // Add hero button title field
+          hero_button_title?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
           benefits_content?: string | null
@@ -510,6 +600,11 @@ export interface Database {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          // Add portfolio fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
         }
         Update: {
           id?: string
@@ -519,6 +614,8 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image?: string | null
+          // Add hero button title field
+          hero_button_title?: string | null
           benefits_title?: string | null
           benefits_image?: string | null
           benefits_content?: string | null
@@ -540,6 +637,11 @@ export interface Database {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          // Add portfolio fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
         }
       }
       cities: {

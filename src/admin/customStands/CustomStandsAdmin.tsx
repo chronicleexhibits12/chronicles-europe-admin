@@ -172,6 +172,16 @@ export function CustomStandsAdmin() {
                 />
               </div>
             </div>
+            {/* Add Hero Button Title Field */}
+            <div className="w-full">
+              <Label htmlFor="hero-button-title">Hero Button Title</Label>
+              <Input
+                id="hero-button-title"
+                value={formData.hero?.buttonTitle || ''}
+                onChange={(e) => handleInputChange('hero', 'buttonTitle', e.target.value)}
+                placeholder="e.g., REQUEST FOR QUOTATION"
+              />
+            </div>
           </div>
         </div>
 
@@ -307,6 +317,54 @@ export function CustomStandsAdmin() {
                 onChange={(newContent) => handleInputChange('standProjectText', 'description', newContent)}
                 controlled={true}
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Portfolio Section - Moved to be right after Stand Project Text Section */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Portfolio Section</h2>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="portfolio-title">Title</Label>
+                <Input
+                  id="portfolio-title"
+                  value={formData.portfolio?.title || ''}
+                  onChange={(e) => handleInputChange('portfolio', 'title', e.target.value)}
+                  placeholder="e.g., OUR PORTFOLIO"
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-subtitle">Subtitle</Label>
+                <Input
+                  id="portfolio-subtitle"
+                  value={formData.portfolio?.subtitle || ''}
+                  onChange={(e) => handleInputChange('portfolio', 'subtitle', e.target.value)}
+                  placeholder="e.g., Explore our extensive portfolio..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-cta-text">CTA Text</Label>
+                <Input
+                  id="portfolio-cta-text"
+                  value={formData.portfolio?.ctaText || ''}
+                  onChange={(e) => handleInputChange('portfolio', 'ctaText', e.target.value)}
+                  placeholder="e.g., View All Projects"
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-cta-link">CTA Link</Label>
+                <Input
+                  id="portfolio-cta-link"
+                  value="/portfolio"
+                  readOnly
+                  placeholder="/portfolio"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  This link is fixed to "/portfolio"
+                </p>
+              </div>
             </div>
           </div>
         </div>

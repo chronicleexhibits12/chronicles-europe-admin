@@ -47,6 +47,13 @@ export class DoubleDeckStandsPageService {
         subtitle: 'DOUBLE DECKER EXHIBITION STAND',
         description: 'The double-decker booths designed by Chronicles not only increase the exhibiting space but also make a solid impression amidst the competition.'
       },
+      // Add portfolio section with default values
+      portfolio: {
+        title: 'OUR PORTFOLIO',
+        subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        ctaText: 'View All Projects',
+        ctaLink: '/portfolio'
+      },
       slug: 'double-decker-stands',
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -92,7 +99,9 @@ export class DoubleDeckStandsPageService {
         hero: {
           title: response.hero_title || '',
           subtitle: response.hero_subtitle || '',
-          backgroundImage: response.hero_background_image || ''
+          backgroundImage: response.hero_background_image || '',
+          // Add button title field
+          buttonTitle: response.hero_button_title || undefined
         },
         benefits: {
           title: response.benefits_title || '',
@@ -123,6 +132,13 @@ export class DoubleDeckStandsPageService {
           title: response.bold_statement_title || '',
           subtitle: response.bold_statement_subtitle || '',
           description: response.bold_statement_description || ''
+        },
+        // Add portfolio section
+        portfolio: {
+          title: response.portfolio_section_title || undefined,
+          subtitle: response.portfolio_section_subtitle || undefined,
+          ctaText: response.portfolio_section_cta_text || undefined,
+          ctaLink: response.portfolio_section_cta_link || undefined
         }
       }
 
@@ -154,6 +170,10 @@ export class DoubleDeckStandsPageService {
       }
       if (data.hero?.backgroundImage !== undefined) {
         updateData.hero_background_image = data.hero.backgroundImage
+      }
+      // Add hero button title
+      if (data.hero?.buttonTitle !== undefined) {
+        updateData.hero_button_title = data.hero.buttonTitle
       }
 
       if (data.benefits?.title !== undefined) {
@@ -215,6 +235,19 @@ export class DoubleDeckStandsPageService {
       if (data.boldStatement?.description !== undefined) {
         updateData.bold_statement_description = data.boldStatement.description
       }
+
+      // Add portfolio section fields
+      if (data.portfolio?.title !== undefined) {
+        updateData.portfolio_section_title = data.portfolio.title
+      }
+      if (data.portfolio?.subtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolio.subtitle
+      }
+      if (data.portfolio?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolio.ctaText
+      }
+      // Fixed ctaLink to /portfolio as requested
+      updateData.portfolio_section_cta_link = '/portfolio'
 
       const { error: updateError } = await (supabase as any)
         .from('double_decker_stands_page')

@@ -21,6 +21,7 @@ export function PavilionStandsAdmin() {
   // File input refs
   const benefitsImageRef = useRef<HTMLInputElement>(null)
   const advantagesImageRef = useRef<HTMLInputElement>(null)
+  const heroBackgroundImageRef = useRef<HTMLInputElement>(null)
 
   // Update form data when content loads
   useEffect(() => {
@@ -105,19 +106,36 @@ export function PavilionStandsAdmin() {
 
   // Get current alt text for a field
   const getCurrentImageAlt = (section: string, field: string): string => {
+    // Special handling for backgroundImage which has a different alt field name
+    if (section === 'hero' && field === 'backgroundImage') {
+      return formData[section]?.[`${field}Alt`] || ''
+    }
+    // For other fields, use the standard pattern
     return formData[section]?.[`${field}Alt`] || ''
   }
 
   // Update alt text for an image
   const updateImageAlt = (section: string, field: string, altText: string) => {
-    handleInputChange(section, `${field}Alt`, altText)
+    // Special handling for backgroundImage which has a different alt field name
+    if (section === 'hero' && field === 'backgroundImage') {
+      handleInputChange(section, `${field}Alt`, altText)
+    } else {
+      // For other fields, use the standard pattern
+      handleInputChange(section, `${field}Alt`, altText)
+    }
   }
 
   // Remove image
   const removeImage = (section: string, field: string) => {
     handleInputChange(section, field, '')
     // Also clear alt text when removing image
-    handleInputChange(section, `${field}Alt`, '')
+    // Special handling for backgroundImage which has a different alt field name
+    if (section === 'hero' && field === 'backgroundImage') {
+      handleInputChange(section, `${field}Alt`, '')
+    } else {
+      // For other fields, use the standard pattern
+      handleInputChange(section, `${field}Alt`, '')
+    }
   }
 
   if (loading) {
@@ -170,6 +188,74 @@ export function PavilionStandsAdmin() {
                   value={formData.hero?.subtitle || ''}
                   onChange={(e) => handleInputChange('hero', 'subtitle', e.target.value)}
                 />
+              </div>
+            </div>
+            {/* Add Hero Button Title Field */}
+            <div>
+              <Label htmlFor="hero-button-title">Hero Button Title</Label>
+              <Input
+                id="hero-button-title"
+                value={formData.hero?.buttonTitle || ''}
+                onChange={(e) => handleInputChange('hero', 'buttonTitle', e.target.value)}
+                placeholder="e.g., REQUEST FOR QUOTATION"
+              />
+            </div>
+            {/* Hero Background Image */}
+            <div className="w-full">
+              <Label htmlFor="hero-background-image">Hero Background Image</Label>
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      value={getCurrentImageAlt('hero', 'backgroundImage')}
+                      onChange={(e) => updateImageAlt('hero', 'backgroundImage', e.target.value)}
+                      placeholder="Alt text"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    ref={heroBackgroundImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleImageUpload(file, 'hero', 'backgroundImage')
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => heroBackgroundImageRef.current?.click()}
+                    disabled={uploadingImages['hero-backgroundImage']}
+                    className="flex items-center gap-2"
+                  >
+                    {uploadingImages['hero-backgroundImage'] ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Choose File
+                  </Button>
+                </div>
+                {getCurrentImageUrl('hero', 'backgroundImage') && (
+                  <div className="relative inline-block">
+                    <img 
+                      src={getCurrentImageUrl('hero', 'backgroundImage')} 
+                      alt={getCurrentImageAlt('hero', 'backgroundImage') || "Hero background preview"} 
+                      className="max-h-16 object-cover rounded border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('hero', 'backgroundImage')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -278,42 +364,9 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Section 4: Stand Project Text Section */}
+        {/* Section 4: Advantages Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Stand Project Text Section)</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="stand-project-title">Title</Label>
-                <Input
-                  id="stand-project-title"
-                  value={formData.standProjectText?.title || ''}
-                  onChange={(e) => handleInputChange('standProjectText', 'title', e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="stand-project-highlight">Highlight Text</Label>
-                <Input
-                  id="stand-project-highlight"
-                  value={formData.standProjectText?.highlight || ''}
-                  onChange={(e) => handleInputChange('standProjectText', 'highlight', e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="w-full">
-              <Label>Description (Rich Text)</Label>
-              <RichTextEditor
-                content={formData.standProjectText?.description || ''}
-                onChange={(newContent) => handleInputChange('standProjectText', 'description', newContent)}
-                controlled={true}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 5: Advantages Section */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Advantages Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Advantages Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="advantages-title">Title</Label>
@@ -391,9 +444,9 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Section 6: Our Expertise Section */}
+        {/* Section 5: Our Expertise Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Our Expertise Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Our Expertise Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="our-expertise-title">Title</Label>
@@ -414,9 +467,9 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Section 7: Company Info Section */}
+        {/* Section 6: Company Info Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7 (Company Info Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Company Info Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="company-info-title">Title</Label>

@@ -52,6 +52,13 @@ export class ModularStandsPageService {
         subtitle: 'MODULAR BOOTHS',
         description: '<p>With over two decades of experience in the European exhibition industry, our team specializes in creating modular booth solutions that align with your brand identity and marketing objectives. We serve clients across major European markets including Germany, France, UK, Italy, Spain, and the Nordics, providing comprehensive support from initial concept through to on-site execution. Our expertise includes customizing modular systems to meet specific industry requirements, integrating advanced technology solutions, and ensuring compliance with venue regulations. We provide end-to-end service including design, production, logistics, installation, and dismantling, allowing you to focus on your exhibition goals while we handle all the technical details. Our dedicated project managers and skilled installation teams ensure seamless execution at every venue, with multilingual support available for international exhibitions.</p>'
       },
+      // Add portfolio section with default values
+      portfolio: {
+        title: 'OUR PORTFOLIO',
+        subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        ctaText: 'View All Projects',
+        ctaLink: '/portfolio'
+      },
       slug: 'modular-stands',
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -97,7 +104,9 @@ export class ModularStandsPageService {
         hero: {
           title: response.hero_title || '',
           subtitle: response.hero_subtitle || '',
-          backgroundImage: response.hero_background_image || ''
+          backgroundImage: response.hero_background_image || '',
+          // Add button title field
+          buttonTitle: response.hero_button_title || undefined
         },
         benefits: {
           title: response.benefits_title || '',
@@ -133,6 +142,13 @@ export class ModularStandsPageService {
           title: response.experts_title || '',
           subtitle: response.experts_subtitle || '',
           description: response.experts_description || ''
+        },
+        // Add portfolio section
+        portfolio: {
+          title: response.portfolio_section_title || undefined,
+          subtitle: response.portfolio_section_subtitle || undefined,
+          ctaText: response.portfolio_section_cta_text || undefined,
+          ctaLink: response.portfolio_section_cta_link || undefined
         }
       }
 
@@ -164,6 +180,10 @@ export class ModularStandsPageService {
       }
       if (data.hero?.backgroundImage !== undefined) {
         updateData.hero_background_image = data.hero.backgroundImage
+      }
+      // Add hero button title
+      if (data.hero?.buttonTitle !== undefined) {
+        updateData.hero_button_title = data.hero.buttonTitle
       }
 
       if (data.benefits?.title !== undefined) {
@@ -235,6 +255,19 @@ export class ModularStandsPageService {
       if (data.experts?.description !== undefined) {
         updateData.experts_description = data.experts.description
       }
+
+      // Add portfolio section fields
+      if (data.portfolio?.title !== undefined) {
+        updateData.portfolio_section_title = data.portfolio.title
+      }
+      if (data.portfolio?.subtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolio.subtitle
+      }
+      if (data.portfolio?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolio.ctaText
+      }
+      // Fixed ctaLink to /portfolio as requested
+      updateData.portfolio_section_cta_link = '/portfolio'
 
       const { error: updateError } = await (supabase as any)
         .from('modular_stands_page')

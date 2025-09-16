@@ -9,6 +9,8 @@ export interface CustomStandsHero {
   subtitle?: string
   backgroundImage?: string
   backgroundImageAlt?: string
+  // Add the button title field
+  buttonTitle?: string
 }
 
 export interface CustomStandsBenefits {
@@ -55,6 +57,14 @@ export interface CustomStandsPointsTable {
   content?: string // Rich text content
 }
 
+// Add the new Portfolio interface
+export interface CustomStandsPortfolio {
+  title?: string
+  subtitle?: string
+  ctaText?: string
+  ctaLink?: string
+}
+
 export interface CustomStandsPage {
   id: string
   meta?: CustomStandsMeta
@@ -66,6 +76,8 @@ export interface CustomStandsPage {
   freshDesign?: CustomStandsFreshDesign
   costSection?: CustomStandsCostSection
   pointsTable?: CustomStandsPointsTable
+  // Add the portfolio section
+  portfolio?: CustomStandsPortfolio
   slug: string
   isActive: boolean
   createdAt: string
@@ -82,6 +94,8 @@ export interface CustomStandsPageData {
   hero_subtitle: string | null
   hero_background_image: string | null
   hero_background_image_alt: string | null
+  // Add the hero button title field
+  hero_button_title: string | null
   benefits_title: string | null
   benefits_image: string | null
   benefits_image_alt: string | null
@@ -105,6 +119,11 @@ export interface CustomStandsPageData {
   cost_section_description: string | null
   points_table_title: string | null
   points_table_content: string | null
+  // Add the portfolio fields
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
   is_active: boolean
   created_at: string
   updated_at: string

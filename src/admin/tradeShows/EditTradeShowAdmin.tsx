@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { TagInput } from '@/components/ui/tag-input'
-import { DatePicker } from '@/components/ui/date-picker'
 import { SearchableSelect } from '@/components/ui/searchable-select'
 import { Loader2, Save, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
@@ -341,16 +340,20 @@ export function EditTradeShowAdmin() {
             {/* Event Details fields added here */}
             <div>
               <Label htmlFor="startDate">Start Date</Label>
-              <DatePicker
+              <Input
+                id="startDate"
+                type="date"
                 value={formData.startDate}
-                onChange={(date) => handleInputChange('startDate', date)}
+                onChange={(e) => handleInputChange('startDate', e.target.value)}
               />
             </div>
             <div>
               <Label htmlFor="endDate">End Date</Label>
-              <DatePicker
+              <Input
+                id="endDate"
+                type="date"
                 value={formData.endDate}
-                onChange={(date) => handleInputChange('endDate', date)}
+                onChange={(e) => handleInputChange('endDate', e.target.value)}
               />
             </div>
             <div>

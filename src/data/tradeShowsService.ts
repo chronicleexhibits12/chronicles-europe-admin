@@ -13,7 +13,7 @@ export class TradeShowsService {
       const { data, error } = await supabase
         .from('trade_shows')
         .select('*')
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false }) // Sort by created date, newest first
 
       if (error) throw new Error(error.message)
       
@@ -65,11 +65,11 @@ export class TradeShowsService {
 
       if (countError) throw new Error(countError.message);
 
-      // Get the paginated data
+      // Get the paginated data, sorted by created date (newest first)
       const { data, error } = await supabase
         .from('trade_shows')
         .select('*')
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false }) // Sort by created date, newest first
         .range(from, to);
 
       if (error) throw new Error(error.message);
@@ -166,12 +166,14 @@ export class TradeShowsService {
       const dbData: Record<string, any> = {
         slug: tradeShowData.slug,
         title: tradeShowData.title,
+        excerpt: tradeShowData.excerpt,
         content: tradeShowData.content,
         start_date: tradeShowData.startDate,
         end_date: tradeShowData.endDate,
         location: tradeShowData.location,
         country: tradeShowData.country,
         city: tradeShowData.city,
+        organizer: tradeShowData.organizer,
         website: tradeShowData.website,
         logo: tradeShowData.logo,
         logo_alt: tradeShowData.logoAlt,
@@ -195,7 +197,7 @@ export class TradeShowsService {
         id: data.id,
         slug: data.slug,
         title: data.title,
-        excerpt: null,
+        excerpt: data.excerpt,
         content: data.content,
         startDate: data.start_date,
         endDate: data.end_date,
@@ -205,7 +207,7 @@ export class TradeShowsService {
         category: null,
         logo: data.logo,
         logoAlt: data.logo_alt,
-        organizer: null,
+        organizer: data.organizer,
         website: data.website,
         venue: null,
         metaTitle: data.meta_title,
@@ -234,12 +236,14 @@ export class TradeShowsService {
       const dbData: Record<string, any> = {
         slug: tradeShowData.slug,
         title: tradeShowData.title,
+        excerpt: tradeShowData.excerpt,
         content: tradeShowData.content,
         start_date: tradeShowData.startDate,
         end_date: tradeShowData.endDate,
         location: tradeShowData.location,
         country: tradeShowData.country,
         city: tradeShowData.city,
+        organizer: tradeShowData.organizer,
         website: tradeShowData.website,
         logo: tradeShowData.logo,
         logo_alt: tradeShowData.logoAlt,
@@ -264,7 +268,7 @@ export class TradeShowsService {
         id: data.id,
         slug: data.slug,
         title: data.title,
-        excerpt: null,
+        excerpt: data.excerpt,
         content: data.content,
         startDate: data.start_date,
         endDate: data.end_date,
@@ -274,7 +278,7 @@ export class TradeShowsService {
         category: null,
         logo: data.logo,
         logoAlt: data.logo_alt,
-        organizer: null,
+        organizer: data.organizer,
         website: data.website,
         venue: null,
         metaTitle: data.meta_title,

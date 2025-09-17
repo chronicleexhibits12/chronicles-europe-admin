@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,6 +45,8 @@ export function TradeShowsAdmin() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [startDateFilter, setStartDateFilter] = useState('')
   const [endDateFilter, setEndDateFilter] = useState('')
+  const [allTradeShows, setAllTradeShows] = useState<any[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
 
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
@@ -52,18 +54,70 @@ export function TradeShowsAdmin() {
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
 
-  // Filter trade shows based on search term
-  const filteredTradeShows = useMemo(() => {
-    if (!tradeShows || !searchTerm) return tradeShows || []
+  // Get all trade shows for global search and sorting
+  const getAllTradeShows = async () => {
+    if (!searchTerm) return
+    setSearchLoading(true)
+    try {
+      const { data, error } = await TradeShowsService.getTradeShows()
+      if (error) throw new Error(error)
+      // Sort by created date (newest first) when searching
+      const sortedData = data?.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ) || []
+      setAllTradeShows(sortedData)
+    } catch (error: any) {
+      console.error('Error fetching all trade shows:', error)
+      toast.error('Failed to search trade shows')
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  // Effect to fetch all trade shows when search term changes
+  useEffect(() => {
+    if (searchTerm) {
+      getAllTradeShows()
+    } else {
+      setAllTradeShows([])
+    }
+  }, [searchTerm])
+
+  // Filter all trade shows based on search term
+  const globalFilteredTradeShows = useMemo(() => {
+    if (!allTradeShows.length || !searchTerm) return []
     
     const term = searchTerm.toLowerCase()
-    return tradeShows.filter(show => 
+    return allTradeShows.filter(show => 
       show.title.toLowerCase().includes(term) ||
+      (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
       (show.location && show.location.toLowerCase().includes(term)) ||
       (show.city && show.city.toLowerCase().includes(term)) ||
       (show.country && show.country.toLowerCase().includes(term))
     )
-  }, [tradeShows, searchTerm])
+  }, [allTradeShows, searchTerm])
+
+  // Sort trade shows by created date (newest first) for regular view
+  const sortedTradeShows = useMemo(() => {
+    if (!tradeShows) return []
+    return [...tradeShows].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  }, [tradeShows])
+
+  // Filter trade shows based on search term
+  const filteredTradeShows = useMemo(() => {
+    if (!sortedTradeShows || !searchTerm) return sortedTradeShows || []
+    
+    const term = searchTerm.toLowerCase()
+    return sortedTradeShows.filter(show => 
+      show.title.toLowerCase().includes(term) ||
+      (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
+      (show.location && show.location.toLowerCase().includes(term)) ||
+      (show.city && show.city.toLowerCase().includes(term)) ||
+      (show.country && show.country.toLowerCase().includes(term))
+    )
+  }, [sortedTradeShows, searchTerm])
 
   const handleCreateTradeShow = () => {
     navigate('/admin/trade-shows/create')
@@ -274,6 +328,12 @@ export function TradeShowsAdmin() {
     )
   }
 
+  // Determine which trade shows to display
+  const displayTradeShows = searchTerm ? globalFilteredTradeShows : filteredTradeShows
+  const displayTotalCount = searchTerm ? globalFilteredTradeShows.length : totalCount
+
+  // Update the refetch function to maintain sorting
+
   return (
     <div className="space-y-6 w-full">
       {/* Delete Confirmation Dialog */}
@@ -384,6 +444,11 @@ export function TradeShowsAdmin() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
           />
+          {searchLoading && (
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+            </div>
+          )}
         </div>
         {searchTerm && (
           <Button 
@@ -401,7 +466,9 @@ export function TradeShowsAdmin() {
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">Trade Shows</h2>
           <p className="text-sm text-gray-600 mt-1">
-            List of all trade shows in the system
+            {searchTerm 
+              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''} for "${searchTerm}"` 
+              : `List of all trade shows in the system`}
           </p>
         </div>
 
@@ -411,12 +478,14 @@ export function TradeShowsAdmin() {
               <TableHead>Title</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Date Range</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Updated</TableHead>
               <TableHead>Published</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredTradeShows.map((tradeShow) => (
+            {displayTradeShows.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((tradeShow) => (
               <TableRow key={tradeShow.id}>
                 <TableCell className="font-medium">{tradeShow.title}</TableCell>
                 <TableCell>{tradeShow.location}</TableCell>
@@ -424,6 +493,16 @@ export function TradeShowsAdmin() {
                   {tradeShow.startDate && tradeShow.endDate 
                     ? new Date(tradeShow.startDate).toLocaleDateString() + ' - ' + new Date(tradeShow.endDate).toLocaleDateString()
                     : 'Not specified'}
+                </TableCell>
+                <TableCell>
+                  {tradeShow.createdAt 
+                    ? new Date(tradeShow.createdAt).toLocaleDateString()
+                    : 'N/A'}
+                </TableCell>
+                <TableCell>
+                  {tradeShow.updatedAt 
+                    ? new Date(tradeShow.updatedAt).toLocaleDateString()
+                    : 'N/A'}
                 </TableCell>
                 <TableCell>
                   <button
@@ -468,7 +547,7 @@ export function TradeShowsAdmin() {
           </TableBody>
         </Table>
 
-        {filteredTradeShows.length === 0 && (
+        {displayTradeShows.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
               {searchTerm ? 'No trade shows found matching your search' : 'No trade shows found'}
@@ -488,7 +567,7 @@ export function TradeShowsAdmin() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!searchTerm && totalPages > 1 && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>

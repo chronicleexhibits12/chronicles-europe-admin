@@ -26,12 +26,14 @@ export function EditTradeShowAdmin() {
     // Basic information
     slug: '',
     title: '',
+    excerpt: '',
     content: '',
     startDate: '',
     endDate: '',
     location: '', // Keep location field for internal use
     country: '',
     city: '',
+    organizer: '', // This will be labeled as "Hero Button Title"
     
     // Images
     logo: '',
@@ -52,12 +54,14 @@ export function EditTradeShowAdmin() {
       setFormData({
         slug: tradeShow.slug || '',
         title: tradeShow.title || '',
+        excerpt: tradeShow.excerpt || '',
         content: tradeShow.content || '',
         startDate: tradeShow.startDate || '',
         endDate: tradeShow.endDate || '',
         location: tradeShow.location || '',
         country: tradeShow.country || '',
         city: tradeShow.city || '',
+        organizer: tradeShow.organizer || '', // Initialize organizer field
         logo: tradeShow.logo || '',
         logoAlt: tradeShow.logoAlt || '',
         metaTitle: tradeShow.metaTitle || '',
@@ -132,12 +136,14 @@ export function EditTradeShowAdmin() {
       const { error } = await TradeShowsService.updateTradeShow(id, {
         slug: formData.slug,
         title: formData.title,
+        excerpt: formData.excerpt,
         content: formData.content,
         startDate: formData.startDate,
         endDate: formData.endDate,
         location: formData.location,
         country: formData.country,
         city: formData.city,
+        organizer: formData.organizer, // Include organizer field
         logo: formData.logo,
         logoAlt: formData.logoAlt,
         metaTitle: formData.metaTitle,
@@ -249,6 +255,25 @@ export function EditTradeShowAdmin() {
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder="e.g., ESC Congress 2025"
                 required
+              />
+            </div>
+            <div>
+              <Label htmlFor="excerpt">Heading (Excerpt)</Label>
+              <Textarea
+                id="excerpt"
+                value={formData.excerpt}
+                onChange={(e) => handleInputChange('excerpt', e.target.value)}
+                placeholder="Brief description or heading for the trade show"
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="organizer">Hero Button Title</Label>
+              <Input
+                id="organizer"
+                value={formData.organizer}
+                onChange={(e) => handleInputChange('organizer', e.target.value)}
+                placeholder="e.g., Register Now, Learn More"
               />
             </div>
             <div>

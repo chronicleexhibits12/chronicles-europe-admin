@@ -24,7 +24,10 @@ export function useTradeShows(page?: number, pageSize?: number) {
       } else {
         // Otherwise, fetch all posts
         const result = await TradeShowsService.getTradeShows()
-        tradeShows = result.data
+        // Sort by created date (newest first) by default
+        tradeShows = result.data?.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ) || []
         fetchError = result.error
         totalCount = tradeShows?.length || 0
       }

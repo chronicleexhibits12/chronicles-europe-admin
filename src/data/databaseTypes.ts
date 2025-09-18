@@ -1312,6 +1312,78 @@ export interface Database {
           countries?: string[]
         }
       }
+      // Add the privacy_page table definition
+      privacy_page: {
+        Row: {
+          id: string
+          title: string
+          meta_title: string
+          meta_description: string
+          meta_keywords: string
+          content: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          meta_title: string
+          meta_description: string
+          meta_keywords: string
+          content: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          meta_title?: string
+          meta_description?: string
+          meta_keywords?: string
+          content?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      // Add the terms_page table definition
+      terms_page: {
+        Row: {
+          id: string
+          title: string
+          meta_title: string
+          meta_description: string
+          meta_keywords: string
+          content: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          meta_title: string
+          meta_description: string
+          meta_keywords: string
+          content: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          meta_title?: string
+          meta_description?: string
+          meta_keywords?: string
+          content?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

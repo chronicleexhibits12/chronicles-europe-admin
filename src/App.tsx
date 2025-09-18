@@ -29,6 +29,8 @@ import { ServicesAdmin } from '@/admin/services/ServicesAdmin'
 import { PortfolioAdmin } from '@/admin/portfolio/PortfolioAdmin'
 import { ContactAdmin } from '@/admin/contact/ContactAdmin'
 import { FormSubmissionsAdmin } from '@/admin/formSubmissions'
+import { PrivacyAdmin } from '@/admin/privacy/PrivacyAdmin'
+import { TermsAdmin } from '@/admin/terms/TermsAdmin'
 import { Toaster } from 'sonner'
 
 function App() {
@@ -67,6 +69,8 @@ function App() {
             <Route path="admin/portfolio" element={<PortfolioAdmin />} />
             <Route path="admin/contact" element={<ContactAdmin />} />
             <Route path="admin/form-submissions" element={<FormSubmissionsAdmin />} />
+            <Route path="admin/privacy" element={<PrivacyAdmin />} />
+            <Route path="admin/terms" element={<TermsAdmin />} />
             <Route path="admin/cities" element={<CitiesAdmin />} />
             <Route path="admin/cities/:id/edit" element={<EditCityAdmin />} />
             <Route path="admin/countries" element={<CountriesAdmin />} />

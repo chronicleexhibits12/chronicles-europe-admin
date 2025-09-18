@@ -84,6 +84,8 @@ export function FormSubmissionsAdmin() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [exportDateFrom, setExportDateFrom] = useState('')
   const [exportDateTo, setExportDateTo] = useState('')
+  const [selectedSubmissions, setSelectedSubmissions] = useState<string[]>([])
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
 
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
@@ -126,9 +128,38 @@ export function FormSubmissionsAdmin() {
     })
   }, [formSubmissions, searchTerm, formTypeFilter, dateFrom, dateTo])
 
+  // Handle selection of a single submission
+  const handleSelectSubmission = (id: string) => {
+    setSelectedSubmissions(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(submissionId => submissionId !== id)
+      } else {
+        return [...prev, id]
+      }
+    })
+  }
+
+  // Handle select all submissions
+  const handleSelectAll = () => {
+    if (selectedSubmissions.length === filteredSubmissions.length && filteredSubmissions.length > 0) {
+      // If all are selected, deselect all
+      setSelectedSubmissions([])
+    } else {
+      // Select all currently filtered submissions
+      setSelectedSubmissions(filteredSubmissions.map(submission => submission.id))
+    }
+  }
+
+  // Check if all submissions are selected
+  const areAllSelected = selectedSubmissions.length > 0 && selectedSubmissions.length === filteredSubmissions.length
+
   const confirmDeleteSubmission = (id: string, formType: string) => {
     setSubmissionToDelete({ id, formType })
     setDeleteDialogOpen(true)
+  }
+
+  const confirmBulkDeleteSubmissions = () => {
+    setBulkDeleteDialogOpen(true)
   }
 
   const handleDeleteSubmission = async () => {
@@ -163,6 +194,61 @@ export function FormSubmissionsAdmin() {
       toast.error('Failed to delete form submission')
       setDeleteDialogOpen(false)
       setSubmissionToDelete(null)
+    }
+  }
+
+  const handleBulkDeleteSubmissions = async () => {
+    if (selectedSubmissions.length === 0) return
+
+    try {
+      let successCount = 0
+      let errorCount = 0
+
+      // Process each selected submission
+      for (const id of selectedSubmissions) {
+        try {
+          // First, get the submission to retrieve document paths
+          const { data: submission } = await FormSubmissionsService.getFormSubmissionById(id)
+          
+          // Delete associated documents from storage if they exist
+          if (submission && submission.documents && submission.documents.length > 0) {
+            for (const doc of submission.documents) {
+              try {
+                await (FormSubmissionsService as any).deleteDocument(doc.path)
+              } catch (docError) {
+                console.warn('Failed to delete document:', doc.path, docError)
+              }
+            }
+          }
+          
+          // Delete the form submission record
+          const { error } = await FormSubmissionsService.deleteFormSubmission(id)
+
+          if (error) throw new Error(error)
+          successCount++
+        } catch (error: any) {
+          console.error('Error deleting form submission:', error)
+          errorCount++
+        }
+      }
+
+      if (errorCount === 0) {
+        toast.success(`${successCount} form submission(s) deleted successfully`)
+      } else if (successCount > 0) {
+        toast.success(`${successCount} form submission(s) deleted successfully`)
+        toast.error(`${errorCount} form submission(s) failed to delete`)
+      } else {
+        toast.error('Failed to delete form submissions')
+      }
+
+      // Clear selection and refresh data
+      setSelectedSubmissions([])
+      refetch()
+      setBulkDeleteDialogOpen(false)
+    } catch (error: any) {
+      console.error('Error deleting form submissions:', error)
+      toast.error('Failed to delete form submissions')
+      setBulkDeleteDialogOpen(false)
     }
   }
 
@@ -409,6 +495,28 @@ export function FormSubmissionsAdmin() {
         </DialogContent>
       </Dialog>
 
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Bulk Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {selectedSubmissions.length} form submission(s)? 
+              This will also delete all associated documents from storage.
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleBulkDeleteSubmissions}>
+              Delete All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* View Submission Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -536,7 +644,13 @@ export function FormSubmissionsAdmin() {
             Manage form submissions
           </p>
         </div>
-        <div>
+        <div className="flex space-x-2">
+          {selectedSubmissions.length > 0 && (
+            <Button variant="destructive" onClick={confirmBulkDeleteSubmissions}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete {selectedSubmissions.length} Selected
+            </Button>
+          )}
           <Button onClick={handleExportToExcel}>
             <Download className="h-4 w-4 mr-2" />
             Export to Excel
@@ -616,6 +730,14 @@ export function FormSubmissionsAdmin() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">
+                <input
+                  type="checkbox"
+                  checked={areAllSelected}
+                  onChange={handleSelectAll}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+              </TableHead>
               <TableHead>Form Type</TableHead>
               <TableHead>Submission Data</TableHead>
               <TableHead>Documents</TableHead>
@@ -625,7 +747,15 @@ export function FormSubmissionsAdmin() {
           </TableHeader>
           <TableBody>
             {filteredSubmissions.map((submission) => (
-              <TableRow key={submission.id}>
+              <TableRow key={submission.id} className={selectedSubmissions.includes(submission.id) ? 'bg-blue-50' : ''}>
+                <TableCell>
+                  <input
+                    type="checkbox"
+                    checked={selectedSubmissions.includes(submission.id)}
+                    onChange={() => handleSelectSubmission(submission.id)}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                </TableCell>
                 <TableCell className="font-medium">{submission.formType}</TableCell>
                 <TableCell>
                   {submission.submissionData ? (

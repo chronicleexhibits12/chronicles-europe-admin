@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,7 +40,8 @@ export function BlogPostsAdmin() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [blogPostToDelete, setBlogPostToDelete] = useState<{id: string, title: string} | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [updatingPostId, setUpdatingPostId] = useState<string | null>(null)
+  const [allBlogPosts, setAllBlogPosts] = useState<any[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
 
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
@@ -48,15 +49,70 @@ export function BlogPostsAdmin() {
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
 
-  // Filter blog posts based on search term
-  const filteredBlogPosts = useMemo(() => {
-    if (!blogPosts || !searchTerm) return blogPosts || []
+  // Get all blog posts for global search and sorting
+  const getAllBlogPosts = async () => {
+    if (!searchTerm) return
+    setSearchLoading(true)
+    try {
+      const { data, error } = await BlogService.getBlogPosts()
+      if (error) throw new Error(error)
+      // Sort by created date (newest first) when searching
+      const sortedData = data?.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ) || []
+      setAllBlogPosts(sortedData)
+    } catch (error: any) {
+      console.error('Error fetching all blog posts:', error)
+      toast.error('Failed to search blog posts')
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  // Effect to fetch all blog posts when search term changes
+  useEffect(() => {
+    if (searchTerm) {
+      getAllBlogPosts()
+    } else {
+      setAllBlogPosts([])
+    }
+  }, [searchTerm])
+
+  // Filter all blog posts based on search term
+  const globalFilteredBlogPosts = useMemo(() => {
+    if (!allBlogPosts.length || !searchTerm) return []
     
     const term = searchTerm.toLowerCase()
-    return blogPosts.filter(post => 
-      post.title.toLowerCase().includes(term)
+    return allBlogPosts.filter(post => 
+      post.title.toLowerCase().includes(term) ||
+      (post.excerpt && post.excerpt.toLowerCase().includes(term)) ||
+      (post.author && post.author.toLowerCase().includes(term))
     )
-  }, [blogPosts, searchTerm])
+  }, [allBlogPosts, searchTerm])
+
+  // Sort blog posts by created date (newest first) for regular view
+  const sortedBlogPosts = useMemo(() => {
+    if (!blogPosts) return []
+    return [...blogPosts].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  }, [blogPosts])
+
+  // Filter blog posts based on search term
+  const filteredBlogPosts = useMemo(() => {
+    if (!sortedBlogPosts || !searchTerm) return sortedBlogPosts || []
+    
+    const term = searchTerm.toLowerCase()
+    return sortedBlogPosts.filter(post => 
+      post.title.toLowerCase().includes(term) ||
+      (post.excerpt && post.excerpt.toLowerCase().includes(term)) ||
+      (post.author && post.author.toLowerCase().includes(term))
+    )
+  }, [sortedBlogPosts, searchTerm])
+
+  // Determine which blog posts to display
+  const displayBlogPosts = searchTerm ? globalFilteredBlogPosts : filteredBlogPosts
+  const displayTotalCount = searchTerm ? globalFilteredBlogPosts.length : totalCount
 
   const handleCreateBlogPost = () => {
     navigate('/admin/blog-posts/create')
@@ -88,27 +144,6 @@ export function BlogPostsAdmin() {
       toast.error('Failed to delete blog post')
       setDeleteDialogOpen(false)
       setBlogPostToDelete(null)
-    }
-  }
-
-  const toggleBlogPostStatus = async (blogPost: any) => {
-    setUpdatingPostId(blogPost.id)
-    try {
-      // Toggle the isActive status
-      const { error } = await BlogService.updateBlogPost(blogPost.id, {
-        ...blogPost,
-        isActive: !blogPost.isActive
-      });
-      
-      if (error) throw new Error(error);
-      
-      toast.success(`Blog post ${!blogPost.isActive ? 'published' : 'unpublished'} successfully`);
-      refetch();
-    } catch (error: any) {
-      console.error('Error updating blog post status:', error);
-      toast.error('Failed to update blog post status');
-    } finally {
-      setUpdatingPostId(null)
     }
   }
 
@@ -188,7 +223,7 @@ export function BlogPostsAdmin() {
     return items
   }
 
-  if (loading) {
+  if (loading && !searchLoading) {
     return (
       <div className="space-y-6">
         <div className="animate-pulse">
@@ -234,19 +269,6 @@ export function BlogPostsAdmin() {
         </DialogContent>
       </Dialog>
 
-      {/* Updating Status Popup */}
-      <Dialog open={updatingPostId !== null}>
-        <DialogContent className="sm:max-w-md">
-          <div className="flex flex-col items-center justify-center py-6">
-            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
-            <DialogTitle className="text-center mb-2">Updating Status</DialogTitle>
-            <DialogDescription className="text-center">
-              Please wait while we update the blog post status...
-            </DialogDescription>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -271,6 +293,11 @@ export function BlogPostsAdmin() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
           />
+          {searchLoading && (
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+            </div>
+          )}
         </div>
         {searchTerm && (
           <Button 
@@ -288,7 +315,9 @@ export function BlogPostsAdmin() {
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">Blog Posts</h2>
           <p className="text-sm text-gray-600 mt-1">
-            List of all blog posts in the system
+            {searchTerm 
+              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''} for "${searchTerm}"` 
+              : `Showing ${Math.min(displayBlogPosts.length, pageSize)} of ${totalCount} blog posts`}
           </p>
         </div>
 
@@ -296,28 +325,24 @@ export function BlogPostsAdmin() {
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
-              <TableHead>Published</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Updated</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredBlogPosts.map((blogPost) => (
+            {displayBlogPosts.map((blogPost) => (
               <TableRow key={blogPost.id}>
                 <TableCell className="font-medium">{blogPost.title}</TableCell>
                 <TableCell>
-                  <button
-                    onClick={() => toggleBlogPostStatus(blogPost)}
-                    disabled={updatingPostId === blogPost.id}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      blogPost.isActive ? 'bg-blue-600' : 'bg-gray-200'
-                    } ${updatingPostId === blogPost.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        blogPost.isActive ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
+                  {blogPost.createdAt 
+                    ? new Date(blogPost.createdAt).toLocaleDateString()
+                    : 'N/A'}
+                </TableCell>
+                <TableCell>
+                  {blogPost.updatedAt 
+                    ? new Date(blogPost.updatedAt).toLocaleDateString()
+                    : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
@@ -347,7 +372,7 @@ export function BlogPostsAdmin() {
           </TableBody>
         </Table>
 
-        {filteredBlogPosts.length === 0 && (
+        {displayBlogPosts.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
               {searchTerm ? 'No blog posts found matching your search' : 'No blog posts found'}
@@ -367,7 +392,7 @@ export function BlogPostsAdmin() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!searchTerm && totalPages > 1 && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>

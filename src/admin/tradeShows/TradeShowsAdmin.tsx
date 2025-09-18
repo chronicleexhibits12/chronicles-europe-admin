@@ -47,12 +47,21 @@ export function TradeShowsAdmin() {
   const [endDateFilter, setEndDateFilter] = useState('')
   const [allTradeShows, setAllTradeShows] = useState<any[]>([])
   const [searchLoading, setSearchLoading] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'expired' | 'upcoming'>('all')
 
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
 
   // Get website URL from environment variables, with fallback
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
+  // Helper function to determine if a trade show is expired or upcoming
+  const getTradeShowStatus = (tradeShow: any) => {
+    if (!tradeShow.endDate) return 'ongoing'
+    const endDate = new Date(tradeShow.endDate)
+    const today = new Date()
+    return endDate < today ? 'expired' : 'upcoming'
+  }
 
   // Get all trade shows for global search and sorting
   const getAllTradeShows = async () => {
@@ -83,19 +92,30 @@ export function TradeShowsAdmin() {
     }
   }, [searchTerm])
 
-  // Filter all trade shows based on search term
+  // Filter all trade shows based on search term and status
   const globalFilteredTradeShows = useMemo(() => {
-    if (!allTradeShows.length || !searchTerm) return []
+    if (!allTradeShows.length) return []
     
-    const term = searchTerm.toLowerCase()
-    return allTradeShows.filter(show => 
-      show.title.toLowerCase().includes(term) ||
-      (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
-      (show.location && show.location.toLowerCase().includes(term)) ||
-      (show.city && show.city.toLowerCase().includes(term)) ||
-      (show.country && show.country.toLowerCase().includes(term))
-    )
-  }, [allTradeShows, searchTerm])
+    // First apply search filter
+    let filtered = allTradeShows
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      filtered = allTradeShows.filter(show => 
+        show.title.toLowerCase().includes(term) ||
+        (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
+        (show.location && show.location.toLowerCase().includes(term)) ||
+        (show.city && show.city.toLowerCase().includes(term)) ||
+        (show.country && show.country.toLowerCase().includes(term))
+      )
+    }
+    
+    // Then apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(show => getTradeShowStatus(show) === statusFilter)
+    }
+    
+    return filtered
+  }, [allTradeShows, searchTerm, statusFilter])
 
   // Sort trade shows by created date (newest first) for regular view
   const sortedTradeShows = useMemo(() => {
@@ -105,19 +125,34 @@ export function TradeShowsAdmin() {
     )
   }, [tradeShows])
 
-  // Filter trade shows based on search term
+  // Filter trade shows based on search term and status
   const filteredTradeShows = useMemo(() => {
-    if (!sortedTradeShows || !searchTerm) return sortedTradeShows || []
+    if (!sortedTradeShows) return sortedTradeShows || []
     
-    const term = searchTerm.toLowerCase()
-    return sortedTradeShows.filter(show => 
-      show.title.toLowerCase().includes(term) ||
-      (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
-      (show.location && show.location.toLowerCase().includes(term)) ||
-      (show.city && show.city.toLowerCase().includes(term)) ||
-      (show.country && show.country.toLowerCase().includes(term))
-    )
-  }, [sortedTradeShows, searchTerm])
+    // First apply search filter
+    let filtered = sortedTradeShows
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      filtered = sortedTradeShows.filter(show => 
+        show.title.toLowerCase().includes(term) ||
+        (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
+        (show.location && show.location.toLowerCase().includes(term)) ||
+        (show.city && show.city.toLowerCase().includes(term)) ||
+        (show.country && show.country.toLowerCase().includes(term))
+      )
+    }
+    
+    // Then apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(show => getTradeShowStatus(show) === statusFilter)
+    }
+    
+    return filtered
+  }, [sortedTradeShows, searchTerm, statusFilter])
+
+  // Determine which trade shows to display
+  const displayTradeShows = searchTerm ? globalFilteredTradeShows : filteredTradeShows
+  const displayTotalCount = searchTerm ? globalFilteredTradeShows.length : filteredTradeShows.length
 
   const handleCreateTradeShow = () => {
     navigate('/admin/trade-shows/create')
@@ -328,10 +363,6 @@ export function TradeShowsAdmin() {
     )
   }
 
-  // Determine which trade shows to display
-  const displayTradeShows = searchTerm ? globalFilteredTradeShows : filteredTradeShows
-  const displayTotalCount = searchTerm ? globalFilteredTradeShows.length : totalCount
-
   // Update the refetch function to maintain sorting
 
   return (
@@ -434,31 +465,58 @@ export function TradeShowsAdmin() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="flex items-center gap-2">
-        <div className="relative w-64">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search trade shows..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-          {searchLoading && (
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-            </div>
+      {/* Search Bar and Filters */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <div className="relative w-64">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search trade shows..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+            {searchLoading && (
+              <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+              </div>
+            )}
+          </div>
+          {searchTerm && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setSearchTerm('')}
+            >
+              Clear
+            </Button>
           )}
         </div>
-        {searchTerm && (
+        
+        {/* Status Filter Buttons */}
+        <div className="flex gap-2">
           <Button 
-            variant="outline" 
+            variant={statusFilter === 'all' ? 'default' : 'outline'} 
             size="sm" 
-            onClick={() => setSearchTerm('')}
+            onClick={() => setStatusFilter('all')}
           >
-            Clear
+            All
           </Button>
-        )}
+          <Button 
+            variant={statusFilter === 'upcoming' ? 'default' : 'outline'} 
+            size="sm" 
+            onClick={() => setStatusFilter('upcoming')}
+          >
+            Upcoming
+          </Button>
+          <Button 
+            variant={statusFilter === 'expired' ? 'default' : 'outline'} 
+            size="sm" 
+            onClick={() => setStatusFilter('expired')}
+          >
+            Expired
+          </Button>
+        </div>
       </div>
 
       {/* Trade Shows Table */}
@@ -466,9 +524,9 @@ export function TradeShowsAdmin() {
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">Trade Shows</h2>
           <p className="text-sm text-gray-600 mt-1">
-            {searchTerm 
-              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''} for "${searchTerm}"` 
-              : `List of all trade shows in the system`}
+            {searchTerm || statusFilter !== 'all'
+              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''}${searchTerm ? ` for "${searchTerm}"` : ''}${statusFilter !== 'all' ? ` (${statusFilter})` : ''}`
+              : `Showing ${Math.min(displayTradeShows.length, pageSize)} of ${totalCount} trade shows`}
           </p>
         </div>
 
@@ -478,6 +536,7 @@ export function TradeShowsAdmin() {
               <TableHead>Title</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Date Range</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Updated</TableHead>
               <TableHead>Published</TableHead>
@@ -485,74 +544,88 @@ export function TradeShowsAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayTradeShows.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((tradeShow) => (
-              <TableRow key={tradeShow.id}>
-                <TableCell className="font-medium">{tradeShow.title}</TableCell>
-                <TableCell>{tradeShow.location}</TableCell>
-                <TableCell>
-                  {tradeShow.startDate && tradeShow.endDate 
-                    ? new Date(tradeShow.startDate).toLocaleDateString() + ' - ' + new Date(tradeShow.endDate).toLocaleDateString()
-                    : 'Not specified'}
-                </TableCell>
-                <TableCell>
-                  {tradeShow.createdAt 
-                    ? new Date(tradeShow.createdAt).toLocaleDateString()
-                    : 'N/A'}
-                </TableCell>
-                <TableCell>
-                  {tradeShow.updatedAt 
-                    ? new Date(tradeShow.updatedAt).toLocaleDateString()
-                    : 'N/A'}
-                </TableCell>
-                <TableCell>
-                  <button
-                    onClick={() => toggleTradeShowStatus(tradeShow)}
-                    disabled={updatingShowId === tradeShow.id}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      tradeShow.isActive ? 'bg-blue-600' : 'bg-gray-200'
-                    } ${updatingShowId === tradeShow.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        tradeShow.isActive ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(websiteUrl + '/top-trade-shows-in-europe/' + tradeShow.slug, '_blank')}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditTradeShow(tradeShow.id)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => confirmDeleteTradeShow(tradeShow.id, tradeShow.title)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {displayTradeShows.map((tradeShow) => {
+              const status = getTradeShowStatus(tradeShow)
+              return (
+                <TableRow key={tradeShow.id}>
+                  <TableCell className="font-medium">{tradeShow.title}</TableCell>
+                  <TableCell>{tradeShow.location}</TableCell>
+                  <TableCell>
+                    {tradeShow.startDate && tradeShow.endDate 
+                      ? new Date(tradeShow.startDate).toLocaleDateString() + ' - ' + new Date(tradeShow.endDate).toLocaleDateString()
+                      : 'Not specified'}
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      status === 'expired' 
+                        ? 'bg-red-100 text-red-800' 
+                        : status === 'upcoming' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {tradeShow.createdAt 
+                      ? new Date(tradeShow.createdAt).toLocaleDateString()
+                      : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    {tradeShow.updatedAt 
+                      ? new Date(tradeShow.updatedAt).toLocaleDateString()
+                      : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <button
+                      onClick={() => toggleTradeShowStatus(tradeShow)}
+                      disabled={updatingShowId === tradeShow.id}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                        tradeShow.isActive ? 'bg-blue-600' : 'bg-gray-200'
+                      } ${updatingShowId === tradeShow.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          tradeShow.isActive ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(websiteUrl + '/top-trade-shows-in-europe/' + tradeShow.slug, '_blank')}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditTradeShow(tradeShow.id)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => confirmDeleteTradeShow(tradeShow.id, tradeShow.title)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
 
         {displayTradeShows.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
-              {searchTerm ? 'No trade shows found matching your search' : 'No trade shows found'}
+              {searchTerm || statusFilter !== 'all' ? 'No trade shows found matching your filters' : 'No trade shows found'}
             </p>
-            {!searchTerm && (
+            {!searchTerm && statusFilter === 'all' && (
               <Button
                 variant="default"
                 className="mt-4"

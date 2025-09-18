@@ -189,16 +189,6 @@ export function CreateTradeShowAdmin() {
               />
             </div>
             <div>
-              <Label htmlFor="excerpt">Heading (Excerpt)</Label>
-              <Textarea
-                id="excerpt"
-                value={formData.excerpt}
-                onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                placeholder="Brief description or heading for the trade show"
-                rows={3}
-              />
-            </div>
-            <div>
               <Label htmlFor="organizer">Hero Button Title</Label>
               <Input
                 id="organizer"
@@ -328,6 +318,16 @@ export function CreateTradeShowAdmin() {
                 onChange={(value) => handleInputChange('city', value)}
                 options={globalLocations?.cities || []}
                 placeholder="Select a city"
+              />
+            </div>
+            <div>
+              <Label htmlFor="excerpt">Heading (Excerpt)</Label>
+              <Textarea
+                id="excerpt"
+                value={formData.excerpt}
+                onChange={(e) => handleInputChange('excerpt', e.target.value)}
+                placeholder="Brief description or heading for the trade show"
+                rows={3}
               />
             </div>
             <div className="col-span-full">

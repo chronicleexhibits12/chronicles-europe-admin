@@ -110,7 +110,7 @@ export class BlogService {
       const { data, error } = await (supabase as any)
         .from('blog_posts')
         .select('*')
-        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false }) // Sort by created date, newest first
 
       if (error) throw new Error(error.message)
       
@@ -158,11 +158,11 @@ export class BlogService {
 
       if (countError) throw new Error(countError.message);
 
-      // Get the paginated data
+      // Get the paginated data, sorted by created date (newest first)
       const { data, error } = await (supabase as any)
         .from('blog_posts')
         .select('*')
-        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false }) // Sort by created date, newest first
         .range(from, to);
 
       if (error) throw new Error(error.message);

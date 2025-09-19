@@ -73,6 +73,18 @@ export class CitiesService {
   // Create city
   static async createCity(cityData: any): Promise<{ data: City | null; error: string | null }> {
     try {
+      // First check if a city with this name already exists
+      const { data: existingCities, error: fetchError } = await this.getCities();
+      if (fetchError) throw new Error(fetchError);
+      
+      const cityExists = existingCities?.some(city => 
+        city.name.toLowerCase() === cityData.name.toLowerCase()
+      );
+      
+      if (cityExists) {
+        return { data: null, error: 'A city page with this name already exists' };
+      }
+      
       const { data, error } = await (supabase as any)
         .from('cities')
         .insert([cityData])

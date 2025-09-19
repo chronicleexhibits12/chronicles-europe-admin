@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { TagInput } from '@/components/ui/tag-input'
+import { SearchableSelect } from '@/components/ui/searchable-select'
 import { 
   Loader2, 
   Save, 
@@ -589,22 +590,20 @@ export function EditCityAdmin() {
                   <span>Loading countries...</span>
                 </div>
               ) : (
-                <select
-                  id="country_slug"
+                <SearchableSelect
                   value={formData.country_slug}
-                  onChange={(e) => handleInputChange('country_slug', e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  required
-                >
-                  <option value="">Select a country</option>
-                  {availableCountries
+                  onChange={(value) => handleInputChange('country_slug', value)}
+                  options={availableCountries
                     .filter(country => country.is_active) // Only show active countries
-                    .map((country) => (
-                      <option key={country.id} value={country.slug}>
-                        {country.name}
-                      </option>
-                    ))}
-                </select>
+                    .map((country) => country.slug)}
+                  placeholder="Select a country"
+                />
+              )}
+              {/* Display selected country name for better UX */}
+              {formData.country_slug && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Selected: {availableCountries.find(c => c.slug === formData.country_slug)?.name}
+                </p>
               )}
             </div>
             <div>

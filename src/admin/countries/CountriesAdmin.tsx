@@ -53,6 +53,8 @@ export function CountriesAdmin() {
   const [selectCountryDialogOpen, setSelectCountryDialogOpen] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
   const [creatingCountryPage, setCreatingCountryPage] = useState(false)
+  const [deleteCountryDialogOpen, setDeleteCountryDialogOpen] = useState(false)
+  const [countryToDeleteFromList, setCountryToDeleteFromList] = useState<string | null>(null)
   
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
@@ -305,6 +307,54 @@ export function CountriesAdmin() {
     }
   }
 
+  const confirmDeleteCountryFromList = (countryName: string) => {
+    setCountryToDeleteFromList(countryName)
+    setDeleteCountryDialogOpen(true)
+  }
+
+  const handleDeleteCountryFromList = async () => {
+    if (!countryToDeleteFromList || !globalLocations) {
+      toast.error('No country selected for deletion')
+      return
+    }
+
+    try {
+      // Remove country from global locations countries array
+      const updatedCountries = globalLocations.countries.filter(country => 
+        country.toLowerCase() !== countryToDeleteFromList.toLowerCase()
+      )
+      
+      // Update the global locations with the new country list
+      const { error: updateError } = await GlobalLocationsService.updateGlobalLocations(globalLocations.id, {
+        ...globalLocations,
+        countries: updatedCountries
+      })
+      
+      if (updateError) {
+        throw new Error(updateError)
+      }
+      
+      // Trigger revalidation
+      await GlobalLocationsService.triggerRevalidation('/trade-shows')
+      
+      toast.success(`Country "${countryToDeleteFromList}" removed successfully!`)
+      
+      // If this was the selected country, clear the selection
+      if (selectedCountry === countryToDeleteFromList) {
+        setSelectedCountry(null)
+      }
+      
+      // Close the dialog and clear the country to delete
+      setDeleteCountryDialogOpen(false)
+      setCountryToDeleteFromList(null)
+    } catch (error: any) {
+      console.error('Error removing country:', error)
+      toast.error('Failed to remove country: ' + (error.message || 'Unknown error'))
+      setDeleteCountryDialogOpen(false)
+      setCountryToDeleteFromList(null)
+    }
+  }
+
   // Filter available countries for the dialog
   const availableCountries = useMemo(() => {
     if (!globalLocations?.countries) return []
@@ -547,12 +597,14 @@ export function CountriesAdmin() {
                 {filteredAvailableCountries.map((country) => (
                   <div 
                     key={country}
-                    className={`p-3 cursor-pointer hover:bg-gray-50 ${
-                      selectedCountry === country ? 'bg-green-50 border-l-4 border-green-500' : ''
+                    className={`p-3 flex items-center justify-between ${
+                      selectedCountry === country ? 'bg-green-50 border-l-4 border-green-500' : 'hover:bg-gray-50'
                     }`}
-                    onClick={() => setSelectedCountry(country)}
                   >
-                    <div className="flex items-center">
+                    <div 
+                      className="flex items-center cursor-pointer flex-1"
+                      onClick={() => setSelectedCountry(country)}
+                    >
                       <div className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
                         selectedCountry === country ? 'bg-green-500 border-green-500' : 'border-gray-300'
                       }`}>
@@ -562,6 +614,18 @@ export function CountriesAdmin() {
                       </div>
                       <span className={selectedCountry === country ? 'font-medium' : ''}>{country}</span>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmDeleteCountryFromList(country);
+                      }}
+                      title={`Remove ${country} from list`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -585,6 +649,41 @@ export function CountriesAdmin() {
               disabled={creatingCountryPage || !selectedCountry}
             >
               {creatingCountryPage ? 'Creating...' : 'Create Page'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Country From List Confirmation Dialog */}
+      <Dialog open={deleteCountryDialogOpen} onOpenChange={(open) => {
+        setDeleteCountryDialogOpen(open)
+        if (!open) {
+          setCountryToDeleteFromList(null)
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Removal</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove "{countryToDeleteFromList}" from the available countries list? 
+              This will not delete any existing country pages.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeleteCountryDialogOpen(false)
+                setCountryToDeleteFromList(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteCountryFromList}
+            >
+              Remove
             </Button>
           </DialogFooter>
         </DialogContent>

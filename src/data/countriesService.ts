@@ -30,6 +30,7 @@ interface SupabaseCountry {
   best_company_subtitle: string | null
   best_company_content_html: string | null
   process_section_title: string | null
+  process_section_subtitle_html: string | null
   process_section_steps: ProcessStep[] | null
   cities_section_title: string | null
   cities_section_subtitle: string | null

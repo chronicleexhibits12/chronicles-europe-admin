@@ -35,6 +35,7 @@ import { CitiesService } from '@/data/citiesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
 import { useGlobalLocations } from '@/hooks/useGlobalLocations'
 import { slugify } from '@/utils/slugify'
+import type { City } from '@/data/citiesTypes'
 
 export function CitiesAdmin() {
   const navigate = useNavigate()
@@ -53,6 +54,35 @@ export function CitiesAdmin() {
   const [selectCityDialogOpen, setSelectCityDialogOpen] = useState(false)
   const [selectedCity, setSelectedCity] = useState<string | null>(null)
   const [creatingCityPage, setCreatingCityPage] = useState(false)
+  const [allCitiesData, setAllCitiesData] = useState<City[]>([])
+  const [loadingAllCities, setLoadingAllCities] = useState(false)
+  const [deleteCityDialogOpen, setDeleteCityDialogOpen] = useState(false)
+  const [cityToDeleteFromList, setCityToDeleteFromList] = useState<string | null>(null)
+  
+  // Fetch all cities when select city dialog opens
+  useEffect(() => {
+    const fetchAllCities = async () => {
+      if (selectCityDialogOpen) {
+        setLoadingAllCities(true)
+        try {
+          const { data, error } = await CitiesService.getCities()
+          if (error) throw new Error(error)
+          setAllCitiesData(data || [])
+        } catch (error: any) {
+          console.error('Error fetching all cities:', error)
+          toast.error('Failed to load cities: ' + (error.message || 'Unknown error'))
+          setAllCitiesData([])
+        } finally {
+          setLoadingAllCities(false)
+        }
+      } else {
+        // Clear the data when dialog is closed
+        setAllCitiesData([])
+      }
+    }
+    
+    fetchAllCities()
+  }, [selectCityDialogOpen])
   
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
@@ -185,7 +215,7 @@ export function CitiesAdmin() {
           
           toast.success('City added successfully!')
         } else {
-          toast.error('City already exists!')
+          toast.error('City already exists in the global locations list!')
         }
       }
 
@@ -229,18 +259,27 @@ export function CitiesAdmin() {
       return
     }
 
-    // Check if city page already exists (case-insensitive comparison)
-    const cityExists = cities?.some(city => 
-      city.name.toLowerCase() === selectedCity.toLowerCase()
-    )
-
-    if (cityExists) {
-      toast.error(`City page for "${selectedCity}" already exists!`)
-      return
-    }
-
     setCreatingCityPage(true)
     try {
+      // Check if city page already exists by querying all cities
+      // This is more reliable than checking against the paginated list
+      const { data: allCities, error: fetchError } = await CitiesService.getCities()
+      
+      if (fetchError) {
+        throw new Error(fetchError)
+      }
+
+      // Check if city page already exists (case-insensitive comparison)
+      const cityExists = allCities?.some(city => 
+        city.name.toLowerCase() === selectedCity.toLowerCase()
+      )
+
+      if (cityExists) {
+        toast.error(`City page for "${selectedCity}" already exists!`)
+        setCreatingCityPage(false)
+        return
+      }
+
       // Generate slug for the city
       const citySlug = `exhibition-stand-builder-${slugify(selectedCity)}`
       
@@ -288,7 +327,12 @@ export function CitiesAdmin() {
       refetch()
     } catch (error: any) {
       console.error('Error creating city page:', error)
-      toast.error('Failed to create city page: ' + (error.message || 'Unknown error'))
+      // Check if it's a duplicate error
+      if (error.message && error.message.includes('duplicate')) {
+        toast.error(`City page for "${selectedCity}" already exists!`)
+      } else {
+        toast.error('Failed to create city page: ' + (error.message || 'Unknown error'))
+      }
     } finally {
       setCreatingCityPage(false)
     }
@@ -296,12 +340,13 @@ export function CitiesAdmin() {
 
   // Filter available cities for the dialog
   const availableCities = useMemo(() => {
-    if (!globalLocations?.cities) return []
+    if (!globalLocations?.cities || !allCitiesData) return []
     
+    // Filter out cities that already have pages
     return globalLocations.cities
-      .filter(city => !cities?.some(c => c.name.toLowerCase() === city.toLowerCase()))
+      .filter(city => !allCitiesData.some(c => c.name.toLowerCase() === city.toLowerCase()))
       .sort()
-  }, [globalLocations?.cities, cities])
+  }, [globalLocations?.cities, allCitiesData])
 
   // Filter cities based on search term in dialog
   const filteredAvailableCities = useMemo(() => {
@@ -312,6 +357,62 @@ export function CitiesAdmin() {
       city.toLowerCase().includes(term)
     )
   }, [availableCities, searchTerm, selectCityDialogOpen])
+
+  const confirmDeleteCityFromList = (cityName: string) => {
+    setCityToDeleteFromList(cityName)
+    setDeleteCityDialogOpen(true)
+  }
+
+  const handleDeleteCityFromList = async () => {
+    if (!cityToDeleteFromList || !globalLocations) {
+      toast.error('No city selected for deletion')
+      return
+    }
+
+    try {
+      // Remove city from global locations cities array
+      const updatedCities = globalLocations.cities.filter(city => 
+        city.toLowerCase() !== cityToDeleteFromList.toLowerCase()
+      )
+      
+      // Update the global locations with the new city list
+      const { error: updateError } = await GlobalLocationsService.updateGlobalLocations(globalLocations.id, {
+        ...globalLocations,
+        cities: updatedCities
+      })
+      
+      if (updateError) {
+        throw new Error(updateError)
+      }
+      
+      // Trigger revalidation for the trade shows page
+      await GlobalLocationsService.triggerRevalidation('/trade-shows')
+      
+      toast.success(`City "${cityToDeleteFromList}" removed successfully!`)
+      
+      // If this was the selected city, clear the selection
+      if (selectedCity === cityToDeleteFromList) {
+        setSelectedCity(null)
+      }
+      
+      // Refetch to update the available cities list
+      if (selectCityDialogOpen) {
+        const { data, error: fetchError } = await CitiesService.getCities()
+        if (!fetchError) {
+          setAllCitiesData(data || [])
+        }
+      }
+      
+      // Close the dialog and clear the city to delete
+      setDeleteCityDialogOpen(false)
+      setCityToDeleteFromList(null)
+    } catch (error: any) {
+      console.error('Error removing city:', error)
+      toast.error('Failed to remove city: ' + (error.message || 'Unknown error'))
+      setDeleteCityDialogOpen(false)
+      setCityToDeleteFromList(null)
+    }
+  }
 
   // Pagination functions
   const goToPage = (page: number) => {
@@ -536,17 +637,24 @@ export function CitiesAdmin() {
           
           {/* Cities List */}
           <div className="flex-1 overflow-y-auto border rounded-md max-h-[400px]">
-            {filteredAvailableCities.length > 0 ? (
+            {loadingAllCities ? (
+              <div className="p-8 text-center">
+                <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
+                <p className="text-gray-500 mt-2">Loading cities...</p>
+              </div>
+            ) : filteredAvailableCities.length > 0 ? (
               <div className="divide-y">
                 {filteredAvailableCities.map((city) => (
                   <div 
                     key={city}
-                    className={`p-3 cursor-pointer hover:bg-gray-50 ${
-                      selectedCity === city ? 'bg-green-50 border-l-4 border-green-500' : ''
+                    className={`p-3 flex items-center justify-between ${
+                      selectedCity === city ? 'bg-green-50 border-l-4 border-green-500' : 'hover:bg-gray-50'
                     }`}
-                    onClick={() => setSelectedCity(city)}
                   >
-                    <div className="flex items-center">
+                    <div 
+                      className="flex items-center cursor-pointer flex-1"
+                      onClick={() => setSelectedCity(city)}
+                    >
                       <div className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
                         selectedCity === city ? 'bg-green-500 border-green-500' : 'border-gray-300'
                       }`}>
@@ -556,6 +664,18 @@ export function CitiesAdmin() {
                       </div>
                       <span className={selectedCity === city ? 'font-medium' : ''}>{city}</span>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmDeleteCityFromList(city);
+                      }}
+                      title={`Remove ${city} from list`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -576,9 +696,44 @@ export function CitiesAdmin() {
             </Button>
             <Button 
               onClick={handleCreateCityPage} 
-              disabled={creatingCityPage || !selectedCity}
+              disabled={creatingCityPage || !selectedCity || loadingAllCities}
             >
               {creatingCityPage ? 'Creating...' : 'Create Page'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete City From List Confirmation Dialog */}
+      <Dialog open={deleteCityDialogOpen} onOpenChange={(open) => {
+        setDeleteCityDialogOpen(open)
+        if (!open) {
+          setCityToDeleteFromList(null)
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Removal</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove "{cityToDeleteFromList}" from the available cities list? 
+              This will not delete any existing city pages.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeleteCityDialogOpen(false)
+                setCityToDeleteFromList(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteCityFromList}
+            >
+              Remove
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -49,6 +49,7 @@ export interface Country {
   
   // Process Section
   process_section_title: string | null
+  process_section_subtitle_html: string | null
   process_section_steps: ProcessStep[] | null
   
   // Cities Section

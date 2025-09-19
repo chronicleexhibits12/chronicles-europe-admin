@@ -75,6 +75,7 @@ interface CountryData {
   
   // Process Section
   process_section_title: string
+  process_section_subtitle_html: string
   process_section_steps: ProcessStep[]
   
   // Cities Section
@@ -132,6 +133,7 @@ export function EditCountryAdmin() {
     
     // Process Section
     process_section_title: '',
+    process_section_subtitle_html: '',
     process_section_steps: [] as ProcessStep[],
     
     // Cities Section
@@ -212,6 +214,7 @@ export function EditCountryAdmin() {
         best_company_subtitle: country.best_company_subtitle || '',
         best_company_content_html: country.best_company_content_html || '',
         process_section_title: country.process_section_title || '',
+        process_section_subtitle_html: country.process_section_subtitle_html || '',
         process_section_steps: processSteps,
         cities_section_title: country.cities_section_title || '',
         cities_section_subtitle: country.cities_section_subtitle || '',
@@ -382,6 +385,7 @@ export function EditCountryAdmin() {
         best_company_subtitle: updatedFormData.best_company_subtitle,
         best_company_content_html: updatedFormData.best_company_content_html,
         process_section_title: updatedFormData.process_section_title,
+        process_section_subtitle_html: updatedFormData.process_section_subtitle_html,
         process_section_steps: updatedFormData.process_section_steps,
         cities_section_title: updatedFormData.cities_section_title,
         cities_section_subtitle: updatedFormData.cities_section_subtitle,
@@ -884,6 +888,14 @@ export function EditCountryAdmin() {
                 value={formData.process_section_title}
                 onChange={(e) => handleInputChange('process_section_title', e.target.value)}
                 placeholder="e.g., The Art And Science Behind Our Exhibition Stand Design & Build Process"
+              />
+            </div>
+            <div>
+              <Label>Subtitle</Label>
+              <RichTextEditor
+                content={formData.process_section_subtitle_html || ''}
+                onChange={(content) => handleRichTextChange('process_section_subtitle_html', content)}
+                controlled={true}
               />
             </div>
             <div>

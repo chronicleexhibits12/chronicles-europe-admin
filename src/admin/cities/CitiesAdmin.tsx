@@ -666,6 +666,7 @@ export function CitiesAdmin() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Sr. No.</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>City Slug</TableHead>
               <TableHead>Country Slug</TableHead>
@@ -674,8 +675,13 @@ export function CitiesAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayCities.map((city) => (
+            {displayCities.map((city, index) => (
               <TableRow key={city.id}>
+                <TableCell className="font-medium">
+                  {searchTerm 
+                    ? displayTotalCount - index 
+                    : totalCount - ((currentPage - 1) * pageSize) - index}
+                </TableCell>
                 <TableCell className="font-medium">{city.name}</TableCell>
                 <TableCell>{city.city_slug}</TableCell>
                 <TableCell>{city.country_slug}</TableCell>

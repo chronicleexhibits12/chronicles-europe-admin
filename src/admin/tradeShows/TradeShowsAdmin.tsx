@@ -533,6 +533,7 @@ export function TradeShowsAdmin() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Sr. No.</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Date Range</TableHead>
@@ -544,10 +545,15 @@ export function TradeShowsAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayTradeShows.map((tradeShow) => {
+            {displayTradeShows.map((tradeShow, index) => {
               const status = getTradeShowStatus(tradeShow)
               return (
                 <TableRow key={tradeShow.id}>
+                  <TableCell className="font-medium">
+                    {searchTerm 
+                      ? displayTotalCount - index 
+                      : totalCount - ((currentPage - 1) * pageSize) - index}
+                  </TableCell>
                   <TableCell className="font-medium">{tradeShow.title}</TableCell>
                   <TableCell>{tradeShow.location}</TableCell>
                   <TableCell>

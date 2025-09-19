@@ -324,6 +324,7 @@ export function BlogPostsAdmin() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Sr. No.</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Updated</TableHead>
@@ -331,8 +332,13 @@ export function BlogPostsAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayBlogPosts.map((blogPost) => (
+            {displayBlogPosts.map((blogPost, index) => (
               <TableRow key={blogPost.id}>
+                <TableCell className="font-medium">
+                  {searchTerm 
+                    ? displayTotalCount - index 
+                    : totalCount - ((currentPage - 1) * pageSize) - index}
+                </TableCell>
                 <TableCell className="font-medium">{blogPost.title}</TableCell>
                 <TableCell>
                   {blogPost.createdAt 

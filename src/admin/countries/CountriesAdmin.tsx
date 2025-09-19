@@ -672,6 +672,7 @@ export function CountriesAdmin() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Sr. No.</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>Last Updated</TableHead>
@@ -679,8 +680,13 @@ export function CountriesAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayCountries.map((country) => (
+            {displayCountries.map((country, index) => (
               <TableRow key={country.id}>
+                <TableCell className="font-medium">
+                  {searchTerm 
+                    ? displayTotalCount - index 
+                    : totalCount - ((currentPage - 1) * pageSize) - index}
+                </TableCell>
                 <TableCell className="font-medium">{country.name}</TableCell>
                 <TableCell>{country.slug}</TableCell>
                 <TableCell>

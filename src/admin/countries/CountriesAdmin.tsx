@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,7 +29,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { toast } from 'sonner'
-import { Search, Plus, Trash2, Edit, Globe, Eye } from 'lucide-react'
+import { Search, Plus, Trash2, Edit, Globe, Eye, Loader2 } from 'lucide-react'
 import { useCountries } from '@/hooks/useCountriesContent'
 import { CountriesService } from '@/data/countriesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
@@ -43,6 +43,8 @@ export function CountriesAdmin() {
   const { data: countries = [], totalCount, loading, error, refetch } = useCountries(currentPage, pageSize)
   const { data: globalLocations } = useGlobalLocations()
   const [searchTerm, setSearchTerm] = useState('')
+  const [allCountries, setAllCountries] = useState<any[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [countryToDelete, setCountryToDelete] = useState<{ id: string; name: string } | null>(null)
   const [addCountryDialogOpen, setAddCountryDialogOpen] = useState(false)
@@ -55,6 +57,47 @@ export function CountriesAdmin() {
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
 
+  // Get all countries for global search
+  const getAllCountries = async () => {
+    if (!searchTerm) return
+    setSearchLoading(true)
+    try {
+      const { data, error } = await CountriesService.getCountries()
+      if (error) throw new Error(error)
+      // Sort by name for consistent display
+      const sortedData = data?.sort((a, b) => 
+        a.name.localeCompare(b.name)
+      ) || []
+      setAllCountries(sortedData)
+    } catch (error: any) {
+      console.error('Error fetching all countries:', error)
+      toast.error('Failed to search countries')
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  // Effect to fetch all countries when search term changes
+  useEffect(() => {
+    if (searchTerm) {
+      getAllCountries()
+    } else {
+      setAllCountries([])
+    }
+  }, [searchTerm])
+
+  // Filter all countries based on search term
+  const globalFilteredCountries = useMemo(() => {
+    if (!allCountries.length) return []
+    
+    const term = searchTerm.toLowerCase()
+    return allCountries.filter(country => 
+      country.name.toLowerCase().includes(term) ||
+      country.slug.toLowerCase().includes(term)
+    )
+  }, [allCountries, searchTerm])
+
+  // Filter countries for regular view
   const filteredCountries = useMemo(() => {
     if (!searchTerm) return countries
     
@@ -64,6 +107,10 @@ export function CountriesAdmin() {
       country.slug.toLowerCase().includes(term)
     )
   }, [countries, searchTerm])
+
+  // Determine which countries to display
+  const displayCountries = searchTerm ? globalFilteredCountries : filteredCountries
+  const displayTotalCount = searchTerm ? globalFilteredCountries.length : filteredCountries.length
 
   const handleViewCountry = (slug: string) => {
     const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app';
@@ -594,6 +641,11 @@ export function CountriesAdmin() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
           />
+          {searchLoading && (
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+            </div>
+          )}
         </div>
         {searchTerm && (
           <Button 
@@ -611,7 +663,9 @@ export function CountriesAdmin() {
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">Countries</h2>
           <p className="text-sm text-gray-600 mt-1">
-            List of all countries in the system
+            {searchTerm
+              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''}${searchTerm ? ` for "${searchTerm}"` : ''}`
+              : `Showing ${Math.min(displayCountries.length, pageSize)} of ${totalCount} countries`}
           </p>
         </div>
 
@@ -625,7 +679,7 @@ export function CountriesAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredCountries.map((country) => (
+            {displayCountries.map((country) => (
               <TableRow key={country.id}>
                 <TableCell className="font-medium">{country.name}</TableCell>
                 <TableCell>{country.slug}</TableCell>
@@ -662,7 +716,7 @@ export function CountriesAdmin() {
           </TableBody>
         </Table>
 
-        {filteredCountries.length === 0 && (
+        {displayCountries.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
               {searchTerm ? 'No countries found matching your search' : 'No countries found'}
@@ -682,7 +736,7 @@ export function CountriesAdmin() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!searchTerm && totalPages > 1 && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>

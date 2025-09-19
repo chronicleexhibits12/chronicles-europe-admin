@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,7 +29,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { toast } from 'sonner'
-import { Search, Plus, Trash2, Edit, MapPin, Eye } from 'lucide-react'
+import { Search, Plus, Trash2, Edit, MapPin, Eye, Loader2 } from 'lucide-react'
 import { useCities } from '@/hooks/useCitiesContent'
 import { CitiesService } from '@/data/citiesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
@@ -43,6 +43,8 @@ export function CitiesAdmin() {
   const { data: cities = [], totalCount, loading, error, refetch } = useCities(currentPage, pageSize)
   const { data: globalLocations } = useGlobalLocations()
   const [searchTerm, setSearchTerm] = useState('')
+  const [allCities, setAllCities] = useState<any[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [cityToDelete, setCityToDelete] = useState<{ id: string; name: string } | null>(null)
   const [addCityDialogOpen, setAddCityDialogOpen] = useState(false)
@@ -55,6 +57,48 @@ export function CitiesAdmin() {
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
 
+  // Get all cities for global search
+  const getAllCities = async () => {
+    if (!searchTerm) return
+    setSearchLoading(true)
+    try {
+      const { data, error } = await CitiesService.getCities()
+      if (error) throw new Error(error)
+      // Sort by name for consistent display
+      const sortedData = data?.sort((a, b) => 
+        a.name.localeCompare(b.name)
+      ) || []
+      setAllCities(sortedData)
+    } catch (error: any) {
+      console.error('Error fetching all cities:', error)
+      toast.error('Failed to search cities')
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  // Effect to fetch all cities when search term changes
+  useEffect(() => {
+    if (searchTerm) {
+      getAllCities()
+    } else {
+      setAllCities([])
+    }
+  }, [searchTerm])
+
+  // Filter all cities based on search term
+  const globalFilteredCities = useMemo(() => {
+    if (!allCities.length) return []
+    
+    const term = searchTerm.toLowerCase()
+    return allCities.filter(city => 
+      city.name.toLowerCase().includes(term) ||
+      city.country_slug.toLowerCase().includes(term) ||
+      city.city_slug.toLowerCase().includes(term)
+    )
+  }, [allCities, searchTerm])
+
+  // Filter cities for regular view
   const filteredCities = useMemo(() => {
     if (!searchTerm) return cities
     
@@ -65,6 +109,10 @@ export function CitiesAdmin() {
       city.city_slug.toLowerCase().includes(term)
     )
   }, [cities, searchTerm])
+
+  // Determine which cities to display
+  const displayCities = searchTerm ? globalFilteredCities : filteredCities
+  const displayTotalCount = searchTerm ? globalFilteredCities.length : filteredCities.length
 
   const handleEditCity = (id: string) => {
     navigate(`/admin/cities/${id}/edit`)
@@ -587,6 +635,11 @@ export function CitiesAdmin() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
           />
+          {searchLoading && (
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+            </div>
+          )}
         </div>
         {searchTerm && (
           <Button 
@@ -604,7 +657,9 @@ export function CitiesAdmin() {
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">Cities</h2>
           <p className="text-sm text-gray-600 mt-1">
-            List of all cities in the system
+            {searchTerm
+              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''}${searchTerm ? ` for "${searchTerm}"` : ''}`
+              : `Showing ${Math.min(displayCities.length, pageSize)} of ${totalCount} cities`}
           </p>
         </div>
 
@@ -619,7 +674,7 @@ export function CitiesAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredCities.map((city) => (
+            {displayCities.map((city) => (
               <TableRow key={city.id}>
                 <TableCell className="font-medium">{city.name}</TableCell>
                 <TableCell>{city.city_slug}</TableCell>
@@ -657,7 +712,7 @@ export function CitiesAdmin() {
           </TableBody>
         </Table>
 
-        {filteredCities.length === 0 && (
+        {displayCities.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
               {searchTerm ? 'No cities found matching your search' : 'No cities found'}
@@ -677,7 +732,7 @@ export function CitiesAdmin() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!searchTerm && totalPages > 1 && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>

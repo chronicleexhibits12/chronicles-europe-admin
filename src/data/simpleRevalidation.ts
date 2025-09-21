@@ -10,12 +10,18 @@
  */
 export async function basicRevalidate(path: string = '/'): Promise<{ success: boolean; error: string | null }> {
   try {
+    // Read the website URL from environment variables, with fallback
+    const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app';
+    
+    // Construct the revalidation endpoint using the website URL and static /api/revalidate path
+    const revalidateEndpoint = `${websiteUrl}/api/revalidate`;
+    
     // Log which path is being revalidated
     console.log(`[Revalidation] Triggering revalidation for path: ${path}`);
     
     // Make the most basic POST request to the revalidation endpoint
     // Include the path in the request body as required by the API route
-    const response = await fetch('https://chronicleseurope.vercel.app/api/revalidate', {
+    const response = await fetch(revalidateEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

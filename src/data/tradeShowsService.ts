@@ -485,6 +485,9 @@ export class TradeShowsService {
   // Trigger revalidation in Next.js website
   static async triggerRevalidation(path: string = '/'): Promise<{ success: boolean; error: string | null }> {
     // Use the simple revalidation approach
-    return basicRevalidate(path)
+    if (path === '/') {
+      return basicRevalidate('/top-trade-shows-in-europe');
+    }
+    return basicRevalidate(path);
   }
 }

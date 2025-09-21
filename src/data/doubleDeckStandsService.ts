@@ -334,7 +334,7 @@ export class DoubleDeckStandsPageService {
   // Trigger revalidation in Next.js website - simplified version
   static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
     // Use the simple revalidation approach
-    return basicRevalidate('/double-decker-stands');
+    return basicRevalidate('/double-decker-exhibition-stands');
   }
 }
 

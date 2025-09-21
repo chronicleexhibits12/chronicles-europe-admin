@@ -377,6 +377,6 @@ export class CustomStandsPageService {
   // Trigger revalidation in Next.js website - simplified version
   static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
     // Use the simple revalidation approach
-    return basicRevalidate('/custom-stands');
+    return basicRevalidate('/custom-booth-design-and-build');
   }
 }

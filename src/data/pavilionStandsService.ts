@@ -343,7 +343,7 @@ export class PavilionStandsPageService {
   // Trigger revalidation in Next.js website - simplified version
   static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
     // Use the simple revalidation approach
-    return basicRevalidate('/pavilion-design');
+    return basicRevalidate('/pavilion-design-build');
   }
 }
 

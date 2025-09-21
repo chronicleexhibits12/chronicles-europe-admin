@@ -535,7 +535,6 @@ export function TradeShowsAdmin() {
             <TableRow>
               <TableHead>Sr. No.</TableHead>
               <TableHead>Title</TableHead>
-              <TableHead>Location</TableHead>
               <TableHead>Date Range</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
@@ -555,7 +554,6 @@ export function TradeShowsAdmin() {
                       : totalCount - ((currentPage - 1) * pageSize) - index}
                   </TableCell>
                   <TableCell className="font-medium">{tradeShow.title}</TableCell>
-                  <TableCell>{tradeShow.location}</TableCell>
                   <TableCell>
                     {tradeShow.startDate && tradeShow.endDate 
                       ? new Date(tradeShow.startDate).toLocaleDateString() + ' - ' + new Date(tradeShow.endDate).toLocaleDateString()

@@ -26,7 +26,7 @@ export function Sidebar() {
         </div>
       </div>
       
-      <nav className="px-4 flex-1">
+      <nav className="px-4 flex-1 overflow-y-auto sidebar-scrollbar">
         <ul className="space-y-2">
           {navigationItems.map((item) => {
             const Icon = item.icon
@@ -54,7 +54,7 @@ export function Sidebar() {
       </nav>
 
       {/* User Info and Logout */}
-      <div className="p-4 border-t border-sidebar-border">
+      <div className="p-4 border-t border-sidebar-border mt-auto">
         <div className="flex items-center gap-3 mb-3 px-2">
           <div className="w-8 h-8 bg-sidebar-primary rounded-full flex items-center justify-center">
             <User className="w-4 h-4 text-sidebar-primary-foreground" />

@@ -1,4 +1,4 @@
-import { Home, Building, FileText, MapPin, Globe, Calendar, BookOpen, Image, FileSpreadsheet } from 'lucide-react'
+import { Home, Building, FileText, MapPin, Globe, Calendar, BookOpen, Image, FileSpreadsheet, Map } from 'lucide-react'
 import type { NavigationItem } from '@/data/commonTypes'
 
 export const navigationItems: NavigationItem[] = [
@@ -50,6 +50,12 @@ export const navigationItems: NavigationItem[] = [
     label: 'Portfolio',
     href: '/admin/portfolio',
     icon: Image
+  },
+  {
+    id: 'sitemap',
+    label: 'Sitemap',
+    href: '/admin/sitemap',
+    icon: Map
   },
   {
     id: 'form-submissions',

@@ -1384,6 +1384,39 @@ export interface Database {
           updated_at?: string
         }
       }
+      // Add the sitemap table definition
+      sitemap: {
+        Row: {
+          id: number
+          url: string
+          priority: number
+          changefreq: string
+          lastmod: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          url: string
+          priority?: number
+          changefreq?: string
+          lastmod?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          url?: string
+          priority?: number
+          changefreq?: string
+          lastmod?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

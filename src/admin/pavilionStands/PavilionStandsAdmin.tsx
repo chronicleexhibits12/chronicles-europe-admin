@@ -444,9 +444,90 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Section 5: Our Expertise Section */}
+        {/* Section 5: Stand Project Text Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Our Expertise Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Stand Project Text Section)</h2>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="stand-project-title">Title</Label>
+                <Input
+                  id="stand-project-title"
+                  value={formData.standProjectText?.title || ''}
+                  onChange={(e) => handleInputChange('standProjectText', 'title', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="stand-project-highlight">Highlight Text</Label>
+                <Input
+                  id="stand-project-highlight"
+                  value={formData.standProjectText?.highlight || ''}
+                  onChange={(e) => handleInputChange('standProjectText', 'highlight', e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="w-full">
+              <Label>Description (Rich Text)</Label>
+              <RichTextEditor
+                content={formData.standProjectText?.description || ''}
+                onChange={(newContent) => handleInputChange('standProjectText', 'description', newContent)}
+                controlled={true}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Portfolio Section */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Portfolio Section</h2>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="portfolio-title">Title</Label>
+                <Input
+                  id="portfolio-title"
+                  value={formData.portfolio?.title || ''}
+                  onChange={(e) => handleInputChange('portfolio', 'title', e.target.value)}
+                  placeholder="e.g., OUR PORTFOLIO"
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-subtitle">Subtitle</Label>
+                <Input
+                  id="portfolio-subtitle"
+                  value={formData.portfolio?.subtitle || ''}
+                  onChange={(e) => handleInputChange('portfolio', 'subtitle', e.target.value)}
+                  placeholder="e.g., Explore our extensive portfolio..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-cta-text">CTA Text</Label>
+                <Input
+                  id="portfolio-cta-text"
+                  value={formData.portfolio?.ctaText || ''}
+                  onChange={(e) => handleInputChange('portfolio', 'ctaText', e.target.value)}
+                  placeholder="e.g., View All Projects"
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-cta-link">CTA Link</Label>
+                <Input
+                  id="portfolio-cta-link"
+                  value="/portfolio"
+                  readOnly
+                  placeholder="/portfolio"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  This link is fixed to "/portfolio"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 6: Our Expertise Section */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Our Expertise Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="our-expertise-title">Title</Label>
@@ -467,9 +548,9 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Section 6: Company Info Section */}
+        {/* Section 7: Company Info Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Company Info Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7 (Company Info Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="company-info-title">Title</Label>

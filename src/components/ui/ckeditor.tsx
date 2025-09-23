@@ -8,6 +8,12 @@ interface CKEditorProps {
   className?: string;
 }
 
+declare global {
+  interface Window {
+    CKEDITOR: any;
+  }
+}
+
 // Global state to track script loading
 let isScriptLoading = false;
 let isScriptLoaded = false;

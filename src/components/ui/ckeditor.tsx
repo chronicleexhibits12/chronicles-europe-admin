@@ -1,7 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import '../../styles/content.css';
+import { useRef, useEffect, useId, useState } from "react";
+import "../../styles/content.css";
 
 interface CKEditorProps {
   content: string;
@@ -10,78 +8,174 @@ interface CKEditorProps {
   className?: string;
 }
 
-export function CKEditorComponent({ content, onChange, placeholder, className }: CKEditorProps) {
-  const [editorInstance, setEditorInstance] = useState<any>(null);
-  const previousContentRef = useRef<string>(content);
-  
-  // Update editor content only when it actually changes from outside
+// Global state to track script loading
+let isScriptLoading = false;
+let isScriptLoaded = false;
+const scriptCallbacks: (() => void)[] = [];
+
+const loadCKEditorScript = (callback: () => void) => {
+  const scriptUrl = "https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js";
+
+  if (isScriptLoaded) {
+    callback();
+    return;
+  }
+
+  scriptCallbacks.push(callback);
+
+  if (isScriptLoading) {
+    return; // Script is already loading
+  }
+
+  const existingScript = document.querySelector(`script[src="${scriptUrl}"]`);
+  if (existingScript) {
+    isScriptLoaded = true;
+    scriptCallbacks.forEach((cb) => cb());
+    scriptCallbacks.length = 0;
+    return;
+  }
+
+  isScriptLoading = true;
+  const script = document.createElement("script");
+  script.src = scriptUrl;
+  script.async = true;
+  script.onload = () => {
+    isScriptLoaded = true;
+    isScriptLoading = false;
+    scriptCallbacks.forEach((cb) => cb());
+    scriptCallbacks.length = 0;
+  };
+  script.onerror = () => {
+    isScriptLoading = false;
+    console.error("Failed to load CKEditor script");
+  };
+  document.body.appendChild(script);
+};
+
+export function CKEditorComponent({
+  content,
+  onChange,
+  placeholder,
+  className,
+}: CKEditorProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<any>(null);
+  const uniqueId = useId();
+  const [isEditorReady, setIsEditorReady] = useState(false);
+  const contentRef = useRef(content);
+
+  // Keep content ref updated
+  contentRef.current = content;
+
   useEffect(() => {
-    if (editorInstance && content !== previousContentRef.current) {
-      // Only update if the content has actually changed from outside the editor
-      if (editorInstance.getData() !== content) {
-        editorInstance.setData(content || '');
+    let isMounted = true;
+
+    const initEditor = () => {
+      if (!isMounted || !window.CKEDITOR || !textareaRef.current) {
+        return;
       }
-      previousContentRef.current = content;
+
+      // Clean up existing instance
+      if (editorRef.current) {
+        editorRef.current.destroy(true);
+        editorRef.current = null;
+      }
+
+      if (window.CKEDITOR.instances[uniqueId]) {
+        window.CKEDITOR.instances[uniqueId].destroy(true);
+      }
+
+      try {
+        const editor = window.CKEDITOR.replace(uniqueId, {
+          format_tags: "p;h1;h2;h3;h4;h5;h6;pre;address;div",
+          startupFocus: false,
+        });
+
+        editorRef.current = editor;
+
+        editor.on("instanceReady", () => {
+          if (!isMounted) return;
+
+          setIsEditorReady(true);
+
+          // Set initial content after editor is ready
+          if (contentRef.current && editor.getData() !== contentRef.current) {
+            editor.setData(contentRef.current);
+          }
+        });
+
+        editor.on("change", () => {
+          if (!isMounted) return;
+          const data = editor.getData();
+          onChange(data);
+        });
+
+        // Also listen for key events for more responsive updates
+        editor.on("key", () => {
+          setTimeout(() => {
+            if (!isMounted) return;
+            const data = editor.getData();
+            onChange(data);
+          }, 0);
+        });
+      } catch (error) {
+        console.error("Failed to initialize CKEditor:", error);
+      }
+    };
+
+    loadCKEditorScript(initEditor);
+
+    return () => {
+      isMounted = false;
+      setIsEditorReady(false);
+
+      if (editorRef.current) {
+        try {
+          editorRef.current.destroy(true);
+        } catch (error) {
+          console.error("Error destroying editor:", error);
+        }
+        editorRef.current = null;
+      }
+
+      if (window.CKEDITOR?.instances[uniqueId]) {
+        try {
+          window.CKEDITOR.instances[uniqueId].destroy(true);
+        } catch (error) {
+          console.error("Error destroying CKEDITOR instance:", error);
+        }
+      }
+    };
+  }, [uniqueId]);
+
+  // Sync content when it changes from parent
+  useEffect(() => {
+    if (
+      isEditorReady &&
+      editorRef.current &&
+      content !== editorRef.current.getData()
+    ) {
+      // Use setTimeout to avoid conflicts with editor's internal operations
+      setTimeout(() => {
+        if (editorRef.current && content !== editorRef.current.getData()) {
+          editorRef.current.setData(content);
+        }
+      }, 0);
     }
-  }, [content, editorInstance]);
+  }, [content, isEditorReady]);
 
   return (
-    <div className={`border rounded-lg ${className}`}>
-      <CKEditor
-        // @ts-ignore - CKEditor types are complex and cause issues
-        editor={ClassicEditor}
-        data={content || ''}
-        onReady={(editor) => {
-          setEditorInstance(editor);
-          // Add the rich-content class to the editor content element
-          const editableElement = editor.ui.view.editable.element;
-          if (editableElement) {
-            editableElement.classList.add('rich-content');
-          }
-        }}
-        onChange={(_event, editor) => {
-          // @ts-ignore - Fixing the type issue with editor.getData()
-          const data = editor.getData();
-          // Update the ref to track the current content
-          previousContentRef.current = data;
-          onChange(data);
-        }}
-        config={{
-          placeholder: placeholder || 'Type here...',
-          toolbar: [
-            'heading',
-            '|',
-            'bold',
-            'italic',
-            'underline',
-            'strikethrough',
-            '|',
-            'link',
-            'bulletedList',
-            'numberedList',
-            'blockQuote',
-            '|',
-            'outdent',
-            'indent',
-            '|',
-            'imageUpload',
-            'insertTable',
-            'mediaEmbed',
-            '|',
-            'undo',
-            'redo'
-          ],
-          heading: {
-            options: [
-              { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-              { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-              { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-              { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
-              { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' },
-              { model: 'heading5', view: 'h5', title: 'Heading 5', class: 'ck-heading_heading5' },
-              { model: 'heading6', view: 'h6', title: 'Heading 6', class: 'ck-heading_heading6' }
-            ]
-          }
+    <div>
+      <textarea
+        ref={textareaRef}
+        id={uniqueId}
+        name={uniqueId}
+        className={`border rounded-lg ${className}`}
+        placeholder={placeholder}
+        defaultValue={content} // Fallback content while editor loads
+        style={{
+          minHeight: "200px",
+          display: isEditorReady ? "none" : "block", // Hide textarea once editor is ready
         }}
       />
     </div>

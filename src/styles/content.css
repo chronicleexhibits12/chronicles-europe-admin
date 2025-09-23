@@ -4,6 +4,10 @@
   color: #374151;
 }
 
+.cke_notification {
+  display: none;
+}
+
 .rich-content h1,
 .rich-content h2,
 .rich-content h3,
@@ -66,7 +70,7 @@
 }
 
 .rich-content ul li::marker {
-  color: #A5CD39; /* Green color for discs only */
+  color: #a5cd39; /* Green color for discs only */
   font-size: 1.2em; /* Slightly larger disc size */
 }
 
@@ -79,7 +83,7 @@
 }
 
 .rich-content blockquote {
-  border-left: 4px solid #A5CD39;
+  border-left: 4px solid #a5cd39;
   padding-left: 1.5rem;
   margin: 1.5rem 0;
   font-style: italic;
@@ -122,7 +126,7 @@
   .rich-content table {
     font-size: 0.75rem;
   }
-  
+
   .rich-content table th,
   .rich-content table td {
     padding: 0.5rem;
@@ -139,20 +143,20 @@
   .rich-content table tr {
     display: block;
   }
-  
+
   .rich-content table thead tr {
     position: absolute;
     top: -9999px;
     left: -9999px;
   }
-  
+
   .rich-content table tr {
     border: 1px solid #d1d5db;
     margin-bottom: 0.5rem;
     border-radius: 0.375rem;
     padding: 0.5rem;
   }
-  
+
   .rich-content table td {
     border: none;
     position: relative;
@@ -160,7 +164,7 @@
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
   }
-  
+
   .rich-content table td:before {
     content: attr(data-label) ": ";
     position: absolute;
@@ -178,20 +182,20 @@
   .rich-content {
     font-size: 0.875rem;
   }
-  
+
   .rich-content h2 {
     font-size: 1.25rem;
   }
-  
+
   .rich-content h3 {
     font-size: 1.125rem;
   }
-  
+
   .rich-content ul,
   .rich-content ol {
     padding-left: 1.25rem;
   }
-  
+
   .rich-content blockquote {
     padding: 0.75rem 1rem;
     margin: 1rem 0;

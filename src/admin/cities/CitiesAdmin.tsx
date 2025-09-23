@@ -318,7 +318,7 @@ export function CitiesAdmin() {
         throw new Error(createError)
       }
 
-      // Trigger revalidation for the new city page (will be at root level until country is set)
+      // Trigger revalidation for the new city page (will be at root level)
       await CitiesService.triggerRevalidation(`/${citySlug}`)
 
       toast.success('City page created successfully!')

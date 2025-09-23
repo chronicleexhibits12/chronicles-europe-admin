@@ -131,9 +131,9 @@ export class CitiesService {
         await this.addCityToTradeShowsPage(cityData.name);
       }
       
-      // Trigger revalidation for the new city page
+      // Trigger revalidation for the new city page - using just city_slug
       if (cityData.city_slug) {
-        await this.triggerRevalidation(`/${cityData.country_slug}/${cityData.city_slug}`)
+        await this.triggerRevalidation(`/${cityData.city_slug}`)
       }
       
       return { data: city, error: null }
@@ -204,7 +204,8 @@ export class CitiesService {
       // Get the updated city to get country and city slugs for revalidation
       const { data: updatedCity } = await this.getCityById(id)
       if (updatedCity) {
-        await this.triggerRevalidation(`/${updatedCity.country_slug}/${updatedCity.city_slug}`)
+        // Trigger revalidation for the updated city page - using just city_slug
+        await this.triggerRevalidation(`/${updatedCity.city_slug}`)
       }
       
       console.log('Updated city result:', data); // Debug log
@@ -270,9 +271,9 @@ export class CitiesService {
       // Remove this city from all countries that reference it
       await this.removeCityFromCountries(cityToDelete.city_slug)
       
-      // Trigger revalidation for the deleted city page
+      // Trigger revalidation for the deleted city page - using just city_slug
       if (cityToDelete.city_slug) {
-        await this.triggerRevalidation(`/${cityToDelete.country_slug}/${cityToDelete.city_slug}`)
+        await this.triggerRevalidation(`/${cityToDelete.city_slug}`)
       }
       
       return { data: true, error: null }

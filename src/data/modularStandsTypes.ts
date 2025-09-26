@@ -6,6 +6,19 @@ export interface ModularStandsPortfolio {
   ctaLink?: string
 }
 
+// Merged interface for Portfolio Section containing both stand project text and portfolio fields
+export interface ModularStandsPortfolioSection {
+  // Stand Project Text Fields
+  standProjectTitle?: string
+  highlight?: string
+  description?: string
+  // Portfolio Fields
+  portfolioTitle?: string
+  portfolioSubtitle?: string
+  ctaText?: string
+  ctaLink?: string
+}
+
 export interface ModularStandsPage {
   id: string
   slug: string
@@ -32,11 +45,8 @@ export interface ModularStandsPage {
     title: string
     content: string
   }
-  standProjectText: {
-    title: string
-    highlight: string
-    description: string
-  }
+  // Merged standProjectText and portfolio into portfolioSection
+  portfolioSection?: ModularStandsPortfolioSection
   exhibitionBenefits: {
     title: string
     subtitle: string
@@ -58,8 +68,6 @@ export interface ModularStandsPage {
     subtitle: string
     description: string
   }
-  // Add portfolio section
-  portfolio?: ModularStandsPortfolio
 }
 
 // Database types for Modular Stands page (matches database schema)
@@ -81,9 +89,14 @@ export interface ModularStandsPageData {
   benefits_content: string
   points_table_title: string
   points_table_content: string
-  stand_project_title: string
-  stand_project_highlight: string
-  stand_project_description: string
+  // Merged stand project text and portfolio fields
+  stand_project_title: string | null
+  stand_project_highlight: string | null
+  stand_project_description: string | null
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
   exhibition_benefits_title: string
   exhibition_benefits_subtitle: string
   exhibition_benefits_content: string
@@ -97,9 +110,4 @@ export interface ModularStandsPageData {
   experts_title: string
   experts_subtitle: string
   experts_description: string
-  // Add portfolio fields
-  portfolio_section_title: string | null
-  portfolio_section_subtitle: string | null
-  portfolio_section_cta_text: string | null
-  portfolio_section_cta_link: string | null
 }

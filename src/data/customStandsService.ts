@@ -24,10 +24,14 @@ export class CustomStandsPageService {
         imageAlt: 'Benefits of custom exhibition stands',
         content: '<ul><li><strong>Custom stand designs</strong> are tailored to your brand, accurately representing your company\'s values.</li><li><strong>Bespoke exhibition booths</strong> are visually attractive, capturing visitors\' attention and creating a buzz on the show floor.</li><li>They feature <em>interactive elements</em>, live presentations, and product demonstrations, encouraging more visitor engagement.</li></ul>'
       },
-      standProjectText: {
-        title: 'SOME OF OUR',
+      portfolioSection: {
+        standProjectTitle: 'SOME OF OUR',
         highlight: 'CUSTOM EXHIBITION STAND',
-        description: 'Check some of the designs aesthetically created and delivered in the best quality by our professional bespoke exhibition stand builders.'
+        description: 'Check some of the designs aesthetically created and delivered in the best quality by our professional bespoke exhibition stand builders.',
+        portfolioTitle: 'OUR PORTFOLIO',
+        portfolioSubtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        ctaText: 'View All Projects',
+        ctaLink: '/portfolio'
       },
       exhibitionBenefits: {
         title: 'Why Choose Our Exhibition Stands?',
@@ -54,13 +58,6 @@ export class CustomStandsPageService {
       pointsTable: {
         title: 'Key Benefits of Our Custom Stands',
         content: '<ul><li><strong>Tailor-made designs</strong> to match your brand identity with our expert designers</li><li><strong>High-quality materials</strong> ensuring durability and elegant appearance</li><li><strong>Cost-effective solutions</strong> with maximum visual impact and ROI</li></ul>'
-      },
-      // Add the portfolio section with default values
-      portfolio: {
-        title: 'OUR PORTFOLIO',
-        subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
-        ctaText: 'View All Projects',
-        ctaLink: '/portfolio'
       },
       slug: 'custom-stands',
       isActive: true,
@@ -110,10 +107,14 @@ export class CustomStandsPageService {
           imageAlt: row.benefits_image_alt || undefined,
           content: row.benefits_content || undefined
         },
-        standProjectText: {
-          title: row.stand_project_title || undefined,
+        portfolioSection: {
+          standProjectTitle: row.stand_project_title || undefined,
           highlight: row.stand_project_highlight || undefined,
-          description: row.stand_project_description || undefined
+          description: row.stand_project_description || undefined,
+          portfolioTitle: row.portfolio_section_title || undefined,
+          portfolioSubtitle: row.portfolio_section_subtitle || undefined,
+          ctaText: row.portfolio_section_cta_text || undefined,
+          ctaLink: row.portfolio_section_cta_link || undefined
         },
         exhibitionBenefits: {
           title: row.exhibition_benefits_title || undefined,
@@ -140,13 +141,6 @@ export class CustomStandsPageService {
         pointsTable: {
           title: row.points_table_title || undefined,
           content: row.points_table_content || undefined
-        },
-        // Add the portfolio section
-        portfolio: {
-          title: row.portfolio_section_title || undefined,
-          subtitle: row.portfolio_section_subtitle || undefined,
-          ctaText: row.portfolio_section_cta_text || undefined,
-          ctaLink: row.portfolio_section_cta_link || undefined
         },
         slug: row.slug || 'custom-stands',
         isActive: row.is_active,
@@ -206,16 +200,27 @@ export class CustomStandsPageService {
         updateData.benefits_content = data.benefits.content
       }
 
-      // Stand Project Text section
-      if (data.standProjectText?.title !== undefined) {
-        updateData.stand_project_title = data.standProjectText.title
+      // Portfolio Section (merged standProjectText and portfolio)
+      if (data.portfolioSection?.standProjectTitle !== undefined) {
+        updateData.stand_project_title = data.portfolioSection.standProjectTitle
       }
-      if (data.standProjectText?.highlight !== undefined) {
-        updateData.stand_project_highlight = data.standProjectText.highlight
+      if (data.portfolioSection?.highlight !== undefined) {
+        updateData.stand_project_highlight = data.portfolioSection.highlight
       }
-      if (data.standProjectText?.description !== undefined) {
-        updateData.stand_project_description = data.standProjectText.description
+      if (data.portfolioSection?.description !== undefined) {
+        updateData.stand_project_description = data.portfolioSection.description
       }
+      if (data.portfolioSection?.portfolioTitle !== undefined) {
+        updateData.portfolio_section_title = data.portfolioSection.portfolioTitle
+      }
+      if (data.portfolioSection?.portfolioSubtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolioSection.portfolioSubtitle
+      }
+      if (data.portfolioSection?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolioSection.ctaText
+      }
+      // Fixed ctaLink to /portfolio as requested
+      updateData.portfolio_section_cta_link = '/portfolio'
 
       // Exhibition Benefits section
       if (data.exhibitionBenefits?.title !== undefined) {
@@ -274,19 +279,6 @@ export class CustomStandsPageService {
       if (data.pointsTable?.content !== undefined) {
         updateData.points_table_content = data.pointsTable.content
       }
-
-      // Portfolio section
-      if (data.portfolio?.title !== undefined) {
-        updateData.portfolio_section_title = data.portfolio.title
-      }
-      if (data.portfolio?.subtitle !== undefined) {
-        updateData.portfolio_section_subtitle = data.portfolio.subtitle
-      }
-      if (data.portfolio?.ctaText !== undefined) {
-        updateData.portfolio_section_cta_text = data.portfolio.ctaText
-      }
-      // Fixed ctaLink to /portfolio as requested
-      updateData.portfolio_section_cta_link = '/portfolio'
 
       if (data.isActive !== undefined) {
         updateData.is_active = data.isActive

@@ -23,10 +23,17 @@ export interface DoubleDeckStandsPointsTable {
   content?: string // Rich text content
 }
 
-export interface DoubleDeckStandsStandProjectText {
-  title?: string
+// Merged interface for Portfolio Section containing both stand project text and portfolio fields
+export interface DoubleDeckStandsPortfolioSection {
+  // Stand Project Text Fields
+  standProjectTitle?: string
   highlight?: string
   description?: string
+  // Portfolio Fields
+  portfolioTitle?: string
+  portfolioSubtitle?: string
+  ctaText?: string
+  ctaLink?: string
 }
 
 export interface DoubleDeckStandsExhibitionBenefits {
@@ -48,26 +55,17 @@ export interface DoubleDeckStandsBoldStatement {
   description?: string
 }
 
-// Add the new Portfolio interface
-export interface DoubleDeckStandsPortfolio {
-  title?: string
-  subtitle?: string
-  ctaText?: string
-  ctaLink?: string
-}
-
 export interface DoubleDeckStandsPage {
   id: string
   meta?: DoubleDeckStandsMeta
   hero?: DoubleDeckStandsHero
   benefits?: DoubleDeckStandsBenefits
   pointsTable?: DoubleDeckStandsPointsTable
-  standProjectText?: DoubleDeckStandsStandProjectText
+  // Merged standProjectText and portfolio into portfolioSection
+  portfolioSection?: DoubleDeckStandsPortfolioSection
   exhibitionBenefits?: DoubleDeckStandsExhibitionBenefits
   boothPartner?: DoubleDeckStandsBoothPartner
   boldStatement?: DoubleDeckStandsBoldStatement
-  // Add the portfolio section
-  portfolio?: DoubleDeckStandsPortfolio
   slug: string
   isActive: boolean
   createdAt: string
@@ -90,9 +88,14 @@ export interface DoubleDeckStandsPageData {
   benefits_content: string | null
   points_table_title: string | null
   points_table_content: string | null
+  // Merged stand project text and portfolio fields
   stand_project_title: string | null
   stand_project_highlight: string | null
   stand_project_description: string | null
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
   exhibition_benefits_title: string | null
   exhibition_benefits_subtitle: string | null
   exhibition_benefits_content: string | null
@@ -103,11 +106,6 @@ export interface DoubleDeckStandsPageData {
   bold_statement_title: string | null
   bold_statement_subtitle: string | null
   bold_statement_description: string | null
-  // Add portfolio fields
-  portfolio_section_title: string | null
-  portfolio_section_subtitle: string | null
-  portfolio_section_cta_text: string | null
-  portfolio_section_cta_link: string | null
   is_active: boolean
   created_at: string
   updated_at: string

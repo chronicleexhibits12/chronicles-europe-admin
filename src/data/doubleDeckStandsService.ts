@@ -26,10 +26,14 @@ export class DoubleDeckStandsPageService {
         title: 'WHY CHOOSE DOUBLE-DECKER STANDS?',
         content: '<ul><li>Maximize your floor space without increasing costs.</li><li>Create private meeting areas on the upper deck.</li><li>Gain better visibility on the crowded show floor.</li><li>Showcase products with stunning two-level designs.</li></ul><p>At Chronicles, we design double-decker booths that not only expand the exhibiting space but also ensure your brand stands tall amidst the competition.</p><p>Our innovative booth designs help clients achieve maximum impact with functional, creative, and visually striking two-story exhibition stands.</p>'
       },
-      standProjectText: {
-        title: 'SOME OF OUR',
+      portfolioSection: {
+        standProjectTitle: 'SOME OF OUR',
         highlight: 'DOUBLE DECKER EXHIBITION STANDS',
-        description: 'Check some of the designs aesthetically created and delivered in the best quality by our professional double decker exhibition stand builders. The below pictures demonstrate our specially tailored exhibition stands to meet the client\'s objectives and maximise the expo\'s success.'
+        description: 'Check some of the designs aesthetically created and delivered in the best quality by our professional double decker exhibition stand builders. The below pictures demonstrate our specially tailored exhibition stands to meet the client\'s objectives and maximise the expo\'s success.',
+        portfolioTitle: 'OUR PORTFOLIO',
+        portfolioSubtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        ctaText: 'View All Projects',
+        ctaLink: '/portfolio'
       },
       exhibitionBenefits: {
         title: 'Why Choose Our Exhibition Stands?',
@@ -46,13 +50,6 @@ export class DoubleDeckStandsPageService {
         title: 'MAKE A BOLD STATEMENT',
         subtitle: 'DOUBLE DECKER EXHIBITION STAND',
         description: 'The double-decker booths designed by Chronicles not only increase the exhibiting space but also make a solid impression amidst the competition.'
-      },
-      // Add portfolio section with default values
-      portfolio: {
-        title: 'OUR PORTFOLIO',
-        subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
-        ctaText: 'View All Projects',
-        ctaLink: '/portfolio'
       },
       slug: 'double-decker-stands',
       isActive: true,
@@ -112,10 +109,14 @@ export class DoubleDeckStandsPageService {
           title: response.points_table_title || '',
           content: response.points_table_content || ''
         },
-        standProjectText: {
-          title: response.stand_project_title || '',
+        portfolioSection: {
+          standProjectTitle: response.stand_project_title || '',
           highlight: response.stand_project_highlight || '',
-          description: response.stand_project_description || ''
+          description: response.stand_project_description || '',
+          portfolioTitle: response.portfolio_section_title || undefined,
+          portfolioSubtitle: response.portfolio_section_subtitle || undefined,
+          ctaText: response.portfolio_section_cta_text || undefined,
+          ctaLink: response.portfolio_section_cta_link || undefined
         },
         exhibitionBenefits: {
           title: response.exhibition_benefits_title || '',
@@ -132,13 +133,6 @@ export class DoubleDeckStandsPageService {
           title: response.bold_statement_title || '',
           subtitle: response.bold_statement_subtitle || '',
           description: response.bold_statement_description || ''
-        },
-        // Add portfolio section
-        portfolio: {
-          title: response.portfolio_section_title || undefined,
-          subtitle: response.portfolio_section_subtitle || undefined,
-          ctaText: response.portfolio_section_cta_text || undefined,
-          ctaLink: response.portfolio_section_cta_link || undefined
         }
       }
 
@@ -193,15 +187,27 @@ export class DoubleDeckStandsPageService {
         updateData.points_table_content = data.pointsTable.content
       }
 
-      if (data.standProjectText?.title !== undefined) {
-        updateData.stand_project_title = data.standProjectText.title
+      // Portfolio Section (merged standProjectText and portfolio)
+      if (data.portfolioSection?.standProjectTitle !== undefined) {
+        updateData.stand_project_title = data.portfolioSection.standProjectTitle
       }
-      if (data.standProjectText?.highlight !== undefined) {
-        updateData.stand_project_highlight = data.standProjectText.highlight
+      if (data.portfolioSection?.highlight !== undefined) {
+        updateData.stand_project_highlight = data.portfolioSection.highlight
       }
-      if (data.standProjectText?.description !== undefined) {
-        updateData.stand_project_description = data.standProjectText.description
+      if (data.portfolioSection?.description !== undefined) {
+        updateData.stand_project_description = data.portfolioSection.description
       }
+      if (data.portfolioSection?.portfolioTitle !== undefined) {
+        updateData.portfolio_section_title = data.portfolioSection.portfolioTitle
+      }
+      if (data.portfolioSection?.portfolioSubtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolioSection.portfolioSubtitle
+      }
+      if (data.portfolioSection?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolioSection.ctaText
+      }
+      // Fixed ctaLink to /portfolio as requested
+      updateData.portfolio_section_cta_link = '/portfolio'
 
       if (data.exhibitionBenefits?.title !== undefined) {
         updateData.exhibition_benefits_title = data.exhibitionBenefits.title
@@ -235,19 +241,6 @@ export class DoubleDeckStandsPageService {
       if (data.boldStatement?.description !== undefined) {
         updateData.bold_statement_description = data.boldStatement.description
       }
-
-      // Add portfolio section fields
-      if (data.portfolio?.title !== undefined) {
-        updateData.portfolio_section_title = data.portfolio.title
-      }
-      if (data.portfolio?.subtitle !== undefined) {
-        updateData.portfolio_section_subtitle = data.portfolio.subtitle
-      }
-      if (data.portfolio?.ctaText !== undefined) {
-        updateData.portfolio_section_cta_text = data.portfolio.ctaText
-      }
-      // Fixed ctaLink to /portfolio as requested
-      updateData.portfolio_section_cta_link = '/portfolio'
 
       const { error: updateError } = await (supabase as any)
         .from('double_decker_stands_page')

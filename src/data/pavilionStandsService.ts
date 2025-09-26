@@ -28,10 +28,14 @@ export class PavilionStandsPageService {
         image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&h=400&fit=crop',
         content: '<ul><li>As pavilion booths bring together a group of different brands in one place so offer the best space for collaboration, engagement, and knowledge exchange.</li><li>Pavilion stands are cost-effective as small enterprises can gain exposure without bearing the cost of large stand-alone exhibitions.</li><li>Pavilion vendors offer greater visibility as multiple companies are sharing the same area which draws the attention of attendees.</li><li>Pavilion booth allows exhibitors to collectively use the shared spaces like meeting rooms, and storage space for storing their marketing materials.</li></ul>'
       },
-      standProjectText: {
-        title: 'SOME OF OUR',
+      portfolioSection: {
+        standProjectTitle: 'SOME OF OUR',
         highlight: 'EXHIBITION PAVILION DESIGNS',
-        description: '<p>Check some of the designs aesthetically created and delivered in the best quality by our professional exhibition pavilion designers. The below pictures demonstrate our specially tailored pavilion designs to meet the <strong>client\'s objectives</strong> and maximise the expo\'s success.</p>'
+        description: '<p>Check some of the designs aesthetically created and delivered in the best quality by our professional exhibition pavilion designers. The below pictures demonstrate our specially tailored pavilion designs to meet the <strong>client\'s objectives</strong> and maximise the expo\'s success.</p>',
+        portfolioTitle: 'OUR PORTFOLIO',
+        portfolioSubtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        ctaText: 'View All Projects',
+        ctaLink: '/portfolio'
       },
       advantages: {
         title: 'ADVANTAGES OF CUSTOM EXHIBITION SOLUTIONS:',
@@ -45,13 +49,6 @@ export class PavilionStandsPageService {
       companyInfo: {
         title: 'RADON SP Z.O.O. AND ITS STAND-BUILDING SERVICES',
         content: '<ul><li>As a premier exhibition stand builder in Europe, we offer a range of services and solutions in all the major exhibiting countries across Europe, including the Netherlands, Germany, Spain, and others.</li><li>We always aim to understand the client\'s marketing goals and deliver a perfect exhibition position.</li><li>We use an integrated approach and methodology that ensures outstanding results every time we take up a project.</li><li>Since 2003, we have been providing project-only solutions with a deep understanding of client\'s marketing goals.</li><li>Our team consists of certified architects, interior designers, and project managers who understand the nuances of different industries.</li><li>We maintain strategic partnerships with leading material suppliers and logistics companies to ensure cost-effective solutions without compromising on quality standards.</li></ul>'
-      },
-      // Add portfolio section with default values
-      portfolio: {
-        title: 'OUR PORTFOLIO',
-        subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
-        ctaText: 'View All Projects',
-        ctaLink: '/portfolio'
       },
       slug: 'pavilion-stands',
       isActive: true,
@@ -108,10 +105,14 @@ export class PavilionStandsPageService {
           imageAlt: row.benefits_image_alt || undefined,
           content: row.benefits_content || ''
         },
-        standProjectText: {
-          title: row.stand_project_title || '',
+        portfolioSection: {
+          standProjectTitle: row.stand_project_title || '',
           highlight: row.stand_project_highlight || '',
-          description: row.stand_project_description || ''
+          description: row.stand_project_description || '',
+          portfolioTitle: row.portfolio_section_title || undefined,
+          portfolioSubtitle: row.portfolio_section_subtitle || undefined,
+          ctaText: row.portfolio_section_cta_text || undefined,
+          ctaLink: row.portfolio_section_cta_link || undefined
         },
         advantages: {
           title: row.advantages_title || '',
@@ -127,13 +128,6 @@ export class PavilionStandsPageService {
         companyInfo: {
           title: row.company_info_title || '',
           content: row.company_info_content || ''
-        },
-        // Add portfolio section
-        portfolio: {
-          title: row.portfolio_section_title || undefined,
-          subtitle: row.portfolio_section_subtitle || undefined,
-          ctaText: row.portfolio_section_cta_text || undefined,
-          ctaLink: row.portfolio_section_cta_link || undefined
         },
         slug: row.slug || 'pavilion-stands',
         isActive: row.is_active,
@@ -203,16 +197,27 @@ export class PavilionStandsPageService {
         updateData.benefits_content = data.benefits.content
       }
 
-      // Stand Project Text section
-      if (data.standProjectText?.title !== undefined) {
-        updateData.stand_project_title = data.standProjectText.title
+      // Portfolio Section (merged standProjectText and portfolio)
+      if (data.portfolioSection?.standProjectTitle !== undefined) {
+        updateData.stand_project_title = data.portfolioSection.standProjectTitle
       }
-      if (data.standProjectText?.highlight !== undefined) {
-        updateData.stand_project_highlight = data.standProjectText.highlight
+      if (data.portfolioSection?.highlight !== undefined) {
+        updateData.stand_project_highlight = data.portfolioSection.highlight
       }
-      if (data.standProjectText?.description !== undefined) {
-        updateData.stand_project_description = data.standProjectText.description
+      if (data.portfolioSection?.description !== undefined) {
+        updateData.stand_project_description = data.portfolioSection.description
       }
+      if (data.portfolioSection?.portfolioTitle !== undefined) {
+        updateData.portfolio_section_title = data.portfolioSection.portfolioTitle
+      }
+      if (data.portfolioSection?.portfolioSubtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolioSection.portfolioSubtitle
+      }
+      if (data.portfolioSection?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolioSection.ctaText
+      }
+      // Fixed ctaLink to /portfolio as requested
+      updateData.portfolio_section_cta_link = '/portfolio'
 
       // Advantages section
       if (data.advantages?.title !== undefined) {
@@ -244,19 +249,6 @@ export class PavilionStandsPageService {
       if (data.companyInfo?.content !== undefined) {
         updateData.company_info_content = data.companyInfo.content
       }
-
-      // Add portfolio section fields
-      if (data.portfolio?.title !== undefined) {
-        updateData.portfolio_section_title = data.portfolio.title
-      }
-      if (data.portfolio?.subtitle !== undefined) {
-        updateData.portfolio_section_subtitle = data.portfolio.subtitle
-      }
-      if (data.portfolio?.ctaText !== undefined) {
-        updateData.portfolio_section_cta_text = data.portfolio.ctaText
-      }
-      // Fixed ctaLink to /portfolio as requested
-      updateData.portfolio_section_cta_link = '/portfolio'
 
       const { error } = await (supabase as any)
         .from('pavilion_design_page')

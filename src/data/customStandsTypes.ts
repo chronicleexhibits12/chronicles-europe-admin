@@ -20,10 +20,17 @@ export interface CustomStandsBenefits {
   content?: string // Rich text content
 }
 
-export interface CustomStandsStandProjectText {
-  title?: string
+// Merged interface for Portfolio Section containing both stand project text and portfolio fields
+export interface CustomStandsPortfolioSection {
+  // Stand Project Text Fields
+  standProjectTitle?: string
   highlight?: string
   description?: string
+  // Portfolio Fields
+  portfolioTitle?: string
+  portfolioSubtitle?: string
+  ctaText?: string
+  ctaLink?: string
 }
 
 export interface CustomStandsExhibitionBenefits {
@@ -57,27 +64,18 @@ export interface CustomStandsPointsTable {
   content?: string // Rich text content
 }
 
-// Add the new Portfolio interface
-export interface CustomStandsPortfolio {
-  title?: string
-  subtitle?: string
-  ctaText?: string
-  ctaLink?: string
-}
-
 export interface CustomStandsPage {
   id: string
   meta?: CustomStandsMeta
   hero?: CustomStandsHero
   benefits?: CustomStandsBenefits
-  standProjectText?: CustomStandsStandProjectText
+  // Merged standProjectText and portfolio into portfolioSection
+  portfolioSection?: CustomStandsPortfolioSection
   exhibitionBenefits?: CustomStandsExhibitionBenefits
   bespoke?: CustomStandsBespoke
   freshDesign?: CustomStandsFreshDesign
   costSection?: CustomStandsCostSection
   pointsTable?: CustomStandsPointsTable
-  // Add the portfolio section
-  portfolio?: CustomStandsPortfolio
   slug: string
   isActive: boolean
   createdAt: string
@@ -100,9 +98,14 @@ export interface CustomStandsPageData {
   benefits_image: string | null
   benefits_image_alt: string | null
   benefits_content: string | null
+  // Merged stand project text and portfolio fields
   stand_project_title: string | null
   stand_project_highlight: string | null
   stand_project_description: string | null
+  portfolio_section_title: string | null
+  portfolio_section_subtitle: string | null
+  portfolio_section_cta_text: string | null
+  portfolio_section_cta_link: string | null
   exhibition_benefits_title: string | null
   exhibition_benefits_subtitle: string | null
   exhibition_benefits_content: string | null
@@ -119,11 +122,6 @@ export interface CustomStandsPageData {
   cost_section_description: string | null
   points_table_title: string | null
   points_table_content: string | null
-  // Add the portfolio fields
-  portfolio_section_title: string | null
-  portfolio_section_subtitle: string | null
-  portfolio_section_cta_text: string | null
-  portfolio_section_cta_link: string | null
   is_active: boolean
   created_at: string
   updated_at: string

@@ -26,10 +26,14 @@ export class ModularStandsPageService {
         title: 'BENEFITS OF MODULAR EXHIBITION STANDS',
         content: '<ul><li>Rapid deployment systems that reduce setup time by up to 70% compared to traditional custom builds.</li><li>Reusable components that deliver significant cost savings over multiple events, with many clients seeing ROI within 2-3 exhibitions.</li><li>Flexible design options that can be easily modified to accommodate different products, messaging, or branding requirements.</li><li>Lightweight materials that simplify transportation and reduce shipping costs, particularly important for international exhibitions.</li><li>Durable construction that maintains professional appearance through years of repeated use across various environments.</li></ul><p>As pioneers in modular exhibition design since 2003, we\'ve refined our systems to offer the perfect balance of affordability, functionality, and visual impact. Our modular solutions incorporate the latest materials and technologies, ensuring your booth stands out while remaining easy to manage. Each system is designed with European logistics in mind, optimizing for the region\'s transportation networks and venue requirements.</p>'
       },
-      standProjectText: {
-        title: 'SOME OF OUR',
+      portfolioSection: {
+        standProjectTitle: 'SOME OF OUR',
         highlight: 'MODULAR EXHIBITION STANDS',
-        description: '<p>Our portfolio showcases innovative modular designs that have helped brands across various industries make a lasting impression at trade shows throughout Europe. Each project demonstrates our commitment to combining functionality with striking visual appeal. From compact 10 square meter booths to expansive island displays, our modular solutions are engineered to maximize impact while minimizing setup complexity. These examples illustrate how our flexible systems can be adapted to different products, target audiences, and venue requirements while maintaining consistent brand messaging.</p>'
+        description: '<p>Our portfolio showcases innovative modular designs that have helped brands across various industries make a lasting impression at trade shows throughout Europe. Each project demonstrates our commitment to combining functionality with striking visual appeal. From compact 10 square meter booths to expansive island displays, our modular solutions are engineered to maximize impact while minimizing setup complexity. These examples illustrate how our flexible systems can be adapted to different products, target audiences, and venue requirements while maintaining consistent brand messaging.</p>',
+        portfolioTitle: 'OUR PORTFOLIO',
+        portfolioSubtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
+        ctaText: 'View All Projects',
+        ctaLink: '/portfolio'
       },
       exhibitionBenefits: {
         title: 'BENEFITS OF MODULAR EXHIBITION STANDS:',
@@ -51,13 +55,6 @@ export class ModularStandsPageService {
         title: 'EXPERTS IN',
         subtitle: 'MODULAR BOOTHS',
         description: '<p>With over two decades of experience in the European exhibition industry, our team specializes in creating modular booth solutions that align with your brand identity and marketing objectives. We serve clients across major European markets including Germany, France, UK, Italy, Spain, and the Nordics, providing comprehensive support from initial concept through to on-site execution. Our expertise includes customizing modular systems to meet specific industry requirements, integrating advanced technology solutions, and ensuring compliance with venue regulations. We provide end-to-end service including design, production, logistics, installation, and dismantling, allowing you to focus on your exhibition goals while we handle all the technical details. Our dedicated project managers and skilled installation teams ensure seamless execution at every venue, with multilingual support available for international exhibitions.</p>'
-      },
-      // Add portfolio section with default values
-      portfolio: {
-        title: 'OUR PORTFOLIO',
-        subtitle: 'Explore our extensive portfolio of exhibition stands and discover the quality and creativity we bring to every project.',
-        ctaText: 'View All Projects',
-        ctaLink: '/portfolio'
       },
       slug: 'modular-stands',
       isActive: true,
@@ -117,10 +114,14 @@ export class ModularStandsPageService {
           title: response.points_table_title || '',
           content: response.points_table_content || ''
         },
-        standProjectText: {
-          title: response.stand_project_title || '',
+        portfolioSection: {
+          standProjectTitle: response.stand_project_title || '',
           highlight: response.stand_project_highlight || '',
-          description: response.stand_project_description || ''
+          description: response.stand_project_description || '',
+          portfolioTitle: response.portfolio_section_title || undefined,
+          portfolioSubtitle: response.portfolio_section_subtitle || undefined,
+          ctaText: response.portfolio_section_cta_text || undefined,
+          ctaLink: response.portfolio_section_cta_link || undefined
         },
         exhibitionBenefits: {
           title: response.exhibition_benefits_title || '',
@@ -142,13 +143,6 @@ export class ModularStandsPageService {
           title: response.experts_title || '',
           subtitle: response.experts_subtitle || '',
           description: response.experts_description || ''
-        },
-        // Add portfolio section
-        portfolio: {
-          title: response.portfolio_section_title || undefined,
-          subtitle: response.portfolio_section_subtitle || undefined,
-          ctaText: response.portfolio_section_cta_text || undefined,
-          ctaLink: response.portfolio_section_cta_link || undefined
         }
       }
 
@@ -203,15 +197,27 @@ export class ModularStandsPageService {
         updateData.points_table_content = data.pointsTable.content
       }
 
-      if (data.standProjectText?.title !== undefined) {
-        updateData.stand_project_title = data.standProjectText.title
+      // Portfolio Section (merged standProjectText and portfolio)
+      if (data.portfolioSection?.standProjectTitle !== undefined) {
+        updateData.stand_project_title = data.portfolioSection.standProjectTitle
       }
-      if (data.standProjectText?.highlight !== undefined) {
-        updateData.stand_project_highlight = data.standProjectText.highlight
+      if (data.portfolioSection?.highlight !== undefined) {
+        updateData.stand_project_highlight = data.portfolioSection.highlight
       }
-      if (data.standProjectText?.description !== undefined) {
-        updateData.stand_project_description = data.standProjectText.description
+      if (data.portfolioSection?.description !== undefined) {
+        updateData.stand_project_description = data.portfolioSection.description
       }
+      if (data.portfolioSection?.portfolioTitle !== undefined) {
+        updateData.portfolio_section_title = data.portfolioSection.portfolioTitle
+      }
+      if (data.portfolioSection?.portfolioSubtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolioSection.portfolioSubtitle
+      }
+      if (data.portfolioSection?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolioSection.ctaText
+      }
+      // Fixed ctaLink to /portfolio as requested
+      updateData.portfolio_section_cta_link = '/portfolio'
 
       if (data.exhibitionBenefits?.title !== undefined) {
         updateData.exhibition_benefits_title = data.exhibitionBenefits.title
@@ -255,19 +261,6 @@ export class ModularStandsPageService {
       if (data.experts?.description !== undefined) {
         updateData.experts_description = data.experts.description
       }
-
-      // Add portfolio section fields
-      if (data.portfolio?.title !== undefined) {
-        updateData.portfolio_section_title = data.portfolio.title
-      }
-      if (data.portfolio?.subtitle !== undefined) {
-        updateData.portfolio_section_subtitle = data.portfolio.subtitle
-      }
-      if (data.portfolio?.ctaText !== undefined) {
-        updateData.portfolio_section_cta_text = data.portfolio.ctaText
-      }
-      // Fixed ctaLink to /portfolio as requested
-      updateData.portfolio_section_cta_link = '/portfolio'
 
       const { error: updateError } = await (supabase as any)
         .from('modular_stands_page')

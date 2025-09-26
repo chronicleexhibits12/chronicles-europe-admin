@@ -6,6 +6,19 @@ export interface PavilionStandsPortfolio {
   ctaLink?: string
 }
 
+// Merged interface for Portfolio Section containing both stand project text and portfolio fields
+export interface PavilionStandsPortfolioSection {
+  // Stand Project Text Fields
+  standProjectTitle?: string
+  highlight?: string
+  description?: string
+  // Portfolio Fields
+  portfolioTitle?: string
+  portfolioSubtitle?: string
+  ctaText?: string
+  ctaLink?: string
+}
+
 export interface PavilionStandsPage {
   id: string
   slug: string
@@ -36,11 +49,6 @@ export interface PavilionStandsPage {
     imageAlt?: string
     content: string
   }
-  standProjectText: {
-    title: string
-    highlight: string
-    description: string
-  }
   advantages: {
     title: string
     image: string
@@ -48,6 +56,8 @@ export interface PavilionStandsPage {
     imageAlt?: string
     content: string
   }
+  // Merged standProjectText and portfolio into portfolioSection
+  portfolioSection?: PavilionStandsPortfolioSection
   ourExpertise: {
     title: string
     content: string
@@ -56,8 +66,6 @@ export interface PavilionStandsPage {
     title: string
     content: string
   }
-  // Add portfolio section
-  portfolio?: PavilionStandsPortfolio
 }
 
 // Database types for Pavilion Stands page (matches database schema)
@@ -83,21 +91,21 @@ export interface PavilionStandsPageData {
   // Add benefits image alt text field
   benefits_image_alt: string | null
   benefits_content: string
-  stand_project_title: string
-  stand_project_highlight: string
-  stand_project_description: string
   advantages_title: string
   advantages_image: string
   // Add advantages image alt text field
   advantages_image_alt: string | null
   advantages_content: string
-  our_expertise_title: string
-  our_expertise_content: string
-  company_info_title: string
-  company_info_content: string
-  // Add portfolio fields
+  // Merged stand project text and portfolio fields
+  stand_project_title: string | null
+  stand_project_highlight: string | null
+  stand_project_description: string | null
   portfolio_section_title: string | null
   portfolio_section_subtitle: string | null
   portfolio_section_cta_text: string | null
   portfolio_section_cta_link: string | null
+  our_expertise_title: string
+  our_expertise_content: string
+  company_info_title: string
+  company_info_content: string
 }

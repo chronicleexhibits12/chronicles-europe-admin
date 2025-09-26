@@ -288,68 +288,49 @@ export function ModularStandsAdmin() {
           </div>
         </div>
 
-        {/* Section 4: Stand Project Text Section */}
+        {/* Section 4: Stand Project Text Section - REMOVED AS PART OF MERGE */}
+        {/* This section has been merged with the Portfolio Section below */}
+
+        {/* Portfolio Section - MERGED STAND PROJECT TEXT AND PORTFOLIO */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 [Stand Project Text Section]</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Portfolio Section</h2>
           <div className="space-y-4">
+            {/* Stand Project Text Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="stand-project-title">Title</Label>
+                <Label htmlFor="stand-project-title">Stand Project Title</Label>
                 <Input
                   id="stand-project-title"
-                  value={formData.standProjectText?.title || ''}
-                  onChange={(e) => handleInputChange('standProjectText', 'title', e.target.value)}
+                  value={formData.portfolioSection?.standProjectTitle || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'standProjectTitle', e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="stand-project-highlight">Highlight Text</Label>
                 <Input
                   id="stand-project-highlight"
-                  value={formData.standProjectText?.highlight || ''}
-                  onChange={(e) => handleInputChange('standProjectText', 'highlight', e.target.value)}
+                  value={formData.portfolioSection?.highlight || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'highlight', e.target.value)}
                 />
               </div>
             </div>
             <div className="w-full">
-              <Label>Description (Rich Text)</Label>
+              <Label>Stand Project Description (Rich Text)</Label>
               <RichTextEditor
-                content={formData.standProjectText?.description || ''}
-                onChange={(newContent) => handleInputChange('standProjectText', 'description', newContent)}
+                content={formData.portfolioSection?.description || ''}
+                onChange={(newContent) => handleInputChange('portfolioSection', 'description', newContent)}
                 controlled={true}
               />
             </div>
-          </div>
-        </div>
-
-        {/* Portfolio Section - Moved to be right after Stand Project Text Section */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Portfolio Section</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="portfolio-title">Title</Label>
-                <Input
-                  id="portfolio-title"
-                  value={formData.portfolio?.title || ''}
-                  onChange={(e) => handleInputChange('portfolio', 'title', e.target.value)}
-                  placeholder="e.g., OUR PORTFOLIO"
-                />
-              </div>
-              <div>
-                <Label htmlFor="portfolio-subtitle">Subtitle</Label>
-                <Input
-                  id="portfolio-subtitle"
-                  value={formData.portfolio?.subtitle || ''}
-                  onChange={(e) => handleInputChange('portfolio', 'subtitle', e.target.value)}
-                  placeholder="e.g., Explore our extensive portfolio..."
-                />
-              </div>
+            
+            {/* Portfolio Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <div>
                 <Label htmlFor="portfolio-cta-text">CTA Text</Label>
                 <Input
                   id="portfolio-cta-text"
-                  value={formData.portfolio?.ctaText || ''}
-                  onChange={(e) => handleInputChange('portfolio', 'ctaText', e.target.value)}
+                  value={formData.portfolioSection?.ctaText || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'ctaText', e.target.value)}
                   placeholder="e.g., View All Projects"
                 />
               </div>

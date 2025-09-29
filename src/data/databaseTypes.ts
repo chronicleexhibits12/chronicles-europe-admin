@@ -664,11 +664,13 @@ export interface Database {
           hero_title: string | null
           hero_subtitle: string | null
           hero_background_image_url: string | null
+          hero_background_image_alt: string | null
           
           // Why Choose Us Section
           why_choose_us_title: string | null
           why_choose_us_subtitle: string | null
           why_choose_us_main_image_url: string | null
+          why_choose_us_main_image_alt: string | null
           why_choose_us_benefits_html: string | null
           
           // What We Do Section
@@ -706,11 +708,13 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image_url?: string | null
+          hero_background_image_alt?: string | null
           
           // Why Choose Us Section
           why_choose_us_title?: string | null
           why_choose_us_subtitle?: string | null
           why_choose_us_main_image_url?: string | null
+          why_choose_us_main_image_alt?: string | null
           why_choose_us_benefits_html?: string | null
           
           // What We Do Section
@@ -748,11 +752,13 @@ export interface Database {
           hero_title?: string | null
           hero_subtitle?: string | null
           hero_background_image_url?: string | null
+          hero_background_image_alt?: string | null
           
           // Why Choose Us Section
           why_choose_us_title?: string | null
           why_choose_us_subtitle?: string | null
           why_choose_us_main_image_url?: string | null
+          why_choose_us_main_image_alt?: string | null
           why_choose_us_benefits_html?: string | null
           
           // What We Do Section
@@ -897,6 +903,194 @@ export interface Database {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+        }
+      }
+      countries: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          
+          // Basic country information
+          slug: string
+          name: string
+          
+          // Active status for RLS
+          is_active: boolean
+          
+          // SEO Metadata
+          seo_title: string | null
+          seo_description: string | null
+          seo_keywords: string | null
+          
+          // Hero Section
+          hero_title: string | null
+          hero_subtitle: string | null
+          hero_background_image_url: string | null
+          hero_background_image_alt: string | null
+          
+          // Why Choose Us Section
+          why_choose_us_title: string | null
+          why_choose_us_subtitle: string | null
+          why_choose_us_main_image_url: string | null
+          why_choose_us_main_image_alt: string | null
+          why_choose_us_benefits_html: string | null
+          
+          // What We Do Section
+          what_we_do_title: string | null
+          what_we_do_subtitle: string | null
+          what_we_do_description_html: string | null
+          
+          // Company Info Section
+          company_info_title: string | null
+          company_info_content_html: string | null
+          
+          // Best Company Section
+          best_company_title: string | null
+          best_company_subtitle: string | null
+          best_company_content_html: string | null
+          
+          // Process Section
+          process_section_title: string | null
+          process_section_subtitle_html: string | null
+          process_section_steps: any | null
+          
+          // Cities Section
+          cities_section_title: string | null
+          cities_section_subtitle: string | null
+          
+          // Portfolio Section
+          portfolio_section_title: string | null
+          portfolio_section_subtitle: string | null
+          portfolio_section_cta_text: string | null
+          portfolio_section_cta_link: string | null
+          
+          // Selected Cities (JSONB array of city slugs)
+          selected_cities: string[]
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          
+          // Basic country information
+          slug: string
+          name: string
+          
+          // Active status for RLS
+          is_active?: boolean
+          
+          // SEO Metadata
+          seo_title?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          
+          // Hero Section
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image_url?: string | null
+          hero_background_image_alt?: string | null
+          
+          // Why Choose Us Section
+          why_choose_us_title?: string | null
+          why_choose_us_subtitle?: string | null
+          why_choose_us_main_image_url?: string | null
+          why_choose_us_main_image_alt?: string | null
+          why_choose_us_benefits_html?: string | null
+          
+          // What We Do Section
+          what_we_do_title?: string | null
+          what_we_do_subtitle?: string | null
+          what_we_do_description_html?: string | null
+          
+          // Company Info Section
+          company_info_title?: string | null
+          company_info_content_html?: string | null
+          
+          // Best Company Section
+          best_company_title?: string | null
+          best_company_subtitle?: string | null
+          best_company_content_html?: string | null
+          
+          // Process Section
+          process_section_title?: string | null
+          process_section_subtitle_html?: string | null
+          process_section_steps?: any | null
+          
+          // Cities Section
+          cities_section_title?: string | null
+          cities_section_subtitle?: string | null
+          
+          // Portfolio Section
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
+          
+          // Selected Cities (JSONB array of city slugs)
+          selected_cities?: string[]
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          
+          // Basic country information
+          slug?: string
+          name?: string
+          
+          // Active status for RLS
+          is_active?: boolean
+          
+          // SEO Metadata
+          seo_title?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          
+          // Hero Section
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_background_image_url?: string | null
+          hero_background_image_alt?: string | null
+          
+          // Why Choose Us Section
+          why_choose_us_title?: string | null
+          why_choose_us_subtitle?: string | null
+          why_choose_us_main_image_url?: string | null
+          why_choose_us_main_image_alt?: string | null
+          why_choose_us_benefits_html?: string | null
+          
+          // What We Do Section
+          what_we_do_title?: string | null
+          what_we_do_subtitle?: string | null
+          what_we_do_description_html?: string | null
+          
+          // Company Info Section
+          company_info_title?: string | null
+          company_info_content_html?: string | null
+          
+          // Best Company Section
+          best_company_title?: string | null
+          best_company_subtitle?: string | null
+          best_company_content_html?: string | null
+          
+          // Process Section
+          process_section_title?: string | null
+          process_section_subtitle_html?: string | null
+          process_section_steps?: any | null
+          
+          // Cities Section
+          cities_section_title?: string | null
+          cities_section_subtitle?: string | null
+          
+          // Portfolio Section
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
+          
+          // Selected Cities (JSONB array of city slugs)
+          selected_cities?: string[]
         }
       }
       // Add the blog_page table definition
@@ -1382,6 +1576,111 @@ export interface Database {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+        }
+      }
+      // Add the main_countries_page table definition
+      main_countries_page: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          
+          // SEO Metadata
+          seo_title: string | null
+          seo_description: string | null
+          seo_keywords: string | null
+          
+          // Hero Section
+          hero_title: string | null
+          hero_subtitle: string | null
+          hero_description: string | null
+          hero_background_image_url: string | null
+          hero_background_image_alt: string | null
+          
+          // Exhibition Stand Types Section
+          exhibition_stand_types: any | null
+          
+          // Portfolio Showcase Section
+          portfolio_showcase_title: string | null
+          portfolio_showcase_description: string | null
+          portfolio_showcase_cta_text: string | null
+          portfolio_showcase_cta_link: string | null
+          
+          // Build Section
+          build_section_title: string | null
+          build_section_highlight: string | null
+          build_section_description: string | null
+          
+          // Meta Information
+          is_active: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          
+          // SEO Metadata
+          seo_title?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          
+          // Hero Section
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_description?: string | null
+          hero_background_image_url?: string | null
+          hero_background_image_alt?: string | null
+          
+          // Exhibition Stand Types Section
+          exhibition_stand_types?: any | null
+          
+          // Portfolio Showcase Section
+          portfolio_showcase_title?: string | null
+          portfolio_showcase_description?: string | null
+          portfolio_showcase_cta_text?: string | null
+          portfolio_showcase_cta_link?: string | null
+          
+          // Build Section
+          build_section_title?: string | null
+          build_section_highlight?: string | null
+          build_section_description?: string | null
+          
+          // Meta Information
+          is_active?: boolean
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          
+          // SEO Metadata
+          seo_title?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          
+          // Hero Section
+          hero_title?: string | null
+          hero_subtitle?: string | null
+          hero_description?: string | null
+          hero_background_image_url?: string | null
+          hero_background_image_alt?: string | null
+          
+          // Exhibition Stand Types Section
+          exhibition_stand_types?: any | null
+          
+          // Portfolio Showcase Section
+          portfolio_showcase_title?: string | null
+          portfolio_showcase_description?: string | null
+          portfolio_showcase_cta_text?: string | null
+          portfolio_showcase_cta_link?: string | null
+          
+          // Build Section
+          build_section_title?: string | null
+          build_section_highlight?: string | null
+          build_section_description?: string | null
+          
+          // Meta Information
+          is_active?: boolean
         }
       }
       // Add the sitemap table definition

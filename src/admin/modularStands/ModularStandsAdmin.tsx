@@ -21,6 +21,7 @@ export function ModularStandsAdmin() {
   // File input refs
   const benefitsImageRef = useRef<HTMLInputElement>(null)
   const exhibitionBenefitsImageRef = useRef<HTMLInputElement>(null)
+  const heroBackgroundImageRef = useRef<HTMLInputElement>(null)
 
   // Update form data when content loads
   useEffect(() => {
@@ -181,6 +182,64 @@ export function ModularStandsAdmin() {
                 onChange={(e) => handleInputChange('hero', 'buttonTitle', e.target.value)}
                 placeholder="e.g., REQUEST FOR QUOTATION"
               />
+            </div>
+            {/* Hero Background Image */}
+            <div className="w-full">
+              <Label htmlFor="hero-background-image">Hero Background Image</Label>
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      value={getCurrentImageAlt('hero', 'backgroundImage')}
+                      onChange={(e) => updateImageAlt('hero', 'backgroundImage', e.target.value)}
+                      placeholder="Alt text"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    ref={heroBackgroundImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleImageUpload(file, 'hero', 'backgroundImage')
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => heroBackgroundImageRef.current?.click()}
+                    disabled={uploadingImages['hero-backgroundImage']}
+                    className="flex items-center gap-2"
+                  >
+                    {uploadingImages['hero-backgroundImage'] ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Choose File
+                  </Button>
+                </div>
+                {getCurrentImageUrl('hero', 'backgroundImage') && (
+                  <div className="relative inline-block">
+                    <img 
+                      src={getCurrentImageUrl('hero', 'backgroundImage')} 
+                      alt={getCurrentImageAlt('hero', 'backgroundImage') || "Hero background preview"} 
+                      className="max-h-16 object-cover rounded border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => removeImage('hero', 'backgroundImage')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

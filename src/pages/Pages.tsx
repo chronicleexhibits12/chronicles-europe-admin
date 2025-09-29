@@ -17,7 +17,8 @@ import { useBlogPage } from '@/hooks/useBlogContent'
 import { useTestimonialsPage } from '@/data/hooks/useTestimonialsContent'
 import { useContactPage } from '@/hooks/useContactContent'
 import { usePrivacyPage } from '@/hooks/usePrivacyContent'
-import { useTermsPage } from '@/hooks/useTermsContent' // Added terms page hook
+import { useTermsPage } from '@/hooks/useTermsContent'
+import { useMainCountriesContent } from '@/hooks/useMainCountriesContent'
 import { Edit, FileText, Eye } from 'lucide-react'
 
 interface PageInfo {
@@ -39,7 +40,8 @@ export function Pages() {
   const { data: testimonialsPage, loading: testimonialsLoading } = useTestimonialsPage()
   const { data: contactPage, loading: contactLoading } = useContactPage()
   const { data: privacyPage, loading: privacyLoading } = usePrivacyPage()
-  const { data: termsPage, loading: termsLoading } = useTermsPage() // Added terms page data
+  const { data: termsPage, loading: termsLoading } = useTermsPage()
+  const { data: mainCountriesPage, loading: mainCountriesLoading } = useMainCountriesContent()
   const [pages, setPages] = useState<PageInfo[]>([])
 
   // Get website URL from environment variables, with fallback
@@ -118,10 +120,18 @@ export function Pages() {
         editPath: '/admin/terms',
         lastUpdated: termsPage?.updatedAt ? new Date(termsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Terms and conditions for using our website and services'
+      },
+      {
+        id: 'main-countries',
+        name: 'Main Countries Page',
+        path: '/major-countries',
+        editPath: '/admin/main-countries',
+        lastUpdated: mainCountriesPage?.updatedAt ? new Date(mainCountriesPage.updatedAt).toLocaleDateString() : 'Never',
+        description: 'Main countries page with exhibition stand types and portfolio showcase'
       }
     ]
     setPages(pagesData)
-  }, [homePage, aboutPage, customStandsPage, tradeShowsPage, blogPage, testimonialsPage, contactPage, privacyPage, termsPage])
+  }, [homePage, aboutPage, customStandsPage, tradeShowsPage, blogPage, testimonialsPage, contactPage, privacyPage, termsPage, mainCountriesPage])
 
   const handleEdit = (editPath: string) => {
     navigate(editPath)
@@ -132,7 +142,7 @@ export function Pages() {
     window.open(`${websiteUrl}${path}`, '_blank')
   }
 
-  const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading || blogLoading || testimonialsLoading || contactLoading || privacyLoading || termsLoading
+  const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading || blogLoading || testimonialsLoading || contactLoading || privacyLoading || termsLoading || mainCountriesLoading
 
   if (loading) {
     return (

@@ -20,11 +20,13 @@ export interface City {
   hero_title: string | null
   hero_subtitle: string | null
   hero_background_image_url: string | null
+  hero_background_image_alt: string | null
   
   // Why Choose Us Section
   why_choose_us_title: string | null
   why_choose_us_subtitle: string | null
   why_choose_us_main_image_url: string | null
+  why_choose_us_main_image_alt: string | null
   why_choose_us_benefits_html: string | null
   
   // What We Do Section

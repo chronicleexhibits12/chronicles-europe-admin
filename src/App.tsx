@@ -32,6 +32,7 @@ import { FormSubmissionsAdmin } from '@/admin/formSubmissions'
 import { PrivacyAdmin } from '@/admin/privacy/PrivacyAdmin'
 import { TermsAdmin } from '@/admin/terms/TermsAdmin'
 import SitemapAdmin from '@/admin/sitemap/SitemapAdmin'
+import { MainCountriesAdmin } from '@/admin/mainCountries/MainCountriesAdmin'
 import { Toaster } from 'sonner'
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
             <Route path="admin/countries" element={<CountriesAdmin />} />
             <Route path="admin/countries/:id/edit" element={<EditCountryAdmin />} />
             <Route path="admin/sitemap" element={<SitemapAdmin />} />
+            <Route path="admin/main-countries" element={<MainCountriesAdmin />} />
           </Route>
         </Routes>
       </Router>

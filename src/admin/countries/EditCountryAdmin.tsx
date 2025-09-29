@@ -48,10 +48,12 @@ interface CountryData {
   hero_title: string
   hero_subtitle: string
   hero_background_image_url: string
+  hero_background_image_alt: string
   
   // Why Choose Us Section
   why_choose_us_title: string
   why_choose_us_main_image_url: string
+  why_choose_us_main_image_alt: string
   why_choose_us_benefits_html: string
   
   // What We Do Section
@@ -106,10 +108,12 @@ export function EditCountryAdmin() {
     hero_title: '',
     hero_subtitle: '',
     hero_background_image_url: '',
+    hero_background_image_alt: '',
     
     // Why Choose Us Section
     why_choose_us_title: '',
     why_choose_us_main_image_url: '',
+    why_choose_us_main_image_alt: '',
     why_choose_us_benefits_html: '',
     
     // What We Do Section
@@ -199,8 +203,10 @@ export function EditCountryAdmin() {
         hero_title: country.hero_title || '',
         hero_subtitle: country.hero_subtitle || '',
         hero_background_image_url: country.hero_background_image_url || '',
+        hero_background_image_alt: country.hero_background_image_alt || '',
         why_choose_us_title: country.why_choose_us_title || '',
         why_choose_us_main_image_url: country.why_choose_us_main_image_url || '',
+        why_choose_us_main_image_alt: country.why_choose_us_main_image_alt || '',
         why_choose_us_benefits_html: country.why_choose_us_benefits_html || '',
         what_we_do_title: country.what_we_do_title || '',
         what_we_do_description_html: country.what_we_do_description_html || '',
@@ -370,8 +376,10 @@ export function EditCountryAdmin() {
         hero_title: updatedFormData.hero_title,
         hero_subtitle: updatedFormData.hero_subtitle,
         hero_background_image_url: updatedFormData.hero_background_image_url,
+        hero_background_image_alt: updatedFormData.hero_background_image_alt,
         why_choose_us_title: updatedFormData.why_choose_us_title,
         why_choose_us_main_image_url: updatedFormData.why_choose_us_main_image_url,
+        why_choose_us_main_image_alt: updatedFormData.why_choose_us_main_image_alt,
         why_choose_us_benefits_html: updatedFormData.why_choose_us_benefits_html,
         what_we_do_title: updatedFormData.what_we_do_title,
         what_we_do_description_html: updatedFormData.what_we_do_description_html,
@@ -592,6 +600,15 @@ export function EditCountryAdmin() {
             <div className="md:col-span-2">
               <Label htmlFor="hero_background_image_url">Background Image</Label>
               <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      value={formData.hero_background_image_alt}
+                      onChange={(e) => handleInputChange('hero_background_image_alt', e.target.value)}
+                      placeholder="Alt text for background image"
+                    />
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button
                     type="button"
@@ -616,7 +633,7 @@ export function EditCountryAdmin() {
                   <div className="relative inline-block">
                     <img 
                       src={getImageUrl('hero_background_image_url')} 
-                      alt="Hero preview" 
+                      alt={formData.hero_background_image_alt || "Hero preview"} 
                       className="h-32 object-cover rounded border"
                     />
                     <Button
@@ -675,6 +692,15 @@ export function EditCountryAdmin() {
             <div className="md:col-span-2">
               <Label htmlFor="why_choose_us_main_image_url">Main Image</Label>
               <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      value={formData.why_choose_us_main_image_alt}
+                      onChange={(e) => handleInputChange('why_choose_us_main_image_alt', e.target.value)}
+                      placeholder="Alt text for main image"
+                    />
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button
                     type="button"
@@ -699,7 +725,7 @@ export function EditCountryAdmin() {
                   <div className="relative inline-block">
                     <img 
                       src={getImageUrl('why_choose_us_main_image_url')} 
-                      alt="Why choose us preview" 
+                      alt={formData.why_choose_us_main_image_alt || "Why choose us preview"} 
                       className="h-32 object-cover rounded border"
                     />
                     <Button

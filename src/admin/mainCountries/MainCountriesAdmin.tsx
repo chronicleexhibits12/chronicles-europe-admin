@@ -3,11 +3,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { TagInput } from '@/components/ui/tag-input'
 import { useMainCountriesContent } from '@/hooks/useMainCountriesContent'
 import type { MainCountriesPage, ExhibitionStandType } from '@/data/mainCountriesTypes'
-import { Upload, Save, Loader2, X, Plus, Edit3 } from 'lucide-react'
+import { Upload, Save, Loader2, X, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 export function MainCountriesAdmin() {
@@ -19,7 +18,6 @@ export function MainCountriesAdmin() {
   const [formData, setFormData] = useState<Partial<MainCountriesPage>>({})
   
   // File input refs
-  const heroImageRef = useRef<HTMLInputElement>(null)
   const exhibitionTypeImageRefs = useRef<{ [key: string]: (instance: HTMLInputElement | null) => void | (() => void) }>({})
 
   // Update form data when main countries page loads
@@ -28,19 +26,6 @@ export function MainCountriesAdmin() {
       setFormData(mainCountriesPage)
     }
   }, [mainCountriesPage])
-
-  const handleInputChange = (section: keyof MainCountriesPage, field: string, value: string) => {
-    setFormData(prev => {
-      const currentSection = (prev[section] as any) || {}
-      return {
-        ...prev,
-        [section]: {
-          ...currentSection,
-          [field]: value
-        }
-      }
-    })
-  }
 
   const handleHeroInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -70,36 +55,6 @@ export function MainCountriesAdmin() {
         [field]: value
       }
     }))
-  }
-
-  const handleImageUpload = async (file: File, section: string, field: string) => {
-    const uploadKey = `${section}-${field}`
-    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }))
-
-    const uploadPromise = uploadImage(file)
-    
-    toast.promise(uploadPromise, {
-      loading: 'Uploading image...',
-      success: (result) => {
-        if (result.data) {
-          if (section === 'hero') {
-            handleHeroInputChange(field, result.data)
-          } else {
-            handleInputChange(section as keyof MainCountriesPage, field, result.data)
-          }
-          return 'Image uploaded successfully!'
-        } else {
-          throw new Error(result.error || 'Upload failed')
-        }
-      },
-      error: (error) => `Failed to upload image: ${error.message || 'Unknown error'}`
-    })
-
-    try {
-      await uploadPromise
-    } finally {
-      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }))
-    }
   }
 
   const handleExhibitionTypeChange = (index: number, field: keyof ExhibitionStandType, value: string | string[]) => {
@@ -138,7 +93,7 @@ export function MainCountriesAdmin() {
     const key = `exhibition-type-${typeIndex}-image-${imageIndex}`
     // Create a ref function if it doesn't exist
     if (!exhibitionTypeImageRefs.current[key]) {
-      exhibitionTypeImageRefs.current[key] = (el: HTMLInputElement | null) => {
+      exhibitionTypeImageRefs.current[key] = () => {
         // We don't need to store the element, just create the ref function
       }
     }

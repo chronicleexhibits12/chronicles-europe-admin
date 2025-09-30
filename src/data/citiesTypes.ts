@@ -11,6 +11,9 @@ export interface City {
   // Active status for RLS
   is_active: boolean
   
+  // Trade Shows Heading
+  trade_shows_heading: string | null
+  
   // SEO Metadata
   seo_title: string | null
   seo_description: string | null

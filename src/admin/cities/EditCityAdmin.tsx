@@ -35,6 +35,7 @@ interface CityData {
   city_slug: string
   name: string
   is_active: boolean // Add is_active field
+  trade_shows_heading: string // Add trade_shows_heading field
   
   // SEO Metadata
   seo_title: string
@@ -88,6 +89,7 @@ export function EditCityAdmin() {
     city_slug: '',
     name: '',
     is_active: true, // Add is_active field with default true
+    trade_shows_heading: '', // Add trade_shows_heading field with default empty string
     
     // SEO Metadata
     seo_title: '',
@@ -157,6 +159,7 @@ export function EditCityAdmin() {
         city_slug: city.city_slug || '',
         name: city.name || '',
         is_active: city.is_active !== undefined ? city.is_active : true, // Handle is_active field
+        trade_shows_heading: city.trade_shows_heading || '', // Handle trade_shows_heading field
         seo_title: city.seo_title || '',
         seo_description: city.seo_description || '',
         seo_keywords: city.seo_keywords || '',
@@ -335,6 +338,7 @@ export function EditCityAdmin() {
           city_slug: updatedFormData.city_slug,
           country_slug: updatedFormData.country_slug,
           is_active: updatedFormData.is_active,
+          trade_shows_heading: updatedFormData.trade_shows_heading,
           seo_title: updatedFormData.seo_title,
           seo_description: updatedFormData.seo_description,
           seo_keywords: updatedFormData.seo_keywords,
@@ -589,6 +593,18 @@ export function EditCityAdmin() {
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="e.g., Paris"
               />
+            </div>
+            <div>
+              <Label htmlFor="trade_shows_heading">Trade Shows Heading</Label>
+              <Input
+                id="trade_shows_heading"
+                value={formData.trade_shows_heading}
+                onChange={(e) => handleInputChange('trade_shows_heading', e.target.value)}
+                placeholder="e.g., Popular Trade Shows in Paris"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                This heading will be displayed on the trade shows section for this city
+              </p>
             </div>
             <div>
               <Label htmlFor="country_slug">Country *</Label>

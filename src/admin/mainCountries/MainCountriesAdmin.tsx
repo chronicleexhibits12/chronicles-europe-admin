@@ -65,6 +65,23 @@ export function MainCountriesAdmin() {
     })
   }
 
+  // Handle image alt text change
+  const handleExhibitionTypeImageAltChange = (typeIndex: number, imageIndex: number, altText: string) => {
+    setFormData(prev => {
+      const exhibitionStandTypes = [...(prev.exhibitionStandTypes || [])]
+      const imagesAlt = [...(exhibitionStandTypes[typeIndex]?.imagesAlt || [])]
+      
+      // Ensure the imagesAlt array is long enough
+      while (imagesAlt.length <= imageIndex) {
+        imagesAlt.push('')
+      }
+      
+      imagesAlt[imageIndex] = altText
+      exhibitionStandTypes[typeIndex] = { ...exhibitionStandTypes[typeIndex], imagesAlt }
+      return { ...prev, exhibitionStandTypes }
+    })
+  }
+
   const addExhibitionType = () => {
     setFormData(prev => ({
       ...prev,
@@ -74,6 +91,7 @@ export function MainCountriesAdmin() {
           title: '',
           description: '',
           images: ['', '', ''],
+          imagesAlt: ['', '', ''], // Initialize with empty alt text array
           ctaText: '',
           ctaLink: '/major-countries' // Fixed CTA link
         }
@@ -373,6 +391,19 @@ export function MainCountriesAdmin() {
                                 src={image} 
                                 alt={`Stand type ${index} image ${imgIndex}`} 
                                 className="h-32 w-full object-cover rounded border"
+                              />
+                            </div>
+                          )}
+                          {image && (
+                            <div className="space-y-1">
+                              <Label htmlFor={`exhibition-type-${index}-image-${imgIndex}-alt`}>
+                                Image {imgIndex + 1} Alt Text
+                              </Label>
+                              <Input
+                                id={`exhibition-type-${index}-image-${imgIndex}-alt`}
+                                value={type.imagesAlt?.[imgIndex] || ''}
+                                onChange={(e) => handleExhibitionTypeImageAltChange(index, imgIndex, e.target.value)}
+                                placeholder="Enter alt text for image"
                               />
                             </div>
                           )}

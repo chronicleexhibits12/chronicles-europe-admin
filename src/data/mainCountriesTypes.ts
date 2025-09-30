@@ -3,6 +3,7 @@ export interface ExhibitionStandType {
   title: string
   description: string
   images: string[]
+  imagesAlt?: string[]  // Added alt text array for images
   ctaText: string
   ctaLink: string
 }

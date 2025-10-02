@@ -28,6 +28,7 @@ export interface ExhibitionEurope {
 export interface ExhibitionUSA {
   title?: string
   htmlContent?: string
+  ctaText?: string
 }
 
 export interface Solutions {
@@ -42,6 +43,17 @@ export interface WhyBest {
   htmlContent?: string
 }
 
+export interface PortfolioSection {
+  title?: string
+  subtitle?: string
+  ctaText?: string
+  ctaLink?: string
+}
+
+export interface TestimonialsSection {
+  title?: string
+}
+
 export interface HomePage {
   id: string
   hero: HeroSection
@@ -50,6 +62,8 @@ export interface HomePage {
   exhibitionUSA: ExhibitionUSA
   solutions: Solutions
   whyBest: WhyBest
+  portfolioSection?: PortfolioSection
+  testimonialsSection?: TestimonialsSection
   isActive: boolean
   createdAt: string
   updatedAt: string

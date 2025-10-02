@@ -24,6 +24,14 @@ export interface Database {
           why_best_title: string | null
           why_best_subtitle: string | null
           why_best_html_content: string | null
+          // Add new portfolio and testimonials fields
+          portfolio_section_title: string | null
+          portfolio_section_subtitle: string | null
+          portfolio_section_cta_text: string | null
+          portfolio_section_cta_link: string | null
+          testimonials_section_title: string | null
+          // Add exhibition USA CTA text field
+          exhibition_usa_cta_text: string | null
           is_active: boolean
           created_at: string
           updated_at: string
@@ -49,6 +57,14 @@ export interface Database {
           why_best_title?: string | null
           why_best_subtitle?: string | null
           why_best_html_content?: string | null
+          // Add new portfolio and testimonials fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
+          testimonials_section_title?: string | null
+          // Add exhibition USA CTA text field
+          exhibition_usa_cta_text?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -74,6 +90,14 @@ export interface Database {
           why_best_title?: string | null
           why_best_subtitle?: string | null
           why_best_html_content?: string | null
+          // Add new portfolio and testimonials fields
+          portfolio_section_title?: string | null
+          portfolio_section_subtitle?: string | null
+          portfolio_section_cta_text?: string | null
+          portfolio_section_cta_link?: string | null
+          testimonials_section_title?: string | null
+          // Add exhibition USA CTA text field
+          exhibition_usa_cta_text?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string

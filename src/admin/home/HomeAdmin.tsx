@@ -352,6 +352,18 @@ export function HomeAdmin() {
                 controlled={true}
               />
             </div>
+            
+            {/* Exhibition USA CTA */}
+            <div className="w-full">
+              <Label htmlFor="usa-cta-text">CTA Text</Label>
+              <Input
+                id="usa-cta-text"
+                value={formData.exhibitionUSA?.ctaText || ''}
+                onChange={(e) => handleInputChange('exhibitionUSA', 'ctaText', e.target.value)}
+                placeholder="Enter CTA text"
+                className="mt-1"
+              />
+            </div>
           </div>
         </div>
 
@@ -477,9 +489,69 @@ export function HomeAdmin() {
           </div>
         </div>
 
-        {/* Section 5: Main Section */}
+        {/* Section 5: Portfolio */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Main Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Portfolio)</h2>
+          
+          <div className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="portfolio-title">Title</Label>
+                <Input
+                  id="portfolio-title"
+                  value={formData.portfolioSection?.title || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'title', e.target.value)}
+                  placeholder="Enter portfolio title"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="portfolio-subtitle">Subtitle</Label>
+                <Input
+                  id="portfolio-subtitle"
+                  value={formData.portfolioSection?.subtitle || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'subtitle', e.target.value)}
+                  placeholder="Enter portfolio subtitle"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="portfolio-cta-text">CTA Text</Label>
+                <Input
+                  id="portfolio-cta-text"
+                  value={formData.portfolioSection?.ctaText || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'ctaText', e.target.value)}
+                  placeholder="Enter CTA text"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="portfolio-cta-link">CTA Link (Fixed)</Label>
+                <Input
+                  id="portfolio-cta-link"
+                  value="/portfolio"
+                  readOnly
+                  className="mt-1 bg-gray-100 cursor-not-allowed"
+                  title="This field is fixed to '/portfolio' as per project specifications"
+                />
+                <input
+                  type="hidden"
+                  value="/portfolio"
+                  onChange={(e) => handleInputChange('portfolioSection', 'ctaLink', e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 6: Main Section */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Main Section)</h2>
           
           <div className="grid gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -519,9 +591,9 @@ export function HomeAdmin() {
           </div>
         </div>
 
-        {/* Section 6: Why We're the Best */}
+        {/* Section 7: Why We're the Best */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Why We're the Best)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7 (Why We're the Best)</h2>
           
           <div className="grid gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -556,6 +628,24 @@ export function HomeAdmin() {
                 placeholder="Enter content..."
                 className="mt-1"
                 controlled={true}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section 8: Testimonials */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 8 (Testimonials)</h2>
+          
+          <div className="grid gap-4">
+            <div className="w-full">
+              <Label htmlFor="testimonials-title">Title</Label>
+              <Input
+                id="testimonials-title"
+                value={formData.testimonialsSection?.title || ''}
+                onChange={(e) => handleInputChange('testimonialsSection', 'title', e.target.value)}
+                placeholder="Enter testimonials title"
+                className="mt-1"
               />
             </div>
           </div>

@@ -39,7 +39,8 @@ export class HomePageService {
         },
         exhibitionUSA: {
           title: row.exhibition_usa_title || undefined,
-          htmlContent: row.exhibition_usa_html_content || undefined
+          htmlContent: row.exhibition_usa_html_content || undefined,
+          ctaText: row.exhibition_usa_cta_text || undefined
         },
         solutions: {
           title: row.solutions_title || undefined,
@@ -50,6 +51,15 @@ export class HomePageService {
           title: row.why_best_title || undefined,
           subtitle: row.why_best_subtitle || undefined,
           htmlContent: row.why_best_html_content || undefined
+        },
+        portfolioSection: {
+          title: row.portfolio_section_title || undefined,
+          subtitle: row.portfolio_section_subtitle || undefined,
+          ctaText: row.portfolio_section_cta_text || undefined,
+          ctaLink: '/portfolio'
+        },
+        testimonialsSection: {
+          title: row.testimonials_section_title || undefined
         },
         isActive: row.is_active,
         createdAt: row.created_at,
@@ -111,6 +121,9 @@ export class HomePageService {
       if (data.exhibitionUSA?.htmlContent !== undefined) {
         updateData.exhibition_usa_html_content = data.exhibitionUSA.htmlContent
       }
+      if (data.exhibitionUSA?.ctaText !== undefined) {
+        updateData.exhibition_usa_cta_text = data.exhibitionUSA.ctaText
+      }
 
       // Solutions
       if (data.solutions?.title !== undefined) {
@@ -133,6 +146,24 @@ export class HomePageService {
       }
       if (data.whyBest?.htmlContent !== undefined) {
         updateData.why_best_html_content = data.whyBest.htmlContent
+      }
+
+      // Portfolio section
+      if (data.portfolioSection?.title !== undefined) {
+        updateData.portfolio_section_title = data.portfolioSection.title
+      }
+      if (data.portfolioSection?.subtitle !== undefined) {
+        updateData.portfolio_section_subtitle = data.portfolioSection.subtitle
+      }
+      if (data.portfolioSection?.ctaText !== undefined) {
+        updateData.portfolio_section_cta_text = data.portfolioSection.ctaText
+      }
+      // Always set portfolio CTA link to fixed value
+      updateData.portfolio_section_cta_link = '/portfolio'
+
+      // Testimonials section
+      if (data.testimonialsSection?.title !== undefined) {
+        updateData.testimonials_section_title = data.testimonialsSection.title
       }
 
       if (data.isActive !== undefined) {

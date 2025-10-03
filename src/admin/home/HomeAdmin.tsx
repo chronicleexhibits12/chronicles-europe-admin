@@ -2,13 +2,15 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { HomeAdminSkeleton } from '@/components/HomeAdminSkeleton'
 import { useHomePage } from '@/hooks/useHomeContent'
 import type { HomePage, SolutionItem } from '@/data/homeTypes'
-import { Upload, Save, Loader2 } from 'lucide-react'
+import { Upload, Save, Loader2, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { HomePageService } from '@/data/homeService'
+import { TagInput } from '@/components/ui/tag-input'
 
 export function HomeAdmin() {
   const { data: homePage, loading, error, updateHomePage, uploadImage } = useHomePage()
@@ -109,6 +111,14 @@ export function HomeAdmin() {
     }
   }
 
+  const handleKeywordsChange = (keywords: string[]) => {
+    handleInputChange('meta', 'keywords', keywords.join(', '))
+  }
+
+  const getKeywordsArray = () => {
+    return formData.meta?.keywords ? formData.meta.keywords.split(',').map(k => k.trim()).filter(k => k) : []
+  }
+
   const handleSave = async () => {
     if (!homePage?.id) return
 
@@ -137,6 +147,13 @@ export function HomeAdmin() {
     } finally {
       setSaving(false)
     }
+  }
+
+  // Remove image
+  const removeImage = (section: string, field: string) => {
+    handleInputChange(section as keyof HomePage, field, '')
+    // Also clear alt text when removing image
+    handleInputChange(section as keyof HomePage, `${field}Alt`, '')
   }
 
   if (loading) {
@@ -169,14 +186,6 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label htmlFor="hero-bg">Background Image</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div className="hidden">
-                  <Input
-                    id="hero-bg"
-                    value={formData.hero?.backgroundImage || ''}
-                    onChange={(e) => handleInputChange('hero', 'backgroundImage', e.target.value)}
-                    placeholder="Enter image URL"
-                  />
-                </div>
                 <div>
                   <Input
                     value={formData.hero?.backgroundImageAlt || ''}
@@ -212,6 +221,16 @@ export function HomeAdmin() {
                     </>
                   )}
                 </Button>
+                {formData.hero?.backgroundImage && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => removeImage('hero', 'backgroundImage')}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
               {formData.hero?.backgroundImage && (
                 <div className="mt-2">
@@ -258,14 +277,6 @@ export function HomeAdmin() {
             <div className="w-full">
               <Label htmlFor="europe-booth">Booth Image</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div className="hidden">
-                  <Input
-                    id="europe-booth"
-                    value={formData.exhibitionEurope?.boothImage || ''}
-                    onChange={(e) => handleInputChange('exhibitionEurope', 'boothImage', e.target.value)}
-                    placeholder="Enter image URL"
-                  />
-                </div>
                 <div>
                   <Input
                     value={formData.exhibitionEurope?.boothImageAlt || ''}
@@ -301,6 +312,16 @@ export function HomeAdmin() {
                     </>
                   )}
                 </Button>
+                {formData.exhibitionEurope?.boothImage && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => removeImage('exhibitionEurope', 'boothImage')}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
               {formData.exhibitionEurope?.boothImage && (
                 <div className="mt-2">
@@ -427,13 +448,6 @@ export function HomeAdmin() {
                     <div className="w-full">
                       <Label>Image</Label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                        <div className="hidden">
-                          <Input
-                            value={item.image}
-                            onChange={(e) => handleSolutionItemChange(index, 'image', e.target.value)}
-                            placeholder="Enter image URL"
-                          />
-                        </div>
                         <div>
                           <Input
                             value={item.imageAlt || ''}
@@ -471,6 +485,19 @@ export function HomeAdmin() {
                             </>
                           )}
                         </Button>
+                        {item.image && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              handleSolutionItemChange(index, 'image', '')
+                              handleSolutionItemChange(index, 'imageAlt', '')
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                       {item.image && (
                         <div className="mt-2">
@@ -647,6 +674,48 @@ export function HomeAdmin() {
                 placeholder="Enter testimonials title"
                 className="mt-1"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* SEO Metadata Section - Moved to the end */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">SEO Metadata</h2>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="meta-title">SEO Title</Label>
+              <Input
+                id="meta-title"
+                value={formData.meta?.title || ''}
+                onChange={(e) => handleInputChange('meta', 'title', e.target.value)}
+                placeholder="SEO title for the home page"
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="meta-description">SEO Description</Label>
+              <Textarea
+                id="meta-description"
+                value={formData.meta?.description || ''}
+                onChange={(e) => handleInputChange('meta', 'description', e.target.value)}
+                placeholder="SEO description for the home page"
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="meta-keywords">SEO Keywords</Label>
+              <TagInput
+                tags={getKeywordsArray()}
+                onChange={handleKeywordsChange}
+                placeholder="Type keywords and press Enter"
+                className="mt-1"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Press Enter, comma, or semicolon after typing each keyword to add it
+              </p>
             </div>
           </div>
         </div>

@@ -444,11 +444,10 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Portfolio Section - MERGED STAND PROJECT TEXT AND PORTFOLIO */}
+        {/* Stand Project Section - Added as a separate section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Portfolio Section</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Stand Project Section)</h2>
           <div className="space-y-4">
-            {/* Stand Project Text Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="stand-project-title">Stand Project Title</Label>
@@ -475,9 +474,32 @@ export function PavilionStandsAdmin() {
                 controlled={true}
               />
             </div>
-            
-            {/* Portfolio Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          </div>
+        </div>
+
+        {/* Portfolio Section - Now a separate section */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Portfolio Section)</h2>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="portfolio-title">Portfolio Title</Label>
+                <Input
+                  id="portfolio-title"
+                  value={formData.portfolioSection?.portfolioTitle || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'portfolioTitle', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-subtitle">Portfolio Subtitle</Label>
+                <Input
+                  id="portfolio-subtitle"
+                  value={formData.portfolioSection?.portfolioSubtitle || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'portfolioSubtitle', e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="portfolio-cta-text">CTA Text</Label>
                 <Input
@@ -503,9 +525,9 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Section 6: Our Expertise Section */}
+        {/* Section 7: Our Expertise Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Our Expertise Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7 (Our Expertise Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="our-expertise-title">Title</Label>
@@ -526,9 +548,9 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Section 7: Company Info Section */}
+        {/* Section 8: Company Info Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 7 (Company Info Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 8 (Company Info Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="company-info-title">Title</Label>

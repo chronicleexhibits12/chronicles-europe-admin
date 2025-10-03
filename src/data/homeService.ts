@@ -21,6 +21,11 @@ export class HomePageService {
       const row = response.data as Database['public']['Tables']['home_page']['Row']
       const homePage: HomePage = {
         id: row.id,
+        meta: {
+          title: row.meta_title || undefined,
+          description: row.meta_description || undefined,
+          keywords: row.meta_keywords || undefined
+        },
         hero: {
           backgroundImage: row.hero_background_image || undefined,
           backgroundImageAlt: row.hero_background_image_alt || undefined
@@ -77,6 +82,17 @@ export class HomePageService {
   static async updateHomePage(id: string, data: Partial<HomePage>): Promise<{ data: HomePage | null; error: string | null }> {
     try {
       const updateData: Record<string, any> = {}
+
+      // Meta section
+      if (data.meta?.title !== undefined) {
+        updateData.meta_title = data.meta.title
+      }
+      if (data.meta?.description !== undefined) {
+        updateData.meta_description = data.meta.description
+      }
+      if (data.meta?.keywords !== undefined) {
+        updateData.meta_keywords = data.meta.keywords
+      }
 
       // Hero section
       if (data.hero?.backgroundImage !== undefined) {

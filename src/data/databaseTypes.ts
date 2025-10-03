@@ -32,6 +32,10 @@ export interface Database {
           testimonials_section_title: string | null
           // Add exhibition USA CTA text field
           exhibition_usa_cta_text: string | null
+          // Add SEO fields
+          meta_title: string | null
+          meta_description: string | null
+          meta_keywords: string | null
           is_active: boolean
           created_at: string
           updated_at: string
@@ -65,6 +69,10 @@ export interface Database {
           testimonials_section_title?: string | null
           // Add exhibition USA CTA text field
           exhibition_usa_cta_text?: string | null
+          // Add SEO fields
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -98,6 +106,10 @@ export interface Database {
           testimonials_section_title?: string | null
           // Add exhibition USA CTA text field
           exhibition_usa_cta_text?: string | null
+          // Add SEO fields
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string

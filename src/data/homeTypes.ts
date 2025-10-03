@@ -1,4 +1,10 @@
 // Home Page Types
+export interface HomeMeta {
+  title?: string
+  description?: string
+  keywords?: string
+}
+
 export interface SolutionItem {
   title: string
   description: string
@@ -56,6 +62,7 @@ export interface TestimonialsSection {
 
 export interface HomePage {
   id: string
+  meta?: HomeMeta
   hero: HeroSection
   mainSection: MainSection
   exhibitionEurope: ExhibitionEurope

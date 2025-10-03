@@ -93,7 +93,7 @@ export function MainCountriesAdmin() {
           images: ['', '', ''],
           imagesAlt: ['', '', ''], // Initialize with empty alt text array
           ctaText: '',
-          ctaLink: '/major-countries' // Fixed CTA link
+          ctaLink: '/major-exhibiting-country' // Fixed CTA link
         }
       ]
     }))
@@ -316,12 +316,12 @@ export function MainCountriesAdmin() {
                     <Label htmlFor={`stand-type-cta-link-${index}`}>CTA Link</Label>
                     <Input
                       id={`stand-type-cta-link-${index}`}
-                      value={type.ctaLink || '/major-countries'}
+                      value={type.ctaLink || '/major-exhibiting-country'}
                       readOnly
-                      placeholder="/major-countries"
+                      placeholder="/major-exhibiting-country"
                     />
                     <p className="text-sm text-muted-foreground mt-1">
-                      This link is fixed to "/major-countries"
+                      This link is fixed to "/major-exhibiting-country"
                     </p>
                   </div>
                   <div className="md:col-span-2">

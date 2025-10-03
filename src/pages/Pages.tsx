@@ -124,7 +124,7 @@ export function Pages() {
       {
         id: 'main-countries',
         name: 'Main Countries Page',
-        path: '/major-countries',
+        path: '/major-exhibiting-country',
         editPath: '/admin/main-countries',
         lastUpdated: mainCountriesPage?.updatedAt ? new Date(mainCountriesPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Main countries page with exhibition stand types and portfolio showcase'

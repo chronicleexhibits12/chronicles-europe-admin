@@ -21,7 +21,6 @@ export function PavilionStandsAdmin() {
   // File input refs
   const benefitsImageRef = useRef<HTMLInputElement>(null)
   const advantagesImageRef = useRef<HTMLInputElement>(null)
-  const heroBackgroundImageRef = useRef<HTMLInputElement>(null)
 
   // Update form data when content loads
   useEffect(() => {
@@ -200,7 +199,8 @@ export function PavilionStandsAdmin() {
                 placeholder="e.g., REQUEST FOR QUOTATION"
               />
             </div>
-            {/* Hero Background Image */}
+            {/* Hero Background Image - REMOVED as per user request */}
+            {/* 
             <div className="w-full">
               <Label htmlFor="hero-background-image">Hero Background Image</Label>
               <div className="space-y-2">
@@ -258,35 +258,12 @@ export function PavilionStandsAdmin() {
                 )}
               </div>
             </div>
+            */}
           </div>
         </div>
-
-        {/* Section 2: Why Choose Section */}
+ {/* Section 2: Benefits Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2 (Why Choose Section)</h2>
-          <div className="space-y-4">
-            <div className="w-full">
-              <Label htmlFor="why-choose-title">Title</Label>
-              <Input
-                id="why-choose-title"
-                value={formData.whyChoose?.title || ''}
-                onChange={(e) => handleInputChange('whyChoose', 'title', e.target.value)}
-              />
-            </div>
-            <div className="w-full">
-              <Label>Content (Rich Text)</Label>
-              <RichTextEditor
-                content={formData.whyChoose?.content || ''}
-                onChange={(newContent) => handleInputChange('whyChoose', 'content', newContent)}
-                controlled={true}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: Benefits Section */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Benefits Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 2 (Benefits Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="benefits-title">Benefits Title</Label>
@@ -363,10 +340,109 @@ export function PavilionStandsAdmin() {
             </div>
           </div>
         </div>
-
-        {/* Section 4: Advantages Section */}
+        {/* Section 3: Why Choose Section */}
         <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Advantages Section)</h2>
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Why Choose Section)</h2>
+          <div className="space-y-4">
+            <div className="w-full">
+              <Label htmlFor="why-choose-title">Title</Label>
+              <Input
+                id="why-choose-title"
+                value={formData.whyChoose?.title || ''}
+                onChange={(e) => handleInputChange('whyChoose', 'title', e.target.value)}
+              />
+            </div>
+            <div className="w-full">
+              <Label>Content (Rich Text)</Label>
+              <RichTextEditor
+                content={formData.whyChoose?.content || ''}
+                onChange={(newContent) => handleInputChange('whyChoose', 'content', newContent)}
+                controlled={true}
+              />
+            </div>
+          </div>
+        </div>
+
+      
+
+        {/* Portfolio Section - Merged stand project and portfolio fields */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 4 (Portfolio Section)</h2>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="stand-project-title">Stand Project Title</Label>
+                <Input
+                  id="stand-project-title"
+                  value={formData.portfolioSection?.standProjectTitle || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'standProjectTitle', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="stand-project-highlight">Highlight Text</Label>
+                <Input
+                  id="stand-project-highlight"
+                  value={formData.portfolioSection?.highlight || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'highlight', e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="w-full">
+              <Label>Stand Project Description (Rich Text)</Label>
+              <RichTextEditor
+                content={formData.portfolioSection?.description || ''}
+                onChange={(newContent) => handleInputChange('portfolioSection', 'description', newContent)}
+                controlled={true}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <Label htmlFor="portfolio-title">Portfolio Title</Label>
+                <Input
+                  id="portfolio-title"
+                  value={formData.portfolioSection?.portfolioTitle || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'portfolioTitle', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-subtitle">Portfolio Subtitle</Label>
+                <Input
+                  id="portfolio-subtitle"
+                  value={formData.portfolioSection?.portfolioSubtitle || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'portfolioSubtitle', e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="portfolio-cta-text">CTA Text</Label>
+                <Input
+                  id="portfolio-cta-text"
+                  value={formData.portfolioSection?.ctaText || ''}
+                  onChange={(e) => handleInputChange('portfolioSection', 'ctaText', e.target.value)}
+                  placeholder="e.g., View All Projects"
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-cta-link">CTA Link</Label>
+                <Input
+                  id="portfolio-cta-link"
+                  value="/portfolio"
+                  readOnly
+                  placeholder="/portfolio"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  This link is fixed to "/portfolio"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+          {/* Section 5: Advantages Section */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Advantages Section)</h2>
           <div className="space-y-4">
             <div className="w-full">
               <Label htmlFor="advantages-title">Title</Label>
@@ -444,86 +520,8 @@ export function PavilionStandsAdmin() {
           </div>
         </div>
 
-        {/* Stand Project Section - Added as a separate section */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 5 (Stand Project Section)</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="stand-project-title">Stand Project Title</Label>
-                <Input
-                  id="stand-project-title"
-                  value={formData.portfolioSection?.standProjectTitle || ''}
-                  onChange={(e) => handleInputChange('portfolioSection', 'standProjectTitle', e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="stand-project-highlight">Highlight Text</Label>
-                <Input
-                  id="stand-project-highlight"
-                  value={formData.portfolioSection?.highlight || ''}
-                  onChange={(e) => handleInputChange('portfolioSection', 'highlight', e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="w-full">
-              <Label>Stand Project Description (Rich Text)</Label>
-              <RichTextEditor
-                content={formData.portfolioSection?.description || ''}
-                onChange={(newContent) => handleInputChange('portfolioSection', 'description', newContent)}
-                controlled={true}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Portfolio Section - Now a separate section */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 6 (Portfolio Section)</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="portfolio-title">Portfolio Title</Label>
-                <Input
-                  id="portfolio-title"
-                  value={formData.portfolioSection?.portfolioTitle || ''}
-                  onChange={(e) => handleInputChange('portfolioSection', 'portfolioTitle', e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="portfolio-subtitle">Portfolio Subtitle</Label>
-                <Input
-                  id="portfolio-subtitle"
-                  value={formData.portfolioSection?.portfolioSubtitle || ''}
-                  onChange={(e) => handleInputChange('portfolioSection', 'portfolioSubtitle', e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="portfolio-cta-text">CTA Text</Label>
-                <Input
-                  id="portfolio-cta-text"
-                  value={formData.portfolioSection?.ctaText || ''}
-                  onChange={(e) => handleInputChange('portfolioSection', 'ctaText', e.target.value)}
-                  placeholder="e.g., View All Projects"
-                />
-              </div>
-              <div>
-                <Label htmlFor="portfolio-cta-link">CTA Link</Label>
-                <Input
-                  id="portfolio-cta-link"
-                  value="/portfolio"
-                  readOnly
-                  placeholder="/portfolio"
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  This link is fixed to "/portfolio"
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Remove the old Section 6 since it's now merged with Section 5 */}
+        {/* Section 6 (Portfolio Section) - REMOVED */}
 
         {/* Section 7: Our Expertise Section */}
         <div className="admin-section">

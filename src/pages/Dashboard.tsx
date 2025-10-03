@@ -57,7 +57,7 @@ export function Dashboard() {
       {
         id: 'custom-stands',
         name: 'Custom Stands Page',
-        path: '/custom-stands',
+        path: '/custom-booth-design-and-build',
         editPath: '/admin/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'

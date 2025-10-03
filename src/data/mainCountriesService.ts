@@ -210,7 +210,7 @@ export class MainCountriesService {
   // Trigger revalidation for ISR
   static async triggerRevalidation(): Promise<void> {
     try {
-      await basicRevalidate('/major-countries')
+      await basicRevalidate('/major-exhibiting-country')
     } catch (error) {
       console.error('Error triggering revalidation:', error)
     }

@@ -21,7 +21,19 @@ export function PrivacyAdmin() {
   // Update form data when privacy page loads
   useEffect(() => {
     if (privacyPage) {
-      setFormData(privacyPage)
+      setFormData({
+        id: privacyPage.id,
+        title: privacyPage.title,
+        content: privacyPage.content,
+        meta: {
+          title: privacyPage.meta.title,
+          description: privacyPage.meta.description,
+          keywords: privacyPage.meta.keywords
+        },
+        isActive: privacyPage.isActive,
+        createdAt: privacyPage.createdAt,
+        updatedAt: privacyPage.updatedAt
+      })
     }
   }, [privacyPage])
 
@@ -64,7 +76,19 @@ export function PrivacyAdmin() {
       success: (result) => {
         if (result.data) {
           // Update local form data with saved data
-          setFormData(result.data)
+          setFormData({
+            id: result.data.id,
+            title: result.data.title,
+            content: result.data.content,
+            meta: {
+              title: result.data.meta.title,
+              description: result.data.meta.description,
+              keywords: result.data.meta.keywords
+            },
+            isActive: result.data.isActive,
+            createdAt: result.data.createdAt,
+            updatedAt: result.data.updatedAt
+          })
           return 'Privacy page updated successfully!'
         } else {
           throw new Error(result.error || 'Update failed')

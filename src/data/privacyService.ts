@@ -11,6 +11,7 @@ export class PrivacyPageService {
         .from('privacy_page')
         .select('*')
         .eq('is_active', true)
+        .limit(1)
         .single()
 
       if (response.error) {
@@ -70,10 +71,10 @@ export class PrivacyPageService {
         updateData.is_active = data.isActive
       }
 
-      // First update the record
+      // Update the record
       const { error: updateError } = await (supabase as any)
         .from('privacy_page')
-        .update(updateData as any)
+        .update(updateData)
         .eq('id', id)
 
       if (updateError) {
@@ -81,7 +82,7 @@ export class PrivacyPageService {
       }
 
       // Then fetch the updated record
-      const { data: updatedData, error: fetchError } = await (supabase as any)
+      const { data: updatedData, error: fetchError } = await supabase
         .from('privacy_page')
         .select('*')
         .eq('id', id)

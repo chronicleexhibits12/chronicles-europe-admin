@@ -275,6 +275,47 @@ export function HomeAdmin() {
             </div>
             
             <div className="w-full">
+              <Label>Content</Label>
+              <RichTextEditor
+                content={formData.exhibitionEurope?.htmlContent || ''}
+                onChange={(content) => handleInputChange('exhibitionEurope', 'htmlContent', content)}
+                placeholder="Enter exhibition content..."
+                className="mt-1"
+                controlled={true}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Exhibition USA */}
+        <div className="admin-section">
+          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Exhibition USA)</h2>
+          
+          <div className="grid gap-4">
+            <div className="w-full">
+              <Label htmlFor="usa-title">Title</Label>
+              <Input
+                id="usa-title"
+                value={formData.exhibitionUSA?.title || ''}
+                onChange={(e) => handleInputChange('exhibitionUSA', 'title', e.target.value)}
+                placeholder="Enter USA exhibition title"
+                className="mt-1"
+              />
+            </div>
+            
+            <div className="w-full">
+              <Label>Content</Label>
+              <RichTextEditor
+                content={formData.exhibitionUSA?.htmlContent || ''}
+                onChange={(content) => handleInputChange('exhibitionUSA', 'htmlContent', content)}
+                placeholder="Enter exhibition content..."
+                className="mt-1"
+                controlled={true}
+              />
+            </div>
+            
+            {/* Booth Image moved from Section 2 */}
+            <div className="w-full">
               <Label htmlFor="europe-booth">Booth Image</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
                 <div>
@@ -332,46 +373,6 @@ export function HomeAdmin() {
                   />
                 </div>
               )}
-            </div>
-            
-            <div className="w-full">
-              <Label>Content</Label>
-              <RichTextEditor
-                content={formData.exhibitionEurope?.htmlContent || ''}
-                onChange={(content) => handleInputChange('exhibitionEurope', 'htmlContent', content)}
-                placeholder="Enter exhibition content..."
-                className="mt-1"
-                controlled={true}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: Exhibition USA */}
-        <div className="admin-section">
-          <h2 className="text-lg font-semibold border-b pb-2 mb-4">Section 3 (Exhibition USA)</h2>
-          
-          <div className="grid gap-4">
-            <div className="w-full">
-              <Label htmlFor="usa-title">Title</Label>
-              <Input
-                id="usa-title"
-                value={formData.exhibitionUSA?.title || ''}
-                onChange={(e) => handleInputChange('exhibitionUSA', 'title', e.target.value)}
-                placeholder="Enter USA exhibition title"
-                className="mt-1"
-              />
-            </div>
-            
-            <div className="w-full">
-              <Label>Content</Label>
-              <RichTextEditor
-                content={formData.exhibitionUSA?.htmlContent || ''}
-                onChange={(content) => handleInputChange('exhibitionUSA', 'htmlContent', content)}
-                placeholder="Enter exhibition content..."
-                className="mt-1"
-                controlled={true}
-              />
             </div>
             
             {/* Exhibition USA CTA */}

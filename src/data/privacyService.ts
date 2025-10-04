@@ -70,19 +70,44 @@ export class PrivacyPageService {
         updateData.is_active = data.isActive
       }
 
-      const { error } = await (supabase as any)
+      // First update the record
+      const { error: updateError } = await (supabase as any)
         .from('privacy_page')
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', id)
-        .select()
-        .single()
 
-      if (error) {
-        return { data: null, error: error.message }
+      if (updateError) {
+        return { data: null, error: updateError.message }
       }
 
-      // Return updated data
-      return this.getPrivacyPage()
+      // Then fetch the updated record
+      const { data: updatedData, error: fetchError } = await (supabase as any)
+        .from('privacy_page')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (fetchError) {
+        return { data: null, error: fetchError.message }
+      }
+
+      // Transform database row to PrivacyPage interface
+      const row = updatedData as Database['public']['Tables']['privacy_page']['Row']
+      const privacyPage: PrivacyPage = {
+        id: row.id,
+        title: row.title || '',
+        meta: {
+          title: row.meta_title || '',
+          description: row.meta_description || '',
+          keywords: row.meta_keywords || ''
+        },
+        content: row.content || '',
+        isActive: row.is_active,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }
+
+      return { data: privacyPage, error: null }
     } catch (error) {
       console.error('Error updating privacy page:', error)
       return { data: null, error: 'Failed to update privacy page' }

@@ -20,6 +20,7 @@ export function AboutAdmin() {
   const [formData, setFormData] = useState<Partial<AboutPage>>({})
   
   // File input refs
+  const heroImageRef = useRef<HTMLInputElement>(null)
   const teamImageRef = useRef<HTMLInputElement>(null)
   const serviceImageRefs = useRef<{ [key: number]: HTMLInputElement | null }>({})
 
@@ -240,7 +241,7 @@ export function AboutAdmin() {
                 </div>
                 <div className="flex gap-2">
                   <input
-                    ref={teamImageRef}
+                    ref={heroImageRef}
                     type="file"
                     accept="image/*"
                     className="hidden"
@@ -252,7 +253,7 @@ export function AboutAdmin() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => teamImageRef.current?.click()}
+                    onClick={() => heroImageRef.current?.click()}
                     disabled={uploadingImages['hero-backgroundImage']}
                     className="flex items-center gap-2"
                   >
@@ -539,21 +540,26 @@ export function AboutAdmin() {
                   </Button>
                 </div>
                 {formData.teamInfo?.teamImage && (
-                  <div className="relative inline-block">
-                    <img
-                      src={formData.teamInfo.teamImage}
-                      alt={formData.teamInfo.teamImageAlt || "Team"}
-                      className="max-h-16 object-cover rounded border"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={() => removeImage('teamInfo', 'teamImage')}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                  <div className="mt-4">
+                    <div className="relative inline-block">
+                      <img
+                        src={formData.teamInfo.teamImage}
+                        alt={formData.teamInfo.teamImageAlt || "Team"}
+                        className="max-w-full h-auto rounded border shadow-sm"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                        onClick={() => removeImage('teamInfo', 'teamImage')}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Current team image preview
+                    </p>
                   </div>
                 )}
               </div>

@@ -1,9 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSitemapContent } from '../../hooks/useSitemapContent';
 import type { SitemapEntry, SitemapFormData } from '../../data/sitemapTypes';
+import { Input } from '../../components/ui/input';
+import { Button } from '../../components/ui/button';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '../../components/ui/table';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../../components/ui/pagination';
+import { Search, Plus, Edit, Trash2 } from 'lucide-react';
 
 const SitemapAdmin: React.FC = () => {
-  const { sitemapEntries, loading, error, addSitemapEntry, updateSitemapEntryById, deleteSitemapEntryById } = useSitemapContent();
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<SitemapFormData>({
@@ -12,6 +34,10 @@ const SitemapAdmin: React.FC = () => {
     changefreq: 'monthly',
     is_active: true
   });
+  const { sitemapEntries, totalCount, loading, error, addSitemapEntry, updateSitemapEntryById, deleteSitemapEntryById } = useSitemapContent(currentPage, pageSize, searchTerm);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   useEffect(() => {
     if (editingId) {
@@ -41,11 +67,22 @@ const SitemapAdmin: React.FC = () => {
     e.preventDefault();
     
     try {
+      // Automatically add "/" prefix if not present
+      let url = formData.url.trim();
+      if (url && !url.startsWith('/')) {
+        url = '/' + url;
+      }
+      
+      const formDataWithSlash = {
+        ...formData,
+        url
+      };
+      
       if (editingId) {
-        await updateSitemapEntryById(editingId, formData);
+        await updateSitemapEntryById(editingId, formDataWithSlash);
         setEditingId(null);
       } else {
-        await addSitemapEntry(formData);
+        await addSitemapEntry(formDataWithSlash);
         setIsAdding(false);
       }
       
@@ -55,9 +92,9 @@ const SitemapAdmin: React.FC = () => {
         changefreq: 'monthly',
         is_active: true
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving sitemap entry:', err);
-      alert('Failed to save sitemap entry');
+      alert(err.message || 'Failed to save sitemap entry');
     }
   };
 
@@ -88,14 +125,90 @@ const SitemapAdmin: React.FC = () => {
     });
   };
 
+  // Pagination functions
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const renderPaginationItems = () => {
+    const items = [];
+    
+    // Always show first page
+    items.push(
+      <PaginationItem key={1}>
+        <PaginationLink 
+          onClick={() => goToPage(1)} 
+          isActive={currentPage === 1}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+    
+    if (totalPages <= 1) return items;
+    
+    // Show ellipsis if there are pages between first and current range
+    if (currentPage > 3) {
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Show pages around current page
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink 
+            onClick={() => goToPage(i)} 
+            isActive={currentPage === i}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // Show ellipsis if there are pages between current range and last
+    if (currentPage < totalPages - 2) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Always show last page if there's more than one page
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink 
+            onClick={() => goToPage(totalPages)} 
+            isActive={currentPage === totalPages}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    return items;
+  };
+
   if (loading) return <div className="p-6">Loading sitemap entries...</div>;
   if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Sitemap Management</h1>
-        <button
+        <Button
           onClick={() => {
             setIsAdding(true);
             setEditingId(null);
@@ -108,8 +221,39 @@ const SitemapAdmin: React.FC = () => {
           }}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
+          <Plus className="h-4 w-4 mr-2" />
           Add New Entry
-        </button>
+        </Button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative w-full md:w-1/3">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            type="text"
+            placeholder="Search URLs..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset to first page when searching
+            }}
+            className="pl-10 w-full"
+          />
+          {searchTerm && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
+              onClick={() => {
+                setSearchTerm('');
+                setCurrentPage(1);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
 
       {(isAdding || editingId) && (
@@ -130,6 +274,7 @@ const SitemapAdmin: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="/example-page"
               />
+              <p className="text-xs text-gray-500 mt-1">Note: A "/" will be automatically added at the beginning if not present</p>
             </div>
             
             <div>
@@ -177,98 +322,126 @@ const SitemapAdmin: React.FC = () => {
           </div>
           
           <div className="flex space-x-2">
-            <button
+            <Button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
               {editingId ? 'Update Entry' : 'Add Entry'}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handleCancel}
+              variant="outline"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       )}
 
       <div className="bg-white shadow overflow-hidden rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                URL
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Priority
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Change Frequency
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Active
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Last Modified
-              </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sitemapEntries.map((entry) => (
-              <tr key={entry.id} className={entry.is_active ? '' : 'bg-gray-100'}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {entry.url}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {entry.priority}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {entry.changefreq}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {entry.is_active ? (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  ) : (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                      Inactive
-                    </span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(entry.updated_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(entry)}
-                    className="text-blue-600 hover:text-blue-900 mr-3"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(entry.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="px-6 py-4 border-b">
+          <h2 className="text-lg font-semibold text-gray-900">Sitemap Entries</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            {searchTerm 
+              ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''} for "${searchTerm}"` 
+              : `Showing ${Math.min(sitemapEntries.length, pageSize)} of ${totalCount} entries`}
+          </p>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-6 py-3">URL</TableHead>
+                <TableHead className="px-6 py-3">Priority</TableHead>
+                <TableHead className="px-6 py-3">Change Frequency</TableHead>
+                <TableHead className="px-6 py-3">Active</TableHead>
+                <TableHead className="px-6 py-3">Last Modified</TableHead>
+                <TableHead className="px-6 py-3 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sitemapEntries.map((entry) => (
+                <TableRow key={entry.id} className={entry.is_active ? '' : 'bg-gray-100'}>
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {entry.url}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {entry.priority}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {entry.changefreq}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {entry.is_active ? (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                        Inactive
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(entry.updated_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <Button
+                      onClick={() => handleEdit(entry)}
+                      variant="outline"
+                      size="sm"
+                      className="mr-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(entry.id)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
         
         {sitemapEntries.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-gray-500">No sitemap entries found.</p>
+            <p className="text-gray-500">
+              {searchTerm ? 'No sitemap entries found matching your search.' : 'No sitemap entries found.'}
+            </p>
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {!searchTerm && totalPages > 1 && (
+        <Pagination className="mt-6">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              />
+            </PaginationItem>
+            
+            {renderPaginationItems()}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 };

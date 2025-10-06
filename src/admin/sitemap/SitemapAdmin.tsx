@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSitemapContent } from '../../hooks/useSitemapContent';
 import type { SitemapEntry, SitemapFormData } from '../../data/sitemapTypes';
 import { Input } from '../../components/ui/input';

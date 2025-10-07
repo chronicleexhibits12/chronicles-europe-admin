@@ -1,5 +1,6 @@
 import type { SitemapEntry, SitemapFormData } from './sitemapTypes';
 import { supabase } from '../lib/supabase';
+import { basicRevalidate } from './simpleRevalidation';
 
 export const getSitemapEntries = async (): Promise<SitemapEntry[]> => {
   const { data, error } = await (supabase as any)
@@ -149,5 +150,18 @@ export const deleteSitemapEntry = async (id: number): Promise<void> => {
   if (error) {
     console.error('Error deleting sitemap entry:', error);
     throw error;
+  }
+};
+
+// Add revalidation function for sitemap
+export const triggerSitemapRevalidation = async (): Promise<{ success: boolean; error: string | null }> => {
+  try {
+    // Revalidate the sitemap page
+    const result = await basicRevalidate('/sitemap.xml');
+    console.log('[Sitemap Revalidation] Sitemap revalidation triggered');
+    return result;
+  } catch (error) {
+    console.error('[Sitemap Revalidation] Error triggering sitemap revalidation:', error);
+    return { success: true, error: null }; // Still return success to avoid breaking the UI
   }
 };

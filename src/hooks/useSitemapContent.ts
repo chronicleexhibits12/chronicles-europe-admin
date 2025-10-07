@@ -9,6 +9,7 @@ import {
   deleteSitemapEntry,
   checkForDuplicateUrl
 } from '../data/sitemapService';
+import { triggerSitemapRevalidation } from '../data/sitemapService';
 
 export const useSitemapContent = (page?: number, pageSize?: number, searchTerm?: string) => {
   const [sitemapEntries, setSitemapEntries] = useState<SitemapEntry[]>([]);
@@ -56,6 +57,10 @@ export const useSitemapContent = (page?: number, pageSize?: number, searchTerm?:
       const newEntry = await createSitemapEntry(entry);
       setSitemapEntries([...sitemapEntries, newEntry]);
       setTotalCount(totalCount + 1);
+      
+      // Trigger revalidation after successful addition
+      await triggerSitemapRevalidation();
+      
       return newEntry;
     } catch (err) {
       console.error('Error adding sitemap entry:', err);
@@ -75,6 +80,10 @@ export const useSitemapContent = (page?: number, pageSize?: number, searchTerm?:
       
       const updatedEntry = await updateSitemapEntry(id, entry);
       setSitemapEntries(sitemapEntries.map(item => item.id === id ? updatedEntry : item));
+      
+      // Trigger revalidation after successful update
+      await triggerSitemapRevalidation();
+      
       return updatedEntry;
     } catch (err) {
       console.error('Error updating sitemap entry:', err);
@@ -87,6 +96,9 @@ export const useSitemapContent = (page?: number, pageSize?: number, searchTerm?:
       await deleteSitemapEntry(id);
       setSitemapEntries(sitemapEntries.filter(item => item.id !== id));
       setTotalCount(totalCount - 1);
+      
+      // Trigger revalidation after successful deletion
+      await triggerSitemapRevalidation();
     } catch (err) {
       console.error('Error deleting sitemap entry:', err);
       throw err;

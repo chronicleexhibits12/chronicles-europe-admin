@@ -354,27 +354,28 @@ const SitemapAdmin: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-6 py-3">URL</TableHead>
-                <TableHead className="px-6 py-3">Priority</TableHead>
-                <TableHead className="px-6 py-3">Change Frequency</TableHead>
-                <TableHead className="px-6 py-3">Active</TableHead>
-                <TableHead className="px-6 py-3">Last Modified</TableHead>
-                <TableHead className="px-6 py-3 text-right">Actions</TableHead>
+                <TableHead className="px-4 py-3">URL</TableHead>
+                <TableHead className="px-4 py-3">Priority</TableHead>
+                <TableHead className="px-4 py-3">Frequency</TableHead>
+                <TableHead className="px-4 py-3">Active</TableHead>
+                <TableHead className="px-4 py-3 hidden md:table-cell">Last Modified</TableHead>
+                <TableHead className="px-4 py-3 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sitemapEntries.map((entry) => (
                 <TableRow key={entry.id} className={entry.is_active ? '' : 'bg-gray-100'}>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <TableCell className="px-4 py-3 text-sm font-medium text-gray-900 max-w-xs truncate">
                     {entry.url}
                   </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <TableCell className="px-4 py-3 text-sm text-gray-500">
                     {entry.priority}
                   </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {entry.changefreq}
+                  <TableCell className="px-4 py-3 text-sm text-gray-500">
+                    <span className="hidden md:inline">{entry.changefreq}</span>
+                    <span className="md:hidden">{entry.changefreq.charAt(0)}</span>
                   </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <TableCell className="px-4 py-3 text-sm text-gray-500">
                     {entry.is_active ? (
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                         Active
@@ -385,25 +386,28 @@ const SitemapAdmin: React.FC = () => {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <TableCell className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">
                     {new Date(entry.updated_at).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Button
-                      onClick={() => handleEdit(entry)}
-                      variant="outline"
-                      size="sm"
-                      className="mr-2"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(entry.id)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <TableCell className="px-4 py-3 text-right text-sm font-medium">
+                    <div className="flex justify-end space-x-1">
+                      <Button
+                        onClick={() => handleEdit(entry)}
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDelete(entry.id)}
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

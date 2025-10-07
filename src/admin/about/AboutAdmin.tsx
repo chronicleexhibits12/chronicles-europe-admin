@@ -172,9 +172,16 @@ export function AboutAdmin() {
 
   // Remove image
   const removeImage = (section: string, field: string) => {
-    handleInputChange(section as keyof AboutPage, field, '')
-    // Also clear alt text when removing image
-    handleInputChange(section as keyof AboutPage, `${field}Alt`, '')
+    // Special handling for teamInfo section
+    if (section === 'teamInfo') {
+      handleInputChange('teamInfo', field, '')
+      // Also clear alt text when removing image
+      handleInputChange('teamInfo', `${field}Alt`, '')
+    } else {
+      handleInputChange(section as keyof AboutPage, field, '')
+      // Also clear alt text when removing image
+      handleInputChange(section as keyof AboutPage, `${field}Alt`, '')
+    }
   }
 
   if (loading) {
@@ -521,7 +528,7 @@ export function AboutAdmin() {
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file) handleImageUpload(file, 'team', 'teamImage')
+                      if (file) handleImageUpload(file, 'teamInfo', 'teamImage')
                     }}
                   />
                   <Button

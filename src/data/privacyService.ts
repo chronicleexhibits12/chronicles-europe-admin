@@ -71,25 +71,16 @@ export class PrivacyPageService {
         updateData.is_active = data.isActive
       }
 
-      // Update the record
-      const { error: updateError } = await (supabase as any)
+      // Update the record and get the updated data in one operation
+      const { data: updatedData, error: updateError } = await (supabase as any)
         .from('privacy_page')
         .update(updateData)
         .eq('id', id)
+        .select('*')
+        .single()
 
       if (updateError) {
         return { data: null, error: updateError.message }
-      }
-
-      // Then fetch the updated record
-      const { data: updatedData, error: fetchError } = await supabase
-        .from('privacy_page')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (fetchError) {
-        return { data: null, error: fetchError.message }
       }
 
       // Transform database row to PrivacyPage interface

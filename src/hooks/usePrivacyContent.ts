@@ -23,15 +23,15 @@ export function usePrivacyPage() {
   }
 
   const updatePrivacyPage = async (id: string, data: Partial<PrivacyPage>) => {
-    setState(prev => ({ ...prev, loading: true }))
+    // Don't set loading to true during update to avoid UI flicker
     
     const result = await PrivacyPageService.updatePrivacyPage(id, data)
     
-    setState({
-      data: result.data,
+    setState(prev => ({
+      data: result.data || prev.data,
       error: result.error,
       loading: false
-    })
+    }))
     
     return result
   }

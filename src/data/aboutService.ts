@@ -116,7 +116,7 @@ export class AboutPageService {
 
       // Company Stats
       if (data.companyStats !== undefined) {
-        updateData.company_stats = data.companyStats
+        updateData.company_stats = data.companyStats || []
       }
 
       // Team Info

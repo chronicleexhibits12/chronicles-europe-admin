@@ -552,7 +552,7 @@ export function AboutAdmin() {
                       <img
                         src={formData.teamInfo.teamImage}
                         alt={formData.teamInfo.teamImageAlt || "Team"}
-                        className="max-w-full h-auto rounded border shadow-sm"
+                        className="max-h-16 object-cover rounded border"
                       />
                       <Button
                         type="button"

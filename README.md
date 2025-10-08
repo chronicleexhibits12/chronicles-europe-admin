@@ -1,5 +1,6 @@
 # Admin Europe - Exhibition Stand Builder CMS
 A modern React-based Content Management System for managing exhibition stand builder website content.
+
 ## 🚀 Features
 
 - **Home Page Management** - Edit hero sections, content blocks, and solutions

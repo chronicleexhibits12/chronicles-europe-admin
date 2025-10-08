@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSitemapContent } from '../../hooks/useSitemapContent';
 import type { SitemapEntry, SitemapFormData } from '../../data/sitemapTypes';
 import { Input } from '../../components/ui/input';
@@ -34,6 +34,8 @@ const SitemapAdmin: React.FC = () => {
     changefreq: 'monthly',
     is_active: true
   });
+  const topRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const { sitemapEntries, totalCount, loading, error, addSitemapEntry, updateSitemapEntryById, deleteSitemapEntryById } = useSitemapContent(currentPage, pageSize, searchTerm);
 
   // Calculate total pages
@@ -53,6 +55,16 @@ const SitemapAdmin: React.FC = () => {
     }
   }, [editingId, sitemapEntries]);
 
+  // Scroll to top when form is opened or after submission
+  useEffect(() => {
+    if ((isAdding || editingId) && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth' });
+    } else if (!isAdding && !editingId && topRef.current) {
+      // Scroll to top after form submission/cancellation
+      topRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isAdding, editingId]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
@@ -67,9 +79,9 @@ const SitemapAdmin: React.FC = () => {
     e.preventDefault();
     
     try {
-      // Automatically add "/" prefix if not present
+      // Automatically add "/" prefix only for relative URLs that don't start with http:// or https://
       let url = formData.url.trim();
-      if (url && !url.startsWith('/')) {
+      if (url && !url.startsWith('/') && !url.startsWith('http://') && !url.startsWith('https://')) {
         url = '/' + url;
       }
       
@@ -92,6 +104,13 @@ const SitemapAdmin: React.FC = () => {
         changefreq: 'monthly',
         is_active: true
       });
+      
+      // Scroll to top after successful submission
+      if (topRef.current) {
+        setTimeout(() => {
+          topRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
     } catch (err: any) {
       console.error('Error saving sitemap entry:', err);
       alert(err.message || 'Failed to save sitemap entry');
@@ -123,6 +142,13 @@ const SitemapAdmin: React.FC = () => {
       changefreq: 'monthly',
       is_active: true
     });
+    
+    // Scroll to top after cancellation
+    if (topRef.current) {
+      setTimeout(() => {
+        topRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   };
 
   // Pagination functions
@@ -205,7 +231,7 @@ const SitemapAdmin: React.FC = () => {
   if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="p-6">
+    <div ref={topRef} className="p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Sitemap Management</h1>
         <Button
@@ -257,7 +283,7 @@ const SitemapAdmin: React.FC = () => {
       </div>
 
       {(isAdding || editingId) && (
-        <form onSubmit={handleSubmit} className="mb-8 p-4 border rounded-lg bg-gray-50">
+        <form ref={formRef} onSubmit={handleSubmit} className="mb-8 p-4 border rounded-lg bg-gray-50">
           <h2 className="text-xl font-semibold mb-4">
             {editingId ? 'Edit Sitemap Entry' : 'Add New Sitemap Entry'}
           </h2>
@@ -272,9 +298,9 @@ const SitemapAdmin: React.FC = () => {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="/example-page"
+                placeholder="/example-page or https://example.com"
               />
-              <p className="text-xs text-gray-500 mt-1">Note: A "/" will be automatically added at the beginning if not present</p>
+              <p className="text-xs text-gray-500 mt-1">Note: A "/" will be automatically added at the beginning for relative URLs</p>
             </div>
             
             <div>

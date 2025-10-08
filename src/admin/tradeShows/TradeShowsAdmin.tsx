@@ -63,9 +63,8 @@ export function TradeShowsAdmin() {
     return endDate < today ? 'expired' : 'upcoming'
   }
 
-  // Get all trade shows for global search and sorting
+  // Get all trade shows for global filtering and sorting
   const getAllTradeShows = async () => {
-    if (!searchTerm) return
     setSearchLoading(true)
     try {
       const { data, error } = await TradeShowsService.getTradeShows()
@@ -77,20 +76,20 @@ export function TradeShowsAdmin() {
       setAllTradeShows(sortedData)
     } catch (error: any) {
       console.error('Error fetching all trade shows:', error)
-      toast.error('Failed to search trade shows')
+      toast.error('Failed to fetch trade shows')
     } finally {
       setSearchLoading(false)
     }
   }
 
-  // Effect to fetch all trade shows when search term changes
+  // Effect to fetch all trade shows when search term or status filter changes
   useEffect(() => {
-    if (searchTerm) {
+    if (searchTerm || statusFilter !== 'all') {
       getAllTradeShows()
     } else {
       setAllTradeShows([])
     }
-  }, [searchTerm])
+  }, [searchTerm, statusFilter])
 
   // Filter all trade shows based on search term and status
   const globalFilteredTradeShows = useMemo(() => {
@@ -151,8 +150,8 @@ export function TradeShowsAdmin() {
   }, [sortedTradeShows, searchTerm, statusFilter])
 
   // Determine which trade shows to display
-  const displayTradeShows = searchTerm ? globalFilteredTradeShows : filteredTradeShows
-  const displayTotalCount = searchTerm ? globalFilteredTradeShows.length : filteredTradeShows.length
+  const displayTradeShows = searchTerm || statusFilter !== 'all' ? globalFilteredTradeShows : filteredTradeShows
+  const displayTotalCount = searchTerm || statusFilter !== 'all' ? globalFilteredTradeShows.length : filteredTradeShows.length
 
   const handleCreateTradeShow = () => {
     navigate('/admin/trade-shows/create')
@@ -644,7 +643,7 @@ export function TradeShowsAdmin() {
       </div>
 
       {/* Pagination */}
-      {!searchTerm && totalPages > 1 && (
+      {!searchTerm && statusFilter === 'all' && totalPages > 1 && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>

@@ -466,10 +466,10 @@ const SitemapAdmin: React.FC = () => {
 
       {/* Pagination */}
       {!debouncedSearchTerm && totalPages > 1 && (
-        <Pagination className="mt-6">
+        <Pagination className="mt-6 ">
           <PaginationContent>
             <PaginationItem className="ml-4">
-              <PaginationPrevious 
+              <PaginationPrevious className="mr-6 "
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
               />

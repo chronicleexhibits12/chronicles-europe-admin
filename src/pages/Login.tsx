@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
+import login from '@/assets/admin-login.svg'
 import { Loader2 } from 'lucide-react'
 
 export function Login() {
@@ -121,7 +121,7 @@ export function Login() {
       <div className="hidden md:block md:w-1/2 bg-gray-50 relative">
         <div className="flex items-center justify-center h-full">
           <img 
-            src="https://cdn.pixabay.com/photo/2018/11/29/20/01/cycling-3846213_960_720.png" 
+            src={login}
             alt="Exhibition Design Illustration" 
             className="max-w-[80%] max-h-[80%] object-contain"
           />

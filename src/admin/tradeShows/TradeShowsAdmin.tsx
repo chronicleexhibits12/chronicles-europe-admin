@@ -207,29 +207,39 @@ export function TradeShowsAdmin() {
     }
   }
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     try {
+      // Show loading state
+      setSearchLoading(true);
+      
+      // Fetch all trade shows for export
+      const { data: allTradeShows, error } = await TradeShowsService.getTradeShows();
+      
+      if (error) {
+        throw new Error(error);
+      }
+      
       // Filter trade shows based on date range if provided
-      let exportData = tradeShows || []
+      let exportData = allTradeShows || [];
       
       if (startDateFilter || endDateFilter) {
         exportData = exportData.filter(show => {
           // If start date filter is set, check if show's end date is after the filter start date
           if (startDateFilter && show.endDate) {
-            const filterStartDate = new Date(startDateFilter)
-            const showEndDate = new Date(show.endDate)
-            if (showEndDate < filterStartDate) return false
+            const filterStartDate = new Date(startDateFilter);
+            const showEndDate = new Date(show.endDate);
+            if (showEndDate < filterStartDate) return false;
           }
           
           // If end date filter is set, check if show's start date is before the filter end date
           if (endDateFilter && show.startDate) {
-            const filterEndDate = new Date(endDateFilter)
-            const showStartDate = new Date(show.startDate)
-            if (showStartDate > filterEndDate) return false
+            const filterEndDate = new Date(endDateFilter);
+            const showStartDate = new Date(show.startDate);
+            if (showStartDate > filterEndDate) return false;
           }
           
-          return true
-        })
+          return true;
+        });
       }
       
       // Prepare data for export
@@ -240,26 +250,35 @@ export function TradeShowsAdmin() {
         'End Date': show.endDate ? new Date(show.endDate).toLocaleDateString() : '',
         City: show.city || '',
         Country: show.country || ''
-      }))
+      }));
+
+      // Check if there's data to export
+      if (exportDataFormatted.length === 0) {
+        toast.warning('No data to export');
+        setSearchLoading(false);
+        return;
+      }
 
       // Create worksheet
-      const ws = XLSX.utils.json_to_sheet(exportDataFormatted)
+      const ws = XLSX.utils.json_to_sheet(exportDataFormatted);
       
       // Create workbook
-      const wb = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(wb, ws, 'Trade Shows')
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Trade Shows');
       
       // Export to file
-      XLSX.writeFile(wb, 'trade-shows-export.xlsx')
+      XLSX.writeFile(wb, 'trade-shows-export.xlsx');
       
-      toast.success('Excel file exported successfully')
-      setExportDialogOpen(false)
+      toast.success(`Excel file exported successfully (${exportDataFormatted.length} records)`);
+      setExportDialogOpen(false);
       // Reset filters after export
-      setStartDateFilter('')
-      setEndDateFilter('')
+      setStartDateFilter('');
+      setEndDateFilter('');
     } catch (error: any) {
-      console.error('Error exporting to Excel:', error)
-      toast.error('Failed to export Excel file')
+      console.error('Error exporting to Excel:', error);
+      toast.error('Failed to export Excel file: ' + (error.message || 'Unknown error'));
+    } finally {
+      setSearchLoading(false);
     }
   }
 
@@ -424,8 +443,15 @@ export function TradeShowsAdmin() {
             <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={exportToExcel}>
-              Export
+            <Button onClick={exportToExcel} disabled={searchLoading}>
+              {searchLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                'Export'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -453,9 +479,16 @@ export function TradeShowsAdmin() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setExportDialogOpen(true)}>
+          <Button onClick={() => setExportDialogOpen(true)} disabled={searchLoading}>
             <Download className="h-4 w-4 mr-2" />
-            Export to Excel
+            {searchLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Exporting...
+              </>
+            ) : (
+              'Export to Excel'
+            )}
           </Button>
           <Button onClick={handleCreateTradeShow}>
             <Plus className="h-4 w-4 mr-2" />

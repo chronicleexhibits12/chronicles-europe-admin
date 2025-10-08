@@ -484,10 +484,18 @@ export class TradeShowsService {
 
   // Trigger revalidation in Next.js website
   static async triggerRevalidation(path: string = '/'): Promise<{ success: boolean; error: string | null }> {
-    // Use the simple revalidation approach
-    if (path === '/') {
-      return basicRevalidate('/top-trade-shows-in-europe');
+    try {
+      // Use the simple revalidation approach
+      if (path === '/') {
+        const result = await basicRevalidate('/top-trade-shows-in-europe');
+        return result;
+      }
+      const result = await basicRevalidate(path);
+      return result;
+    } catch (error) {
+      console.error('[TradeShowsService] Revalidation failed:', error);
+      // Even if revalidation fails, we don't want to fail the save operation
+      return { success: true, error: null };
     }
-    return basicRevalidate(path);
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { PrivacyPageService } from '@/data/privacyService'
 import type { PrivacyPage } from '@/data/privacyTypes'
 import type { ApiResponse } from '@/data/commonTypes'
@@ -10,22 +10,26 @@ export function usePrivacyPage() {
     loading: true
   })
 
-  const fetchPrivacyPage = async () => {
+  const fetchPrivacyPage = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true }))
     
+    console.log('Fetching privacy page data...')
     const result = await PrivacyPageService.getPrivacyPage()
+    console.log('Privacy page fetch result:', result)
     
     setState({
       data: result.data,
       error: result.error,
       loading: false
     })
-  }
+  }, [])
 
-  const updatePrivacyPage = async (id: string, data: Partial<PrivacyPage>) => {
+  const updatePrivacyPage = useCallback(async (id: string, data: Partial<PrivacyPage>) => {
     // Don't set loading to true during update to avoid UI flicker
     
+    console.log('Updating privacy page with data:', data)
     const result = await PrivacyPageService.updatePrivacyPage(id, data)
+    console.log('Privacy page update result:', result)
     
     setState(prev => ({
       data: result.data || prev.data,
@@ -34,11 +38,11 @@ export function usePrivacyPage() {
     }))
     
     return result
-  }
+  }, [])
 
   useEffect(() => {
     fetchPrivacyPage()
-  }, [])
+  }, [fetchPrivacyPage])
 
   return {
     ...state,

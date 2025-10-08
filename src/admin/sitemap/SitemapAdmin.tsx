@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSitemapContent } from '../../hooks/useSitemapContent';
 import type { SitemapEntry, SitemapFormData } from '../../data/sitemapTypes';
 import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/button'; 
 import { 
   Table, 
   TableBody, 
@@ -26,6 +26,7 @@ const SitemapAdmin: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<SitemapFormData>({
@@ -36,7 +37,22 @@ const SitemapAdmin: React.FC = () => {
   });
   const topRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const { sitemapEntries, totalCount, loading, error, addSitemapEntry, updateSitemapEntryById, deleteSitemapEntryById } = useSitemapContent(currentPage, pageSize, searchTerm);
+  
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      if (searchTerm) {
+        setCurrentPage(1); // Reset to first page when searching
+      }
+    }, 1500); // 1.5 second debounce
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchTerm]);
+
+  const { sitemapEntries, totalCount, loading, error, addSitemapEntry, updateSitemapEntryById, deleteSitemapEntryById } = useSitemapContent(currentPage, pageSize, debouncedSearchTerm);
 
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -260,10 +276,7 @@ const SitemapAdmin: React.FC = () => {
             type="text"
             placeholder="Search URLs..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1); // Reset to first page when searching
-            }}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 w-full"
           />
           {searchTerm && (
@@ -273,6 +286,7 @@ const SitemapAdmin: React.FC = () => {
               className="absolute right-2 top-1/2 transform -translate-y-1/2"
               onClick={() => {
                 setSearchTerm('');
+                setDebouncedSearchTerm('');
                 setCurrentPage(1);
               }}
             >
@@ -370,8 +384,8 @@ const SitemapAdmin: React.FC = () => {
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">Sitemap Entries</h2>
           <p className="text-sm text-gray-600 mt-1">
-            {searchTerm 
-              ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''} for "${searchTerm}"` 
+            {debouncedSearchTerm 
+              ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''} for "${debouncedSearchTerm}"` 
               : `Showing ${Math.min(sitemapEntries.length, pageSize)} of ${totalCount} entries`}
           </p>
         </div>
@@ -444,17 +458,17 @@ const SitemapAdmin: React.FC = () => {
         {sitemapEntries.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">
-              {searchTerm ? 'No sitemap entries found matching your search.' : 'No sitemap entries found.'}
+              {debouncedSearchTerm ? 'No sitemap entries found matching your search.' : 'No sitemap entries found.'}
             </p>
           </div>
         )}
       </div>
 
       {/* Pagination */}
-      {!searchTerm && totalPages > 1 && (
+      {!debouncedSearchTerm && totalPages > 1 && (
         <Pagination className="mt-6">
           <PaginationContent>
-            <PaginationItem>
+            <PaginationItem className="ml-4">
               <PaginationPrevious 
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}

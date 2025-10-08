@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
+import { usePrivacyPage } from '@/hooks/usePrivacyContent'
+import { PrivacyPageService } from '@/data/privacyService'
+import type { PrivacyPage } from '@/data/privacyTypes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { RichTextEditor } from '@/components/ui/rich-text-editor'
-import { usePrivacyPage } from '@/hooks/usePrivacyContent'
-import type { PrivacyPage } from '@/data/privacyTypes'
-import { PrivacyPageService } from '@/data/privacyService'
-import { Save, Loader2 } from 'lucide-react'
+import { Loader2, Save } from 'lucide-react'
 import { toast } from 'sonner'
-import { TagInput } from '@/components/ui/tag-input' // Added TagInput import
+import { TagInput } from '@/components/ui/tag-input'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 
 export function PrivacyAdmin() {
   const { data: privacyPage, loading, error, updatePrivacyPage } = usePrivacyPage()
@@ -18,24 +18,35 @@ export function PrivacyAdmin() {
   // Form state
   const [formData, setFormData] = useState<Partial<PrivacyPage>>({})
   
-  // Update form data when privacy page loads
+  // Update form data when privacy page loads - only when privacyPage.id changes
   useEffect(() => {
-    if (privacyPage) {
-      setFormData({
-        id: privacyPage.id,
-        title: privacyPage.title,
-        content: privacyPage.content,
-        meta: {
-          title: privacyPage.meta.title,
-          description: privacyPage.meta.description,
-          keywords: privacyPage.meta.keywords
-        },
-        isActive: privacyPage.isActive,
-        createdAt: privacyPage.createdAt,
-        updatedAt: privacyPage.updatedAt
-      })
+    if (privacyPage && privacyPage.id) {
+      // Use a timeout to prevent immediate state updates that might cause loops
+      const timer = setTimeout(() => {
+        setFormData(prevFormData => {
+          // Only update if the ID is different to prevent infinite loops
+          if (prevFormData.id !== privacyPage.id) {
+            return {
+              id: privacyPage.id,
+              title: privacyPage.title,
+              content: privacyPage.content,
+              meta: {
+                title: privacyPage.meta.title,
+                description: privacyPage.meta.description,
+                keywords: privacyPage.meta.keywords
+              },
+              isActive: privacyPage.isActive,
+              createdAt: privacyPage.createdAt,
+              updatedAt: privacyPage.updatedAt
+            }
+          }
+          return prevFormData
+        })
+      }, 0)
+      
+      return () => clearTimeout(timer)
     }
-  }, [privacyPage])
+  }, [privacyPage?.id]) // Only depend on the ID to prevent infinite loops
 
   const handleInputChange = (field: keyof PrivacyPage, value: string) => {
     setFormData(prev => ({
@@ -65,7 +76,10 @@ export function PrivacyAdmin() {
   }
 
   const handleSave = async () => {
-    if (!privacyPage?.id) return
+    if (!privacyPage?.id) {
+      toast.error('No privacy page ID found. Please refresh the page.')
+      return
+    }
 
     setSaving(true)
     
@@ -75,23 +89,27 @@ export function PrivacyAdmin() {
       loading: 'Saving changes...',
       success: (result) => {
         if (result.data) {
-          // Update local form data with saved data
-          setFormData(prev => ({
-            ...prev,
-            ...result.data
-          }))
+          // Update local form data with saved data after a small delay
+          setTimeout(() => {
+            setFormData(prev => ({
+              ...prev,
+              ...result.data
+            }))
+          }, 100)
           return 'Privacy page updated successfully!'
         } else {
           throw new Error(result.error || 'Update failed')
         }
       },
-      error: (error) => `Failed to save: ${error.message || 'Unknown error'}`
+      error: (error) => `Failed to save: ${error.message || error || 'Unknown error'}`
     })
 
     try {
       await savePromise
       // Trigger revalidation after successful save
       await PrivacyPageService.triggerRevalidation()
+    } catch (error) {
+      console.error('Error during save process:', error)
     } finally {
       setSaving(false)
     }
@@ -113,8 +131,29 @@ export function PrivacyAdmin() {
 
   if (error) {
     return (
-      <div className="text-center text-destructive">
-        <p>Error loading privacy page: {error}</p>
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="text-center text-destructive bg-destructive/10 p-6 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">Error Loading Privacy Page</h2>
+          <p className="mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // If we have no data but no error, it means there's no active privacy page
+  if (!privacyPage) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="text-center text-yellow-700 bg-yellow-50 p-6 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">No Active Privacy Page</h2>
+          <p className="mb-4">There is no active privacy page in the database. Please contact an administrator to set one up.</p>
+          <Button onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
       </div>
     )
   }

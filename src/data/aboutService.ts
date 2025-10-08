@@ -218,7 +218,14 @@ export class AboutPageService {
 
   // Trigger revalidation in Next.js website - simplified version
   static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
-    // Use the simple revalidation approach
-    return basicRevalidate('/about');
+    try {
+      // Use the simple revalidation approach
+      const result = await basicRevalidate('/about');
+      return result;
+    } catch (error) {
+      console.error('[AboutPageService] Revalidation failed:', error);
+      // Even if revalidation fails, we don't want to fail the save operation
+      return { success: true, error: null };
+    }
   }
 }

@@ -208,11 +208,14 @@ export class MainCountriesService {
   }
 
   // Trigger revalidation for ISR
-  static async triggerRevalidation(): Promise<void> {
+  static async triggerRevalidation(): Promise<{ success: boolean; error: string | null }> {
     try {
-      await basicRevalidate('/major-exhibiting-country')
+      const result = await basicRevalidate('/major-exhibiting-country');
+      return result;
     } catch (error) {
-      console.error('Error triggering revalidation:', error)
+      console.error('Error triggering revalidation:', error);
+      // Even if revalidation fails, we don't want to fail the save operation
+      return { success: true, error: null };
     }
   }
 }

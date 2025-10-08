@@ -52,7 +52,7 @@ AS $$
     LIMIT 1;
 $$;
 
--- Create trigger to update updated_at timestamp
+-- Create or replace trigger function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -61,6 +61,10 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS update_privacy_page_updated_at ON privacy_page;
+
+-- Create trigger to update updated_at timestamp
 CREATE TRIGGER update_privacy_page_updated_at 
     BEFORE UPDATE ON privacy_page 
     FOR EACH ROW 

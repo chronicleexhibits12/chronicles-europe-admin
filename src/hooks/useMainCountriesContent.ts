@@ -36,7 +36,10 @@ export const useMainCountriesContent = () => {
       } else {
         setData(updatedData)
         // Trigger revalidation after successful update
-        await MainCountriesService.triggerRevalidation()
+        const revalidationResult = await MainCountriesService.triggerRevalidation()
+        if (revalidationResult.error) {
+          console.warn('[MainCountries] Revalidation warning:', revalidationResult.error)
+        }
         return { data: updatedData, error: null }
       }
     } catch (err) {

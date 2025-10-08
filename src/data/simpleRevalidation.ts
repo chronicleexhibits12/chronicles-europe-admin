@@ -10,14 +10,21 @@
  */
 export async function basicRevalidate(path: string = '/'): Promise<{ success: boolean; error: string | null }> {
   try {
-    // Read the website URL from environment variables, with fallback
-    const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app';
+    // In development, use the proxy to avoid CORS issues
+    // In production, use the full URL
+    const isDev = import.meta.env.DEV;
+    const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicles-europe.vercel.app';
     
-    // Construct the revalidation endpoint using the website URL and static /api/revalidate path
-    const revalidateEndpoint = `${websiteUrl}/api/revalidate`;
+    // Construct the revalidation endpoint
+    // In development, use relative path to hit the proxy
+    // In production, use the full URL
+    const revalidateEndpoint = isDev 
+      ? '/api/revalidate' 
+      : `${websiteUrl}/api/revalidate`;
     
     // Log which path is being revalidated
     console.log(`[Revalidation] Triggering revalidation for path: ${path}`);
+    console.log(`[Revalidation] Using endpoint: ${revalidateEndpoint}`);
     
     // Make the most basic POST request to the revalidation endpoint
     // Include the path in the request body as required by the API route
@@ -26,7 +33,9 @@ export async function basicRevalidate(path: string = '/'): Promise<{ success: bo
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ path }) // Send the path in the request body
+      body: JSON.stringify({ path }), // Send the path in the request body
+      // Add credentials: 'omit' to prevent sending cookies which can cause CORS issues
+      credentials: 'omit'
     });
 
     if (!response.ok) {

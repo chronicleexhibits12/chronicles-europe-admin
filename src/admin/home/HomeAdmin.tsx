@@ -57,7 +57,7 @@ export function HomeAdmin() {
         if (result.data) {
           handleInputChange(section as keyof HomePage, field, result.data)
           // Trigger revalidation after successful image upload
-          HomePageService.triggerRevalidation()
+          HomePageService.triggerRevalidation().catch(console.warn)
           return 'Image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')
@@ -95,7 +95,7 @@ export function HomeAdmin() {
         if (result.data) {
           handleSolutionItemChange(index, 'image', result.data)
           // Trigger revalidation after successful image upload
-          HomePageService.triggerRevalidation()
+          HomePageService.triggerRevalidation().catch(console.warn)
           return 'Solution item image uploaded successfully!'
         } else {
           throw new Error(result.error || 'Upload failed')
@@ -143,7 +143,12 @@ export function HomeAdmin() {
     try {
       await savePromise
       // Trigger revalidation after successful save
-      await HomePageService.triggerRevalidation()
+      const revalidationResult = await HomePageService.triggerRevalidation()
+      if (revalidationResult.error) {
+        console.warn('[HomeAdmin] Revalidation warning:', revalidationResult.error)
+      }
+    } catch (error) {
+      console.error('[HomeAdmin] Revalidation error:', error)
     } finally {
       setSaving(false)
     }

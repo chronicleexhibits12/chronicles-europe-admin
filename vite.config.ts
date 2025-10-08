@@ -11,6 +11,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    // Add proxy for revalidation endpoint to avoid CORS issues in development
+    proxy: {
+      '/api/revalidate': {
+        target: process.env.VITE_WEBSITE_URL || 'https://chronicles-europe.vercel.app',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
+      }
+    }
+  },
   build: {
     // Optimize build for production
     minify: 'terser',

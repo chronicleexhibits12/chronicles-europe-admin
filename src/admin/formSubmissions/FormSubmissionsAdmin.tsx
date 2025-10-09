@@ -26,7 +26,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import { Trash2, Eye, Search, Download, X } from 'lucide-react'
+import { Trash2, Eye, Search, Download, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useFormSubmissions } from '@/hooks/useFormSubmissionsContent'
 import { FormSubmissionsService } from '@/data/formSubmissionsService'
@@ -86,6 +86,7 @@ export function FormSubmissionsAdmin() {
   const [exportDateTo, setExportDateTo] = useState('')
   const [selectedSubmissions, setSelectedSubmissions] = useState<string[]>([])
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
 
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
@@ -278,6 +279,28 @@ export function FormSubmissionsAdmin() {
     setDateTo('')
   }
 
+  const handleStartDateChange = (date: string) => {
+    setDateFrom(date);
+    
+    // If a start date is selected, automatically set end date to one day after
+    if (date) {
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      // Format as YYYY-MM-DD
+      const nextDayString = nextDay.toISOString().split('T')[0];
+      setDateTo(nextDayString);
+    } else {
+      // If start date is cleared, also clear end date
+      setDateTo('');
+    }
+  };
+
+  const handleEndDateChange = (date: string) => {
+    setDateTo(date);
+    // Note: We don't modify the start date when end date changes
+    // This allows users to manually override the automatic behavior
+  };
+
   // Format file size for display
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes'
@@ -293,10 +316,41 @@ export function FormSubmissionsAdmin() {
     setExportDialogOpen(true)
   }
 
-  const performExport = () => {
+  const handleExportStartDateChange = (date: string) => {
+    setExportDateFrom(date);
+    
+    // If a start date is selected, automatically set end date to one day after
+    if (date) {
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      // Format as YYYY-MM-DD
+      const nextDayString = nextDay.toISOString().split('T')[0];
+      setExportDateTo(nextDayString);
+    } else {
+      // If start date is cleared, also clear end date
+      setExportDateTo('');
+    }
+  };
+
+  const handleExportEndDateChange = (date: string) => {
+    setExportDateTo(date);
+    // Note: We don't modify the start date when end date changes
+    // This allows users to manually override the automatic behavior
+  };
+
+  const performExport = async () => {
     try {
+      setExportLoading(true) // Set loading state
+      
+      // Get all form submissions for export (not just current page)
+      const { data: allFormSubmissions, error: fetchError } = await FormSubmissionsService.getFormSubmissions()
+      
+      if (fetchError) {
+        throw new Error(fetchError)
+      }
+      
       // Filter form submissions based on export date range if provided
-      let exportData = formSubmissions || []
+      let exportData = allFormSubmissions || []
       
       if (exportDateFrom || exportDateTo) {
         exportData = exportData.filter(submission => {
@@ -317,7 +371,8 @@ export function FormSubmissionsAdmin() {
       }
       
       if (exportData.length === 0) {
-        toast.error('No data to export for the selected date range')
+        toast.warning('No data to export')
+        setExportLoading(false)
         return
       }
 
@@ -361,14 +416,16 @@ export function FormSubmissionsAdmin() {
       // Export to Excel file
       XLSX.writeFile(wb, 'form-submissions-export.xlsx')
       
-      toast.success('Form submissions exported successfully')
+      toast.success(`Excel file exported successfully (${exportDataFormatted.length} records)`)
       setExportDialogOpen(false)
-      // Reset export date filters
+      // Reset filters after export
       setExportDateFrom('')
       setExportDateTo('')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error exporting to Excel:', error)
-      toast.error('Failed to export form submissions')
+      toast.error('Failed to export form submissions: ' + (error.message || 'Unknown error'))
+    } finally {
+      setExportLoading(false) // Reset loading state
     }
   }
 
@@ -594,30 +651,30 @@ export function FormSubmissionsAdmin() {
           <DialogHeader>
             <DialogTitle>Export Form Submissions</DialogTitle>
             <DialogDescription>
-              Select a date range to filter the export data
+              Select a start date to automatically set the end date to the next day, or select both dates manually
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             <div>
               <label htmlFor="exportDateFrom" className="block text-sm font-medium text-gray-700 mb-1">
-                From Date
+                Start Date
               </label>
               <Input
                 id="exportDateFrom"
                 type="date"
                 value={exportDateFrom}
-                onChange={(e) => setExportDateFrom(e.target.value)}
+                onChange={(e) => handleExportStartDateChange(e.target.value)}
               />
             </div>
             <div>
               <label htmlFor="exportDateTo" className="block text-sm font-medium text-gray-700 mb-1">
-                To Date
+                End Date
               </label>
               <Input
                 id="exportDateTo"
                 type="date"
                 value={exportDateTo}
-                onChange={(e) => setExportDateTo(e.target.value)}
+                onChange={(e) => handleExportEndDateChange(e.target.value)}
               />
             </div>
           </div>
@@ -629,8 +686,15 @@ export function FormSubmissionsAdmin() {
             }}>
               Cancel
             </Button>
-            <Button onClick={performExport}>
-              Export
+            <Button onClick={performExport} disabled={exportLoading}>
+              {exportLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                'Export'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -651,9 +715,16 @@ export function FormSubmissionsAdmin() {
               Delete {selectedSubmissions.length} Selected
             </Button>
           )}
-          <Button onClick={handleExportToExcel}>
+          <Button onClick={handleExportToExcel} disabled={exportLoading}>
             <Download className="h-4 w-4 mr-2" />
-            Export to Excel
+            {exportLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Exporting...
+              </>
+            ) : (
+              'Export to Excel'
+            )}
           </Button>
         </div>
       </div>
@@ -692,7 +763,7 @@ export function FormSubmissionsAdmin() {
               type="date"
               placeholder="From date"
               value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
+              onChange={(e) => handleStartDateChange(e.target.value)}
             />
           </div>
           
@@ -702,7 +773,7 @@ export function FormSubmissionsAdmin() {
               type="date"
               placeholder="To date"
               value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
+              onChange={(e) => handleEndDateChange(e.target.value)}
             />
           </div>
         </div>

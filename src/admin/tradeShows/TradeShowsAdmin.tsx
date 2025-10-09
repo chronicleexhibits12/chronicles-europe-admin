@@ -207,6 +207,28 @@ export function TradeShowsAdmin() {
     }
   }
 
+  const handleExportStartDateChange = (date: string) => {
+    setStartDateFilter(date);
+    
+    // If a start date is selected, automatically set end date to one day after
+    if (date) {
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      // Format as YYYY-MM-DD
+      const nextDayString = nextDay.toISOString().split('T')[0];
+      setEndDateFilter(nextDayString);
+    } else {
+      // If start date is cleared, also clear end date
+      setEndDateFilter('');
+    }
+  };
+
+  const handleExportEndDateChange = (date: string) => {
+    setEndDateFilter(date);
+    // Note: We don't modify the start date when end date changes
+    // This allows users to manually override the automatic behavior
+  };
+
   const exportToExcel = async () => {
     try {
       // Show loading state
@@ -244,7 +266,6 @@ export function TradeShowsAdmin() {
       
       // Prepare data for export
       const exportDataFormatted = exportData.map(show => ({
-        Slug: show.slug,
         Title: show.title,
         'Start Date': show.startDate ? new Date(show.startDate).toLocaleDateString() : '',
         'End Date': show.endDate ? new Date(show.endDate).toLocaleDateString() : '',
@@ -412,7 +433,7 @@ export function TradeShowsAdmin() {
           <DialogHeader>
             <DialogTitle>Export Trade Shows</DialogTitle>
             <DialogDescription>
-              Select a date range to filter the export data
+              Select a start date to automatically set the end date to the next day, or select both dates manually
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
@@ -424,7 +445,7 @@ export function TradeShowsAdmin() {
                 id="startDate"
                 type="date"
                 value={startDateFilter}
-                onChange={(e) => setStartDateFilter(e.target.value)}
+                onChange={(e) => handleExportStartDateChange(e.target.value)}
               />
             </div>
             <div>
@@ -435,7 +456,7 @@ export function TradeShowsAdmin() {
                 id="endDate"
                 type="date"
                 value={endDateFilter}
-                onChange={(e) => setEndDateFilter(e.target.value)}
+                onChange={(e) => handleExportEndDateChange(e.target.value)}
               />
             </div>
           </div>

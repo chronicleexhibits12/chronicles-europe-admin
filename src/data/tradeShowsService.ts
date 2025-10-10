@@ -219,6 +219,7 @@ export class TradeShowsService {
         metaKeywords: data.meta_keywords,
         sortOrder: data.sort_order,
         isActive: data.is_active,
+        redirectUrl: data.redirect_url,
         createdAt: data.created_at,
         updatedAt: data.updated_at
       }
@@ -291,6 +292,7 @@ export class TradeShowsService {
         metaKeywords: data.meta_keywords,
         sortOrder: data.sort_order,
         isActive: data.is_active,
+        redirectUrl: data.redirect_url,
         createdAt: data.created_at,
         updatedAt: data.updated_at
       }

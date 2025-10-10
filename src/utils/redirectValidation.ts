@@ -72,7 +72,7 @@ export function validateRedirectUrlFormat(redirectUrl: string): boolean {
  * @param table The table to check ('blog_posts' or 'trade_shows')
  * @returns True if the URL exists in the table, false otherwise
  */
-export async function validateRedirectUrlExists(redirectUrl: string, table: 'blog_posts' | 'trade_shows'): Promise<boolean> {
+export async function validateRedirectUrlExists(redirectUrl: string, _table: 'blog_posts' | 'trade_shows'): Promise<boolean> {
   // If it's a full URL, we can't validate it against our tables
   try {
     new URL(redirectUrl)

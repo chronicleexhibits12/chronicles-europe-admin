@@ -133,6 +133,7 @@ export class BlogService {
         metaKeywords: row.meta_keywords,
         sortOrder: row.sort_order,
         isActive: row.is_active,
+        redirectUrl: row.redirect_url,
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }))
@@ -186,6 +187,7 @@ export class BlogService {
         metaKeywords: row.meta_keywords,
         sortOrder: row.sort_order,
         isActive: row.is_active,
+        redirectUrl: row.redirect_url,
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }));
@@ -231,6 +233,7 @@ export class BlogService {
         metaKeywords: data.meta_keywords,
         sortOrder: data.sort_order,
         isActive: data.is_active,
+        redirectUrl: data.redirect_url,
         createdAt: data.created_at,
         updatedAt: data.updated_at
       }
@@ -334,6 +337,7 @@ export class BlogService {
         meta_keywords: blogPostData.metaKeywords,
         sort_order: blogPostData.sortOrder,
         is_active: blogPostData.isActive,
+        redirect_url: blogPostData.redirectUrl,
         updated_at: new Date().toISOString()
       }
 

@@ -10,6 +10,7 @@ import { BlogService } from '@/data/blogService'
 import { TagInput } from '@/components/ui/tag-input'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { Loader2, Save, Upload, X } from 'lucide-react'
+import { validateRedirectUrlFormat, validateRedirectUrlExists } from '@/utils/redirectValidation'
 
 export function EditBlogPostAdmin() {
   const { id } = useParams()
@@ -27,10 +28,12 @@ export function EditBlogPostAdmin() {
     metaDescription: '',
     metaKeywords: [] as string[],
     sortOrder: 0,
-    isActive: true
+    isActive: true,
+    redirectUrl: '' // Add redirectUrl field
   })
   const [isSaving, setIsSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [redirectUrlError, setRedirectUrlError] = useState('') // Add state for redirect URL error
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -47,7 +50,8 @@ export function EditBlogPostAdmin() {
         metaDescription: blogPost.metaDescription || '',
         metaKeywords: blogPost.metaKeywords ? blogPost.metaKeywords.split(',').map(k => k.trim()).filter(k => k) : [],
         sortOrder: blogPost.sortOrder,
-        isActive: blogPost.isActive
+        isActive: blogPost.isActive,
+        redirectUrl: blogPost.redirectUrl || '' // Initialize redirectUrl
       })
     }
   }, [blogPost])
@@ -58,6 +62,11 @@ export function EditBlogPostAdmin() {
       ...prev,
       [name]: value
     }))
+    
+    // Clear redirect URL error when user types
+    if (name === 'redirectUrl') {
+      setRedirectUrlError('')
+    }
   }
 
   const handleMetaKeywordsChange = (keywords: string[]) => {
@@ -131,8 +140,38 @@ export function EditBlogPostAdmin() {
     if (e.target) e.target.value = ''
   }
 
+  const validateRedirectUrl = async () => {
+    if (!formData.redirectUrl) {
+      setRedirectUrlError('')
+      return true
+    }
+    
+    // Validate URL format
+    if (!validateRedirectUrlFormat(formData.redirectUrl)) {
+      setRedirectUrlError('Please enter a valid URL or relative path')
+      return false
+    }
+    
+    // Validate that the URL exists in the appropriate table
+    const isValid = await validateRedirectUrlExists(formData.redirectUrl, 'blog_posts')
+    if (!isValid) {
+      setRedirectUrlError('The specified URL does not exist in the blog posts')
+      return false
+    }
+    
+    setRedirectUrlError('')
+    return true
+  }
+
   const handleSave = async () => {
     if (!id) return
+
+    // Validate redirect URL before saving
+    const isRedirectUrlValid = await validateRedirectUrl()
+    if (!isRedirectUrlValid) {
+      toast.error('Please fix the redirect URL error before saving')
+      return
+    }
 
     setIsSaving(true)
     try {
@@ -226,6 +265,24 @@ export function EditBlogPostAdmin() {
                 placeholder="Enter URL slug"
                 required
               />
+            </div>
+            <div className="col-span-full">
+              <Label htmlFor="redirectUrl">Redirect URL</Label>
+              <Input
+                id="redirectUrl"
+                name="redirectUrl"
+                value={formData.redirectUrl}
+                onChange={handleInputChange}
+                placeholder="Enter redirect URL (optional)"
+                className={redirectUrlError ? 'border-red-500' : ''}
+              />
+              {redirectUrlError && (
+                <p className="text-sm text-red-500 mt-1">{redirectUrlError}</p>
+              )}
+              <p className="text-sm text-muted-foreground mt-1">
+                If provided, visitors will be redirected to this URL instead of viewing the standard blog post page.
+                Enter a full URL (e.g. https://example.com) or a relative path (e.g. /events).
+              </p>
             </div>
             <div>
               <Label htmlFor="isActive">Published</Label>

@@ -887,6 +887,7 @@ export interface Database {
           meta_keywords: string | null
           sort_order: number
           is_active: boolean
+          redirect_url: string | null
           created_at: string
           updated_at: string
         }
@@ -912,6 +913,7 @@ export interface Database {
           meta_keywords?: string | null
           sort_order?: number
           is_active?: boolean
+          redirect_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -937,6 +939,7 @@ export interface Database {
           meta_keywords?: string | null
           sort_order?: number
           is_active?: boolean
+          redirect_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -1194,6 +1197,7 @@ export interface Database {
           meta_keywords: string | null
           sort_order: number
           is_active: boolean
+          redirect_url: string | null
           created_at: string
           updated_at: string
         }
@@ -1215,6 +1219,7 @@ export interface Database {
           meta_keywords?: string | null
           sort_order?: number
           is_active?: boolean
+          redirect_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -1236,6 +1241,7 @@ export interface Database {
           meta_keywords?: string | null
           sort_order?: number
           is_active?: boolean
+          redirect_url?: string | null
           created_at?: string
           updated_at?: string
         }

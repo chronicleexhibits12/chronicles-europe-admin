@@ -36,6 +36,7 @@ export interface BlogPost {
   metaKeywords: string | null
   sortOrder: number
   isActive: boolean
+  redirectUrl: string | null
   createdAt: string
   updatedAt: string
 }

@@ -40,6 +40,7 @@ export class TradeShowsService {
         metaKeywords: row.meta_keywords,
         sortOrder: row.sort_order,
         isActive: row.is_active,
+        redirectUrl: row.redirect_url,
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }))
@@ -97,6 +98,7 @@ export class TradeShowsService {
         metaKeywords: row.meta_keywords,
         sortOrder: row.sort_order,
         isActive: row.is_active,
+        redirectUrl: row.redirect_url,
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }));
@@ -148,6 +150,7 @@ export class TradeShowsService {
         metaKeywords: row.meta_keywords,
         sortOrder: row.sort_order,
         isActive: row.is_active,
+        redirectUrl: row.redirect_url,
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }
@@ -181,7 +184,8 @@ export class TradeShowsService {
         meta_description: tradeShowData.metaDescription,
         meta_keywords: tradeShowData.metaKeywords,
         is_active: tradeShowData.isActive !== undefined ? tradeShowData.isActive : true, // Use provided value or default to true
-        sort_order: tradeShowData.sortOrder || 0
+        sort_order: tradeShowData.sortOrder || 0,
+        redirect_url: tradeShowData.redirectUrl
       }
 
       const { data, error } = await (supabase as any)
@@ -251,6 +255,7 @@ export class TradeShowsService {
         meta_description: tradeShowData.metaDescription,
         meta_keywords: tradeShowData.metaKeywords,
         is_active: tradeShowData.isActive,
+        redirect_url: tradeShowData.redirectUrl,
         updated_at: new Date().toISOString()
       }
 

@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { useTradeShow } from '@/hooks/useTradeShowsContent'
 import { TradeShowsService } from '@/data/tradeShowsService'
 import { useGlobalLocations } from '@/hooks/useGlobalLocations'
+import { validateRedirectUrlFormat, validateRedirectUrlExists } from '@/utils/redirectValidation'
 
 export function EditTradeShowAdmin() {
   const { id } = useParams()
@@ -20,6 +21,7 @@ export function EditTradeShowAdmin() {
   const { data: globalLocations } = useGlobalLocations()
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
+  const [redirectUrlError, setRedirectUrlError] = useState('') // Add state for redirect URL error
   
   // Form state
   const [formData, setFormData] = useState({
@@ -44,6 +46,9 @@ export function EditTradeShowAdmin() {
     metaDescription: '',
     metaKeywords: '',
     
+    // Redirect URL
+    redirectUrl: '',
+    
     // Status
     isActive: true
   })
@@ -67,6 +72,7 @@ export function EditTradeShowAdmin() {
         metaTitle: tradeShow.metaTitle || '',
         metaDescription: tradeShow.metaDescription || '',
         metaKeywords: tradeShow.metaKeywords || '',
+        redirectUrl: tradeShow.redirectUrl || '', // Initialize redirectUrl
         isActive: tradeShow.isActive
       })
     }
@@ -77,6 +83,11 @@ export function EditTradeShowAdmin() {
       ...prev,
       [field]: value
     }))
+
+    // Clear redirect URL error when user types
+    if (field === 'redirectUrl') {
+      setRedirectUrlError('')
+    }
 
     // Auto-set end date to start date + 1 day when start date changes
     if (field === 'startDate') {
@@ -127,8 +138,38 @@ export function EditTradeShowAdmin() {
     return typeof value === 'string' ? value : ''
   }
 
+  const validateRedirectUrl = async () => {
+    if (!formData.redirectUrl) {
+      setRedirectUrlError('')
+      return true
+    }
+    
+    // Validate URL format
+    if (!validateRedirectUrlFormat(formData.redirectUrl)) {
+      setRedirectUrlError('Please enter a valid URL or relative path')
+      return false
+    }
+    
+    // Validate that the URL exists in the appropriate table
+    const isValid = await validateRedirectUrlExists(formData.redirectUrl, 'trade_shows')
+    if (!isValid) {
+      setRedirectUrlError('The specified URL does not exist in the trade shows')
+      return false
+    }
+    
+    setRedirectUrlError('')
+    return true
+  }
+
   const handleSave = async () => {
     if (!id) return
+    
+    // Validate redirect URL before saving
+    const isRedirectUrlValid = await validateRedirectUrl()
+    if (!isRedirectUrlValid) {
+      toast.error('Please fix the redirect URL error before saving')
+      return
+    }
     
     setSaving(true)
     
@@ -149,6 +190,7 @@ export function EditTradeShowAdmin() {
         metaTitle: formData.metaTitle,
         metaDescription: formData.metaDescription,
         metaKeywords: formData.metaKeywords,
+        redirectUrl: formData.redirectUrl, // Include redirectUrl field
         isActive: formData.isActive
       })
 
@@ -275,6 +317,23 @@ export function EditTradeShowAdmin() {
                 placeholder="e.g., esc-congress-2025"
                 required
               />
+            </div>
+            <div className="col-span-full">
+              <Label htmlFor="redirectUrl">Redirect URL</Label>
+              <Input
+                id="redirectUrl"
+                value={formData.redirectUrl}
+                onChange={(e) => handleInputChange('redirectUrl', e.target.value)}
+                placeholder="Enter redirect URL (optional)"
+                className={redirectUrlError ? 'border-red-500' : ''}
+              />
+              {redirectUrlError && (
+                <p className="text-sm text-red-500 mt-1">{redirectUrlError}</p>
+              )}
+              <p className="text-sm text-muted-foreground mt-1">
+                If provided, visitors will be redirected to this URL instead of viewing the standard trade show page.
+                Enter a full URL (e.g. https://example.com) or a relative path (e.g. /events).
+              </p>
             </div>
             <div>
               <Label htmlFor="isActive">Published</Label>

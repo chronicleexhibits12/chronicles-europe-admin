@@ -224,7 +224,7 @@ export class TradeShowsService {
       }
       
       // Trigger revalidation for the trade shows page
-      await this.triggerRevalidation('/trade-shows')
+      await this.triggerRevalidation('/top-trade-shows-in-europe')
       
       return { data: tradeShow, error: null }
     } catch (error: any) {
@@ -296,8 +296,8 @@ export class TradeShowsService {
       }
       
       // Trigger revalidation for the trade shows page and the specific trade show
-      await this.triggerRevalidation('/trade-shows')
-      await this.triggerRevalidation(`/trade-shows/${tradeShow.slug}`)
+      await this.triggerRevalidation('/top-trade-shows-in-europe')
+      await this.triggerRevalidation(`/top-trade-shows-in-europe/${tradeShow.slug}`)
       
       return { data: tradeShow, error: null }
     } catch (error: any) {
@@ -317,7 +317,7 @@ export class TradeShowsService {
       if (error) throw new Error(error.message)
 
       // Trigger revalidation for the trade shows page
-      await this.triggerRevalidation('/trade-shows')
+      await this.triggerRevalidation('/top-trade-shows-in-europe')
       
       return { data: true, error: null }
     } catch (error: any) {
@@ -427,7 +427,7 @@ export class TradeShowsService {
       }
       
       // Trigger revalidation for the trade shows page
-      await this.triggerRevalidation('/trade-shows')
+      await this.triggerRevalidation('/top-trade-shows-in-europe')
       
       return { data: page, error: null }
     } catch (error: any) {

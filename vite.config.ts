@@ -1,11 +1,12 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
-import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  base: "/admin/", // Add this for production deployment under /admin path
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -14,50 +15,62 @@ export default defineConfig({
   server: {
     // Add proxy for revalidation endpoint to avoid CORS issues in development
     proxy: {
-      '/api/revalidate': {
-        target: process.env.VITE_WEBSITE_URL || 'https://chronicles-europe.vercel.app',
+      "/api/revalidate": {
+        target:
+          process.env.VITE_WEBSITE_URL ||
+          "https://chronicles-europe.vercel.app",
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
-      }
-    }
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
+      },
+    },
+  },
+  preview: {
+    port: 3010,
+    strictPort: true,
+    host: "127.0.0.1", // Listen only on localhost for security
   },
   build: {
     // Optimize build for production
-    minify: 'terser',
+    outDir: "dist",
+    minify: "terser",
     sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
           // Split vendor libraries into separate chunks
-          'react-vendor': ['react', 'react-dom'],
-          'router-vendor': ['react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-label', '@radix-ui/react-slot', 'lucide-react'],
-          'editor-vendor': [
-            '@tiptap/react',
-            '@tiptap/starter-kit',
-            '@tiptap/extension-color',
-            '@tiptap/extension-image',
-            '@tiptap/extension-link',
-            '@tiptap/extension-text-align',
-            '@tiptap/extension-text-style',
-            '@tiptap/extension-underline'
+          "react-vendor": ["react", "react-dom"],
+          "router-vendor": ["react-router-dom"],
+          "ui-vendor": [
+            "@radix-ui/react-label",
+            "@radix-ui/react-slot",
+            "lucide-react",
           ],
-          'supabase-vendor': ['@supabase/supabase-js']
-        }
-      }
+          "editor-vendor": [
+            "@tiptap/react",
+            "@tiptap/starter-kit",
+            "@tiptap/extension-color",
+            "@tiptap/extension-image",
+            "@tiptap/extension-link",
+            "@tiptap/extension-text-align",
+            "@tiptap/extension-text-style",
+            "@tiptap/extension-underline",
+          ],
+          "supabase-vendor": ["@supabase/supabase-js"],
+        },
+      },
     },
     // Increase chunk size warning limit
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
   },
   // Optimize dependencies
   optimizeDeps: {
     include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      '@supabase/supabase-js',
-      'lucide-react'
-    ]
-  }
-})
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@supabase/supabase-js",
+      "lucide-react",
+    ],
+  },
+});

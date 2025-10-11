@@ -794,13 +794,16 @@ export function CountriesAdmin() {
                     : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewCountry(country.slug)}
+                  <a 
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleViewCountry(country.slug);
+                    }}
+                    className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                   >
                     <Eye className="h-4 w-4" />
-                  </Button>
+                  </a>
                   <Button
                     variant="outline"
                     size="sm"

@@ -268,8 +268,21 @@ export function FormSubmissionsAdmin() {
     setViewDialogOpen(true)
   }
 
-  const handleDownloadDocument = (url: string) => {
-    window.open(url, '_blank')
+  
+
+  // Group documents by field name for hierarchical display
+  const groupDocumentsByField = (documents: DocumentMetadata[]) => {
+    const grouped: Record<string, DocumentMetadata[]> = {}
+    
+    documents.forEach(doc => {
+      const fieldName = doc.field_name || 'Other Documents'
+      if (!grouped[fieldName]) {
+        grouped[fieldName] = []
+      }
+      grouped[fieldName].push(doc)
+    })
+    
+    return grouped
   }
 
   const clearFilters = () => {
@@ -609,23 +622,36 @@ export function FormSubmissionsAdmin() {
               {selectedSubmission.documents && selectedSubmission.documents.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Uploaded Documents</h3>
-                  <div className="space-y-2">
-                    {selectedSubmission.documents.map((doc, index) => (
-                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                        <div>
-                          <p className="font-medium">{doc.file_name}</p>
-                          <p className="text-sm text-gray-500">{doc.file_type} • {formatFileSize(doc.file_size)}</p>
+                  <div className="space-y-4">
+                    {(() => {
+                      const groupedDocs = groupDocumentsByField(selectedSubmission.documents)
+                      return Object.entries(groupedDocs).map(([fieldName, docs]) => (
+                        <div key={fieldName} className="border rounded-lg">
+                          <div className="bg-gray-100 px-4 py-2 font-medium border-b">
+                            {fieldName}
+                          </div>
+                          <div className="p-3 space-y-2">
+                            {docs.map((doc, index) => (
+                              <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded">
+                                <div>
+                                  <p className="font-medium">{doc.file_name}</p>
+                                  <p className="text-sm text-gray-500">{doc.file_type} • {formatFileSize(doc.file_size)}</p>
+                                </div>
+                                <a 
+                                  href={doc.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                >
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Download File
+                                </a>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleDownloadDocument(doc.url)}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                      </div>
-                    ))}
+                      ))
+                    })()}
                   </div>
                 </div>
               )}
@@ -857,13 +883,16 @@ export function FormSubmissionsAdmin() {
                   {format(new Date(submission.createdAt), 'PPP')}
                 </TableCell>
                 <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewSubmission(submission)}
+                  <a 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleViewSubmission(submission);
+                    }}
+                    className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                   >
                     <Eye className="h-4 w-4" />
-                  </Button>
+                  </a>
                   <Button
                     variant="outline"
                     size="sm"

@@ -649,13 +649,14 @@ export function TradeShowsAdmin() {
                     </button>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(websiteUrl + '/top-trade-shows-in-europe/' + tradeShow.slug, '_blank')}
+                    <a 
+                      href={websiteUrl + '/top-trade-shows-in-europe/' + tradeShow.slug}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     >
                       <Eye className="h-4 w-4" />
-                    </Button>
+                    </a>
                     <Button
                       variant="outline"
                       size="sm"

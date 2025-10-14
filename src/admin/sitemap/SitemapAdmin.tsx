@@ -431,14 +431,16 @@ const SitemapAdmin: React.FC = () => {
                   </TableCell>
                   <TableCell className="px-4 py-3 text-right text-sm font-medium">
                     <div className="flex justify-end space-x-1">
-                      <Button
-                        onClick={() => handleEdit(entry)}
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0"
+                      <a
+                        href={`/admin/sitemap/${entry.id}/edit`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleEdit(entry);
+                        }}
+                        className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                       >
                         <Edit className="h-4 w-4" />
-                      </Button>
+                      </a>
                       <Button
                         onClick={() => handleDelete(entry.id)}
                         variant="outline"

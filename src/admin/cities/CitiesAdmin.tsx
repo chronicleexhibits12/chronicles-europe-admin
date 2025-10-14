@@ -59,6 +59,9 @@ export function CitiesAdmin() {
   const [deleteCityDialogOpen, setDeleteCityDialogOpen] = useState(false)
   const [cityToDeleteFromList, setCityToDeleteFromList] = useState<string | null>(null)
   
+  // Get website URL from environment variables, with fallback
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
   // Fetch all cities when select city dialog opens
   useEffect(() => {
     const fetchAllCities = async () => {
@@ -845,31 +848,34 @@ export function CitiesAdmin() {
                     ? new Date(city.updated_at).toLocaleDateString() 
                     : 'N/A'}
                 </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <a 
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleViewCity(city.city_slug);
-                    }}
-                    className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </a>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditCity(city.id)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => confirmDeleteCity(city.id, city.name)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <a 
+                      href={`${websiteUrl}/exhibition-stands-in-${city.city_slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </a>
+                    <a
+                      href={`/admin/cities/${city.id}/edit`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleEditCity(city.id);
+                      }}
+                      className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </a>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => confirmDeleteCity(city.id, city.name)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

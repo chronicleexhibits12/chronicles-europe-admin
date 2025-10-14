@@ -35,6 +35,7 @@ import { CountriesService } from '@/data/countriesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
 import { useGlobalLocations } from '@/hooks/useGlobalLocations'
 import { slugify } from '@/utils/slugify'
+import type { Country } from '@/data/countriesTypes'
 
 export function CountriesAdmin() {
   const navigate = useNavigate()
@@ -53,9 +54,14 @@ export function CountriesAdmin() {
   const [selectCountryDialogOpen, setSelectCountryDialogOpen] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
   const [creatingCountryPage, setCreatingCountryPage] = useState(false)
+  const [allCountriesData, setAllCountriesData] = useState<Country[]>([])
+  const [loadingAllCountries, setLoadingAllCountries] = useState(false)
   const [deleteCountryDialogOpen, setDeleteCountryDialogOpen] = useState(false)
   const [countryToDeleteFromList, setCountryToDeleteFromList] = useState<string | null>(null)
   
+  // Get website URL from environment variables, with fallback
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize)
 
@@ -115,7 +121,6 @@ export function CountriesAdmin() {
   const displayTotalCount = searchTerm ? globalFilteredCountries.length : filteredCountries.length
 
   const handleViewCountry = (slug: string) => {
-    const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app';
     window.open(`${websiteUrl}/${slug}`, '_blank');
   };
 
@@ -793,31 +798,34 @@ export function CountriesAdmin() {
                     ? new Date(country.updated_at).toLocaleDateString() 
                     : 'N/A'}
                 </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <a 
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleViewCountry(country.slug);
-                    }}
-                    className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </a>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditCountry(country.id)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => confirmDeleteCountry(country.id, country.name)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <a 
+                      href={`${websiteUrl}/${country.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </a>
+                    <a
+                      href={`/admin/countries/${country.id}/edit`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleEditCountry(country.id);
+                      }}
+                      className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </a>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => confirmDeleteCountry(country.id, country.name)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

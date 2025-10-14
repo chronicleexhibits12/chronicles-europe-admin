@@ -207,25 +207,25 @@ export function Pages() {
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <a 
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleView(page.path);
-                      }}
+                      href={`${websiteUrl}${page.path}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 h-8"
                     >
                       <Eye className="h-4 w-4 mr-1" />
                       View
                     </a>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => handleEdit(page.editPath)}
-                      className="h-8 px-3"
+                    <a
+                      href={page.editPath}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleEdit(page.editPath);
+                      }}
+                      className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 h-8"
                     >
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
-                    </Button>
+                    </a>
                   </div>
                 </TableCell>
               </TableRow>

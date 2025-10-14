@@ -432,7 +432,7 @@ const SitemapAdmin: React.FC = () => {
                   <TableCell className="px-4 py-3 text-right text-sm font-medium">
                     <div className="flex justify-end space-x-1">
                       <a
-                        href={`/admin/sitemap/${entry.id}/edit`}
+                        href={`/admin/admin/sitemap/${entry.id}/edit`}
                         onClick={(e) => {
                           e.preventDefault();
                           handleEdit(entry);

@@ -516,10 +516,7 @@ export function CitiesAdmin() {
     )
   }
 
-  const handleViewCity = (citySlug: string) => {
-    const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app';
-    window.open(`${websiteUrl}/${citySlug}`, '_blank');
-  };
+  
 
   return (
     <div className="space-y-6 w-full">
@@ -859,7 +856,7 @@ export function CitiesAdmin() {
                       <Eye className="h-4 w-4" />
                     </a>
                     <a
-                      href={`/admin/cities/${city.id}/edit`}
+                      href={`/admin/admin/cities/${city.id}/edit`}
                       onClick={(e) => {
                         e.preventDefault();
                         handleEditCity(city.id);

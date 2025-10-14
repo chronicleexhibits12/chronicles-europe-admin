@@ -361,7 +361,7 @@ export function BlogPostsAdmin() {
                       <Eye className="h-4 w-4" />
                     </a>
                     <a
-                      href={`/admin/blog-posts/${blogPost.id}/edit`}
+                      href={`/admin/admin/blog-posts/${blogPost.id}/edit`}
                       onClick={(e) => {
                         e.preventDefault();
                         handleEditBlogPost(blogPost.id);

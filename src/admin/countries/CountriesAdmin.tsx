@@ -35,7 +35,7 @@ import { CountriesService } from '@/data/countriesService'
 import { GlobalLocationsService } from '@/data/globalLocationsService'
 import { useGlobalLocations } from '@/hooks/useGlobalLocations'
 import { slugify } from '@/utils/slugify'
-import type { Country } from '@/data/countriesTypes'
+
 
 export function CountriesAdmin() {
   const navigate = useNavigate()
@@ -54,8 +54,6 @@ export function CountriesAdmin() {
   const [selectCountryDialogOpen, setSelectCountryDialogOpen] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
   const [creatingCountryPage, setCreatingCountryPage] = useState(false)
-  const [allCountriesData, setAllCountriesData] = useState<Country[]>([])
-  const [loadingAllCountries, setLoadingAllCountries] = useState(false)
   const [deleteCountryDialogOpen, setDeleteCountryDialogOpen] = useState(false)
   const [countryToDeleteFromList, setCountryToDeleteFromList] = useState<string | null>(null)
   
@@ -120,9 +118,6 @@ export function CountriesAdmin() {
   const displayCountries = searchTerm ? globalFilteredCountries : filteredCountries
   const displayTotalCount = searchTerm ? globalFilteredCountries.length : filteredCountries.length
 
-  const handleViewCountry = (slug: string) => {
-    window.open(`${websiteUrl}/${slug}`, '_blank');
-  };
 
   const handleEditCountry = (id: string) => {
     navigate(`/admin/countries/${id}/edit`)
@@ -809,7 +804,7 @@ export function CountriesAdmin() {
                       <Eye className="h-4 w-4" />
                     </a>
                     <a
-                      href={`/admin/countries/${country.id}/edit`}
+                      href={`/admin/admin/countries/${country.id}/edit`}
                       onClick={(e) => {
                         e.preventDefault();
                         handleEditCountry(country.id);

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
 import { 
   Table, 
   TableBody, 
@@ -53,7 +52,7 @@ export function Pages() {
         id: 'home',
         name: 'Home Page',
         path: '/',
-        editPath: '/admin/home',
+        editPath: '/home',
         lastUpdated: homePage?.updatedAt ? new Date(homePage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Main landing page with hero section, services, and company information'
       },
@@ -61,7 +60,7 @@ export function Pages() {
         id: 'about',
         name: 'About Page',
         path: '/about',
-        editPath: '/admin/about-us',
+        editPath: '/about-us',
         lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Company information, team details, services, and statistics'
       },
@@ -69,7 +68,7 @@ export function Pages() {
         id: 'services',
         name: 'Services Page',
         path: '/services',
-        editPath: '/admin/services',
+        editPath: '/services',
         lastUpdated: 'Never', // Services page doesn't have a single updatedAt field
         description: 'Our services and solutions for exhibition stands'
       },
@@ -77,7 +76,7 @@ export function Pages() {
         id: 'trade-shows',
         name: 'Trade Shows Page',
         path: '/top-trade-shows-in-europe',
-        editPath: '/admin/trade-shows-page',
+        editPath: '/trade-shows-page',
         lastUpdated: tradeShowsPage?.updatedAt ? new Date(tradeShowsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Trade shows and exhibitions landing page'
       },
@@ -85,7 +84,7 @@ export function Pages() {
         id: 'blog',
         name: 'Blog Page',
         path: '/blog',
-        editPath: '/admin/blog-page',
+        editPath: '/blog-page',
         lastUpdated: blogPage?.updatedAt ? new Date(blogPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Blog landing page with all posts'
       },
@@ -93,7 +92,7 @@ export function Pages() {
         id: 'testimonials',
         name: 'Testimonials Page',
         path: '/review',
-        editPath: '/admin/testimonials',
+        editPath: '/testimonials',
         lastUpdated: testimonialsPage?.updatedAt ? new Date(testimonialsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Client testimonials and reviews'
       },
@@ -101,7 +100,7 @@ export function Pages() {
         id: 'contact',
         name: 'Contact Page',
         path: '/contact',
-        editPath: '/admin/contact',
+        editPath: '/contact',
         lastUpdated: contactPage?.updatedAt ? new Date(contactPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Contact information and inquiry form'
       },
@@ -109,7 +108,7 @@ export function Pages() {
         id: 'privacy',
         name: 'Privacy Policy',
         path: '/privacy-policy',
-        editPath: '/admin/privacy',
+        editPath: '/privacy',
         lastUpdated: privacyPage?.updatedAt ? new Date(privacyPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Privacy policy and data protection information'
       },
@@ -117,7 +116,7 @@ export function Pages() {
         id: 'terms',
         name: 'Terms & Conditions',
         path: '/terms-and-conditions',
-        editPath: '/admin/terms',
+        editPath: '/terms',
         lastUpdated: termsPage?.updatedAt ? new Date(termsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Terms and conditions for using our website and services'
       },
@@ -125,7 +124,7 @@ export function Pages() {
         id: 'main-countries',
         name: 'Main Countries Page',
         path: '/major-exhibiting-country',
-        editPath: '/admin/main-countries',
+        editPath: '/main-countries',
         lastUpdated: mainCountriesPage?.updatedAt ? new Date(mainCountriesPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Main countries page with exhibition stand types and portfolio showcase'
       }
@@ -137,10 +136,6 @@ export function Pages() {
     navigate(editPath)
   }
 
-  const handleView = (path: string) => {
-    // Open the website page in a new tab using the environment variable
-    window.open(`${websiteUrl}${path}`, '_blank')
-  }
 
   const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading || blogLoading || testimonialsLoading || contactLoading || privacyLoading || termsLoading || mainCountriesLoading
 
@@ -216,7 +211,7 @@ export function Pages() {
                       View
                     </a>
                     <a
-                      href={page.editPath}
+                      href={`/admin/admin${page.editPath}`}
                       onClick={(e) => {
                         e.preventDefault();
                         handleEdit(page.editPath);

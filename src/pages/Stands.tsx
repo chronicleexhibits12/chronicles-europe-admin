@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
 import { 
   Table, 
   TableBody, 
@@ -41,7 +40,7 @@ export function Stands() {
         id: 'custom-stands',
         name: 'Custom Exhibition Stands',
         path: '/custom-booth-design-and-build',
-        editPath: '/admin/custom-stands',
+        editPath: '/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'
       },
@@ -49,7 +48,7 @@ export function Stands() {
         id: 'double-decker-stands',
         name: 'Double Decker Exhibition Stands',
         path: '/double-decker-exhibition-stands',
-        editPath: '/admin/double-decker-stands',
+        editPath: '/double-decker-stands',
         lastUpdated: doubleDeckStandsPage?.updatedAt ? new Date(doubleDeckStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Double decker exhibition stands design and build services information'
       },
@@ -57,7 +56,7 @@ export function Stands() {
         id: 'modular-stands',
         name: 'Modular Exhibition Stands',
         path: '/modular-booth-design-and-build',
-        editPath: '/admin/modular-stands',
+        editPath: '/modular-stands',
         lastUpdated: modularStandsPage?.updatedAt ? new Date(modularStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Modular exhibition stands design and build services information'
       },
@@ -65,7 +64,7 @@ export function Stands() {
         id: 'pavilion-stands',
         name: 'Pavilion Exhibition Stands',
         path: '/pavilion-design-build',
-        editPath: '/admin/pavilion-stands',
+        editPath: '/pavilion-stands',
         lastUpdated: pavilionStandsPage?.updatedAt ? new Date(pavilionStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Pavilion exhibition stands design and build services information'
       }
@@ -75,11 +74,6 @@ export function Stands() {
 
   const handleEdit = (editPath: string) => {
     navigate(editPath)
-  }
-
-  const handleView = (path: string) => {
-    // Open the page in a new tab using the environment variable
-    window.open(`${websiteUrl}${path}`, '_blank')
   }
 
   const loading = customStandsLoading || doubleDeckStandsLoading || modularStandsLoading || pavilionStandsLoading
@@ -156,7 +150,7 @@ export function Stands() {
                       View
                     </a>
                     <a
-                      href={stand.editPath}
+                      href={`/admin/admin${stand.editPath}`}
                       onClick={(e) => {
                         e.preventDefault();
                         handleEdit(stand.editPath);

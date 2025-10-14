@@ -659,7 +659,7 @@ export function TradeShowsAdmin() {
                         <Eye className="h-4 w-4" />
                       </a>
                       <a
-                        href={`/admin/trade-shows/${tradeShow.id}/edit`}
+                        href={`/admin/admin/trade-shows/${tradeShow.id}/edit`}
                         onClick={(e) => {
                           e.preventDefault();
                           handleEditTradeShow(tradeShow.id);

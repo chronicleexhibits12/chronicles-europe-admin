@@ -40,7 +40,7 @@ export function Stands() {
         id: 'custom-stands',
         name: 'Custom Exhibition Stands',
         path: '/custom-booth-design-and-build',
-        editPath: '/custom-stands',
+        editPath: '/admin/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'
       },
@@ -48,7 +48,7 @@ export function Stands() {
         id: 'double-decker-stands',
         name: 'Double Decker Exhibition Stands',
         path: '/double-decker-exhibition-stands',
-        editPath: '/double-decker-stands',
+        editPath: '/admin/double-decker-stands',
         lastUpdated: doubleDeckStandsPage?.updatedAt ? new Date(doubleDeckStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Double decker exhibition stands design and build services information'
       },
@@ -56,7 +56,7 @@ export function Stands() {
         id: 'modular-stands',
         name: 'Modular Exhibition Stands',
         path: '/modular-booth-design-and-build',
-        editPath: '/modular-stands',
+        editPath: '/admin/modular-stands',
         lastUpdated: modularStandsPage?.updatedAt ? new Date(modularStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Modular exhibition stands design and build services information'
       },
@@ -64,7 +64,7 @@ export function Stands() {
         id: 'pavilion-stands',
         name: 'Pavilion Exhibition Stands',
         path: '/pavilion-design-build',
-        editPath: '/pavilion-stands',
+        editPath: '/admin/pavilion-stands',
         lastUpdated: pavilionStandsPage?.updatedAt ? new Date(pavilionStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Pavilion exhibition stands design and build services information'
       }

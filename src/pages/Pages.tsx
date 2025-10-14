@@ -52,7 +52,7 @@ export function Pages() {
         id: 'home',
         name: 'Home Page',
         path: '/',
-        editPath: '/home',
+        editPath: '/admin/home',
         lastUpdated: homePage?.updatedAt ? new Date(homePage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Main landing page with hero section, services, and company information'
       },
@@ -60,7 +60,7 @@ export function Pages() {
         id: 'about',
         name: 'About Page',
         path: '/about',
-        editPath: '/about-us',
+        editPath: '/admin/about-us',
         lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Company information, team details, services, and statistics'
       },
@@ -68,7 +68,7 @@ export function Pages() {
         id: 'services',
         name: 'Services Page',
         path: '/services',
-        editPath: '/services',
+        editPath: '/admin/services',
         lastUpdated: 'Never', // Services page doesn't have a single updatedAt field
         description: 'Our services and solutions for exhibition stands'
       },
@@ -76,7 +76,7 @@ export function Pages() {
         id: 'trade-shows',
         name: 'Trade Shows Page',
         path: '/top-trade-shows-in-europe',
-        editPath: '/trade-shows-page',
+        editPath: '/admin/trade-shows-page',
         lastUpdated: tradeShowsPage?.updatedAt ? new Date(tradeShowsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Trade shows and exhibitions landing page'
       },
@@ -84,7 +84,7 @@ export function Pages() {
         id: 'blog',
         name: 'Blog Page',
         path: '/blog',
-        editPath: '/blog-page',
+        editPath: '/admin/blog-page',
         lastUpdated: blogPage?.updatedAt ? new Date(blogPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Blog landing page with all posts'
       },
@@ -92,7 +92,7 @@ export function Pages() {
         id: 'testimonials',
         name: 'Testimonials Page',
         path: '/review',
-        editPath: '/testimonials',
+        editPath: '/admin/testimonials',
         lastUpdated: testimonialsPage?.updatedAt ? new Date(testimonialsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Client testimonials and reviews'
       },
@@ -100,7 +100,7 @@ export function Pages() {
         id: 'contact',
         name: 'Contact Page',
         path: '/contact',
-        editPath: '/contact',
+        editPath: '/admin/contact',
         lastUpdated: contactPage?.updatedAt ? new Date(contactPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Contact information and inquiry form'
       },
@@ -108,7 +108,7 @@ export function Pages() {
         id: 'privacy',
         name: 'Privacy Policy',
         path: '/privacy-policy',
-        editPath: '/privacy',
+        editPath: '/admin/privacy',
         lastUpdated: privacyPage?.updatedAt ? new Date(privacyPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Privacy policy and data protection information'
       },
@@ -116,7 +116,7 @@ export function Pages() {
         id: 'terms',
         name: 'Terms & Conditions',
         path: '/terms-and-conditions',
-        editPath: '/terms',
+        editPath: '/admin/terms',
         lastUpdated: termsPage?.updatedAt ? new Date(termsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Terms and conditions for using our website and services'
       },
@@ -124,7 +124,7 @@ export function Pages() {
         id: 'main-countries',
         name: 'Main Countries Page',
         path: '/major-exhibiting-country',
-        editPath: '/main-countries',
+        editPath: '/admin/main-countries',
         lastUpdated: mainCountriesPage?.updatedAt ? new Date(mainCountriesPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Main countries page with exhibition stand types and portfolio showcase'
       }

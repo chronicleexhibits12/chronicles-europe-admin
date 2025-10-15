@@ -50,14 +50,14 @@ export function Dashboard() {
         id: 'about',
         name: 'About Page',
         path: '/about-us',
-        editPath: 'admin/about-us',
+        editPath: '/admin/about-us',
         lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Company information, team details, services, and statistics'
       },
       {
         id: 'custom-stands',
         name: 'Custom Stands Page',
-        path: '/custom-booth-design-and-build',
+        path: '/custom-exhibition-stand/',
         editPath: '/admin/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'
@@ -242,11 +242,11 @@ export function Dashboard() {
             Use the navigation menu to manage your website content. You can edit pages, update stands information, and more.
           </p>
           <div className="flex justify-center gap-4">
-            <Button onClick={() => navigate('/pages')}>
+            <Button onClick={() => navigate('/admin/pages')}>
               <FileText className="h-4 w-4 mr-2" />
               Manage Pages
             </Button>
-            <Button variant="outline" onClick={() => window.open('https://chronicleseurope.vercel.app', '_blank')}>
+            <Button variant="outline" onClick={() => window.open('https://chronicleexhibits.eu', '_blank')}>
               <Eye className="h-4 w-4 mr-2" />
               View Website
             </Button>

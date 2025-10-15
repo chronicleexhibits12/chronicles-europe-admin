@@ -588,10 +588,9 @@ export function TradeShowsAdmin() {
             <TableRow>
               <TableHead>Sr. No.</TableHead>
               <TableHead>Title</TableHead>
-              <TableHead>Date Range</TableHead>
+              <TableHead>City</TableHead>
+              <TableHead>Country</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Updated</TableHead>
               <TableHead>Published</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -607,11 +606,8 @@ export function TradeShowsAdmin() {
                       : totalCount - ((currentPage - 1) * pageSize) - index}
                   </TableCell>
                   <TableCell className="font-medium">{tradeShow.title}</TableCell>
-                  <TableCell>
-                    {tradeShow.startDate && tradeShow.endDate 
-                      ? new Date(tradeShow.startDate).toLocaleDateString() + ' - ' + new Date(tradeShow.endDate).toLocaleDateString()
-                      : 'Not specified'}
-                  </TableCell>
+                  <TableCell>{tradeShow.city || 'Not specified'}</TableCell>
+                  <TableCell>{tradeShow.country || 'Not specified'}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       status === 'expired' 
@@ -622,16 +618,6 @@ export function TradeShowsAdmin() {
                     }`}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
-                  </TableCell>
-                  <TableCell>
-                    {tradeShow.createdAt 
-                      ? new Date(tradeShow.createdAt).toLocaleDateString()
-                      : 'N/A'}
-                  </TableCell>
-                  <TableCell>
-                    {tradeShow.updatedAt 
-                      ? new Date(tradeShow.updatedAt).toLocaleDateString()
-                      : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <button

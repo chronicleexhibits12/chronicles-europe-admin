@@ -32,48 +32,53 @@ export function Stands() {
   const [stands, setStands] = useState<StandInfo[]>([])
 
   // Get website URL from environment variables, with fallback
-  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleexhibits.eu'
 
   useEffect(() => {
     const standsData: StandInfo[] = [
       {
         id: 'custom-stands',
         name: 'Custom Exhibition Stands',
-        path: '/custom-booth-design-and-build',
+        path: '/custom-exhibition-stand/',
         editPath: '/admin/custom-stands',
         lastUpdated: customStandsPage?.updatedAt ? new Date(customStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Custom exhibition stands design and build services information'
       },
       {
         id: 'double-decker-stands',
-        name: 'Double Decker Exhibition Stands',
-        path: '/double-decker-exhibition-stands',
+        name: 'Double Storey Exhibition Stands',
+        path: '/double-storey-exhibition-stand/',
         editPath: '/admin/double-decker-stands',
         lastUpdated: doubleDeckStandsPage?.updatedAt ? new Date(doubleDeckStandsPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Double decker exhibition stands design and build services information'
+        description: 'Double storey exhibition stands design and build services information'
       },
       {
         id: 'modular-stands',
         name: 'Modular Exhibition Stands',
-        path: '/modular-booth-design-and-build',
+        path: '/modular-exhibition-stand/',
         editPath: '/admin/modular-stands',
         lastUpdated: modularStandsPage?.updatedAt ? new Date(modularStandsPage.updatedAt).toLocaleDateString() : 'Never',
         description: 'Modular exhibition stands design and build services information'
       },
       {
         id: 'pavilion-stands',
-        name: 'Pavilion Exhibition Stands',
-        path: '/pavilion-design-build',
+        name: 'Country Pavilion Exhibition Stands',
+        path: '/country-pavilion-exhibition-stand/',
         editPath: '/admin/pavilion-stands',
         lastUpdated: pavilionStandsPage?.updatedAt ? new Date(pavilionStandsPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Pavilion exhibition stands design and build services information'
+        description: 'Country pavilion exhibition stands design and build services information'
       }
     ]
     setStands(standsData)
   }, [customStandsPage, doubleDeckStandsPage, modularStandsPage, pavilionStandsPage])
 
-  const handleEdit = (editPath: string) => {
-    navigate(editPath)
+  const handleEdit = (editPath: string, event: React.MouseEvent) => {
+    // If Ctrl key is pressed, open in new tab
+    if (event.ctrlKey) {
+      window.open(editPath, '_blank');
+    } else {
+      navigate(editPath);
+    }
   }
 
   const loading = customStandsLoading || doubleDeckStandsLoading || modularStandsLoading || pavilionStandsLoading
@@ -150,10 +155,10 @@ export function Stands() {
                       View
                     </a>
                     <a
-                      href={`/admin/admin${stand.editPath}`}
+                      href={stand.editPath}
                       onClick={(e) => {
                         e.preventDefault();
-                        handleEdit(stand.editPath);
+                        handleEdit(stand.editPath, e);
                       }}
                       className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 h-8"
                     >

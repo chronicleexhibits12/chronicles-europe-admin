@@ -44,7 +44,7 @@ export function Pages() {
   const [pages, setPages] = useState<PageInfo[]>([])
 
   // Get website URL from environment variables, with fallback
-  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleexhibits.eu'
 
   useEffect(() => {
     const pagesData: PageInfo[] = [

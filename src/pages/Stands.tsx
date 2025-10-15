@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { 
   Table, 
   TableBody, 
@@ -24,7 +23,7 @@ interface StandInfo {
 }
 
 export function Stands() {
-  const navigate = useNavigate()
+
   const { data: customStandsPage, loading: customStandsLoading } = useCustomStandsPage()
   const { content: doubleDeckStandsPage, loading: doubleDeckStandsLoading } = useDoubleDeckStandsContent()
   const { content: modularStandsPage, loading: modularStandsLoading } = useModularStandsContent()
@@ -72,15 +71,7 @@ export function Stands() {
     setStands(standsData)
   }, [customStandsPage, doubleDeckStandsPage, modularStandsPage, pavilionStandsPage])
 
-  const handleEdit = (editPath: string, event: React.MouseEvent) => {
-    // If Ctrl key is pressed, open in new tab
-    if (event.ctrlKey) {
-      window.open(editPath, '_blank');
-    } else {
-      navigate(editPath);
-    }
-  }
-
+  
   const loading = customStandsLoading || doubleDeckStandsLoading || modularStandsLoading || pavilionStandsLoading
 
   if (loading) {
@@ -155,11 +146,9 @@ export function Stands() {
                       View
                     </a>
                     <a
-                      href={stand.editPath}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleEdit(stand.editPath, e);
-                      }}
+                      href={`/admin${stand.editPath}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 h-8"
                     >
                       <Edit className="h-4 w-4 mr-1" />

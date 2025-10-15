@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { 
   Table, 
   TableBody, 
@@ -30,7 +29,6 @@ interface PageInfo {
 }
 
 export function Pages() {
-  const navigate = useNavigate()
   const { data: homePage, loading: homeLoading } = useHomePage()
   const { data: aboutPage, loading: aboutLoading } = useAboutPage()
   const { data: customStandsPage, loading: customStandsLoading } = useCustomStandsPage()
@@ -132,9 +130,6 @@ export function Pages() {
     setPages(pagesData)
   }, [homePage, aboutPage, customStandsPage, tradeShowsPage, blogPage, testimonialsPage, contactPage, privacyPage, termsPage, mainCountriesPage])
 
-  const handleEdit = (editPath: string) => {
-    navigate(editPath)
-  }
 
 
   const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading || blogLoading || testimonialsLoading || contactLoading || privacyLoading || termsLoading || mainCountriesLoading
@@ -212,10 +207,8 @@ export function Pages() {
                     </a>
                     <a
                       href={`/admin${page.editPath}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleEdit(page.editPath);
-                      }}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 h-8"
                     >
                       <Edit className="h-4 w-4 mr-1" />

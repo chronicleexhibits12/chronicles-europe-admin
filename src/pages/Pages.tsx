@@ -211,7 +211,7 @@ export function Pages() {
                       View
                     </a>
                     <a
-                      href={`/admin/admin${page.editPath}`}
+                      href={`/admin${page.editPath}`}
                       onClick={(e) => {
                         e.preventDefault();
                         handleEdit(page.editPath);

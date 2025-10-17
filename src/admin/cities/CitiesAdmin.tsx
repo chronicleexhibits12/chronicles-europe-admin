@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,7 +37,6 @@ import { slugify } from "@/utils/slugify";
 import type { City } from "@/data/citiesTypes";
 
 export function CitiesAdmin() {
-  
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const {

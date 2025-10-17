@@ -38,7 +38,7 @@ import { slugify } from "@/utils/slugify";
 import type { City } from "@/data/citiesTypes";
 
 export function CitiesAdmin() {
-  const navigate = useNavigate();
+  
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const {

@@ -37,7 +37,6 @@ import { useGlobalLocations } from "@/hooks/useGlobalLocations";
 import { slugify } from "@/utils/slugify";
 
 export function CountriesAdmin() {
-  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const {

@@ -1,24 +1,24 @@
-import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table'
-import { 
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
@@ -27,228 +27,251 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination'
-import { toast } from 'sonner'
-import { Search, Plus, Trash2, Edit, Globe, Eye, Loader2 } from 'lucide-react'
-import { useCountries } from '@/hooks/useCountriesContent'
-import { CountriesService } from '@/data/countriesService'
-import { GlobalLocationsService } from '@/data/globalLocationsService'
-import { useGlobalLocations } from '@/hooks/useGlobalLocations'
-import { slugify } from '@/utils/slugify'
-
+} from "@/components/ui/pagination";
+import { toast } from "sonner";
+import { Search, Plus, Trash2, Edit, Globe, Eye, Loader2 } from "lucide-react";
+import { useCountries } from "@/hooks/useCountriesContent";
+import { CountriesService } from "@/data/countriesService";
+import { GlobalLocationsService } from "@/data/globalLocationsService";
+import { useGlobalLocations } from "@/hooks/useGlobalLocations";
+import { slugify } from "@/utils/slugify";
 
 export function CountriesAdmin() {
-  const navigate = useNavigate()
-  const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
-  const { data: countries = [], totalCount, loading, error, refetch } = useCountries(currentPage, pageSize)
-  const { data: globalLocations } = useGlobalLocations()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [allCountries, setAllCountries] = useState<any[]>([])
-  const [searchLoading, setSearchLoading] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [countryToDelete, setCountryToDelete] = useState<{ id: string; name: string } | null>(null)
-  const [addCountryDialogOpen, setAddCountryDialogOpen] = useState(false)
-  const [newCountryName, setNewCountryName] = useState('')
-  const [addingCountry, setAddingCountry] = useState(false)
-  const [selectCountryDialogOpen, setSelectCountryDialogOpen] = useState(false)
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
-  const [creatingCountryPage, setCreatingCountryPage] = useState(false)
-  const [deleteCountryDialogOpen, setDeleteCountryDialogOpen] = useState(false)
-  const [countryToDeleteFromList, setCountryToDeleteFromList] = useState<string | null>(null)
-  
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const {
+    data: countries = [],
+    totalCount,
+    loading,
+    error,
+    refetch,
+  } = useCountries(currentPage, pageSize);
+  const { data: globalLocations } = useGlobalLocations();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [allCountries, setAllCountries] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [countryToDelete, setCountryToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [addCountryDialogOpen, setAddCountryDialogOpen] = useState(false);
+  const [newCountryName, setNewCountryName] = useState("");
+  const [addingCountry, setAddingCountry] = useState(false);
+  const [selectCountryDialogOpen, setSelectCountryDialogOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [creatingCountryPage, setCreatingCountryPage] = useState(false);
+  const [deleteCountryDialogOpen, setDeleteCountryDialogOpen] = useState(false);
+  const [countryToDeleteFromList, setCountryToDeleteFromList] = useState<
+    string | null
+  >(null);
+
   // Get website URL from environment variables, with fallback
-  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+  const websiteUrl =
+    import.meta.env.VITE_WEBSITE_URL || "https://chronicleseurope.vercel.app";
 
   // Calculate total pages
-  const totalPages = Math.ceil(totalCount / pageSize)
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   // Get all countries for global search
   const getAllCountries = async () => {
-    if (!searchTerm) return
-    setSearchLoading(true)
+    if (!searchTerm) return;
+    setSearchLoading(true);
     try {
-      const { data, error } = await CountriesService.getCountries()
-      if (error) throw new Error(error)
+      const { data, error } = await CountriesService.getCountries();
+      if (error) throw new Error(error);
       // Sort by name for consistent display
-      const sortedData = data?.sort((a, b) => 
-        a.name.localeCompare(b.name)
-      ) || []
-      setAllCountries(sortedData)
+      const sortedData =
+        data?.sort((a, b) => a.name.localeCompare(b.name)) || [];
+      setAllCountries(sortedData);
     } catch (error: any) {
-      console.error('Error fetching all countries:', error)
-      toast.error('Failed to search countries')
+      console.error("Error fetching all countries:", error);
+      toast.error("Failed to search countries");
     } finally {
-      setSearchLoading(false)
+      setSearchLoading(false);
     }
-  }
+  };
 
   // Effect to fetch all countries when search term changes
   useEffect(() => {
     if (searchTerm) {
-      getAllCountries()
+      getAllCountries();
     } else {
-      setAllCountries([])
+      setAllCountries([]);
     }
-  }, [searchTerm])
+  }, [searchTerm]);
 
   // Filter all countries based on search term
   const globalFilteredCountries = useMemo(() => {
-    if (!allCountries.length) return []
-    
-    const term = searchTerm.toLowerCase()
-    return allCountries.filter(country => 
-      country.name.toLowerCase().includes(term) ||
-      country.slug.toLowerCase().includes(term)
-    )
-  }, [allCountries, searchTerm])
+    if (!allCountries.length) return [];
+
+    const term = searchTerm.toLowerCase();
+    return allCountries.filter(
+      (country) =>
+        country.name.toLowerCase().includes(term) ||
+        country.slug.toLowerCase().includes(term)
+    );
+  }, [allCountries, searchTerm]);
 
   // Filter countries for regular view
   const filteredCountries = useMemo(() => {
-    if (!searchTerm) return countries
-    
-    const term = searchTerm.toLowerCase().trim()
-    return countries.filter(country => 
-      country.name.toLowerCase().includes(term) ||
-      country.slug.toLowerCase().includes(term)
-    )
-  }, [countries, searchTerm])
+    if (!searchTerm) return countries;
+
+    const term = searchTerm.toLowerCase().trim();
+    return countries.filter(
+      (country) =>
+        country.name.toLowerCase().includes(term) ||
+        country.slug.toLowerCase().includes(term)
+    );
+  }, [countries, searchTerm]);
 
   // Determine which countries to display
-  const displayCountries = searchTerm ? globalFilteredCountries : filteredCountries
-  const displayTotalCount = searchTerm ? globalFilteredCountries.length : filteredCountries.length
-
-
-  const handleEditCountry = (id: string) => {
-    navigate(`/admin/countries/${id}/edit`)
-  }
+  const displayCountries = searchTerm
+    ? globalFilteredCountries
+    : filteredCountries;
+  const displayTotalCount = searchTerm
+    ? globalFilteredCountries.length
+    : filteredCountries.length;
 
   const confirmDeleteCountry = (id: string, name: string) => {
-    setCountryToDelete({ id, name })
-    setDeleteDialogOpen(true)
-  }
+    setCountryToDelete({ id, name });
+    setDeleteDialogOpen(true);
+  };
 
   const handleDeleteCountry = async () => {
-    if (!countryToDelete) return
+    if (!countryToDelete) return;
 
     try {
       // Delete the country from the database
-      const { error: deleteError } = await CountriesService.deleteCountry(countryToDelete.id)
-      
+      const { error: deleteError } = await CountriesService.deleteCountry(
+        countryToDelete.id
+      );
+
       if (deleteError) {
-        throw new Error(deleteError)
+        throw new Error(deleteError);
       }
-      
-      toast.success('Country deleted successfully')
-      refetch()
-      setDeleteDialogOpen(false)
-      setCountryToDelete(null)
+
+      toast.success("Country deleted successfully");
+      refetch();
+      setDeleteDialogOpen(false);
+      setCountryToDelete(null);
     } catch (error: any) {
-      console.error('Error deleting country:', error)
-      toast.error('Failed to delete country: ' + (error.message || 'Unknown error'))
-      setDeleteDialogOpen(false)
-      setCountryToDelete(null)
+      console.error("Error deleting country:", error);
+      toast.error(
+        "Failed to delete country: " + (error.message || "Unknown error")
+      );
+      setDeleteDialogOpen(false);
+      setCountryToDelete(null);
     }
-  }
+  };
 
   const openAddCountryDialog = () => {
-    setAddCountryDialogOpen(true)
-    setNewCountryName('')
-  }
+    setAddCountryDialogOpen(true);
+    setNewCountryName("");
+  };
 
   const handleAddCountry = async () => {
     if (!newCountryName.trim()) {
-      toast.error('Please enter a country name')
-      return
+      toast.error("Please enter a country name");
+      return;
     }
 
-    setAddingCountry(true)
+    setAddingCountry(true);
     try {
       // Add the country to the global locations countries array
       if (globalLocations) {
         // Check if country already exists in the array (case-insensitive comparison)
-        const countryExists = globalLocations.countries.some(country => 
-          country.toLowerCase() === newCountryName.toLowerCase()
-        )
-        
+        const countryExists = globalLocations.countries.some(
+          (country) => country.toLowerCase() === newCountryName.toLowerCase()
+        );
+
         if (!countryExists) {
           // Add new country to existing countries
-          const updatedCountries = [...globalLocations.countries, newCountryName]
-          
+          const updatedCountries = [
+            ...globalLocations.countries,
+            newCountryName,
+          ];
+
           // Update the global locations with the new country list
-          const { error: updateError } = await GlobalLocationsService.updateGlobalLocations(globalLocations.id, {
-            ...globalLocations,
-            countries: updatedCountries
-          })
-          
+          const { error: updateError } =
+            await GlobalLocationsService.updateGlobalLocations(
+              globalLocations.id,
+              {
+                ...globalLocations,
+                countries: updatedCountries,
+              }
+            );
+
           if (updateError) {
-            throw new Error(updateError)
+            throw new Error(updateError);
           }
-          
+
           // Trigger revalidation
-          await GlobalLocationsService.triggerRevalidation('/trade-shows')
-          
-          toast.success('Country added successfully!')
+          await GlobalLocationsService.triggerRevalidation("/trade-shows");
+
+          toast.success("Country added successfully!");
         } else {
-          toast.error('Country already exists!')
+          toast.error("Country already exists!");
         }
       }
 
-      setAddCountryDialogOpen(false)
-      setNewCountryName('')
+      setAddCountryDialogOpen(false);
+      setNewCountryName("");
       // We don't need to refetch countries since we're not adding to the countries table
     } catch (error: any) {
-      console.error('Error adding country:', error)
-      toast.error('Failed to add country: ' + (error.message || 'Unknown error'))
+      console.error("Error adding country:", error);
+      toast.error(
+        "Failed to add country: " + (error.message || "Unknown error")
+      );
     } finally {
-      setAddingCountry(false)
+      setAddingCountry(false);
     }
-  }
+  };
 
   // Filter existing countries for the add dialog
   const existingCountries = useMemo(() => {
-    if (!globalLocations?.countries) return []
-    
-    return globalLocations.countries
-      .sort()
-  }, [globalLocations?.countries])
+    if (!globalLocations?.countries) return [];
+
+    return globalLocations.countries.sort();
+  }, [globalLocations?.countries]);
 
   // Filter countries based on search term in add dialog
   const filteredExistingCountries = useMemo(() => {
-    if (!addCountryDialogOpen || !existingCountries) return []
-    
-    const term = searchTerm.toLowerCase().trim()
-    return existingCountries.filter(country => 
+    if (!addCountryDialogOpen || !existingCountries) return [];
+
+    const term = searchTerm.toLowerCase().trim();
+    return existingCountries.filter((country) =>
       country.toLowerCase().includes(term)
-    )
-  }, [existingCountries, searchTerm, addCountryDialogOpen])
+    );
+  }, [existingCountries, searchTerm, addCountryDialogOpen]);
 
   const openSelectCountryDialog = () => {
-    setSelectCountryDialogOpen(true)
-    setSelectedCountry(null)
-  }
+    setSelectCountryDialogOpen(true);
+    setSelectedCountry(null);
+  };
 
   const handleCreateCountryPage = async () => {
     if (!selectedCountry) {
-      toast.error('Please select a country')
-      return
+      toast.error("Please select a country");
+      return;
     }
 
     // Check if country page already exists (case-insensitive comparison)
-    const countryExists = countries?.some(country => 
-      country.name.toLowerCase() === selectedCountry.toLowerCase()
-    )
+    const countryExists = countries?.some(
+      (country) => country.name.toLowerCase() === selectedCountry.toLowerCase()
+    );
 
     if (countryExists) {
-      toast.error(`Country page for "${selectedCountry}" already exists!`)
-      return
+      toast.error(`Country page for "${selectedCountry}" already exists!`);
+      return;
     }
 
-    setCreatingCountryPage(true)
+    setCreatingCountryPage(true);
     try {
       // Generate slug for the country
-      const slug = `exhibition-stand-builder-${slugify(selectedCountry)}`
-      
+      const slug = `exhibition-stand-builder-${slugify(selectedCountry)}`;
+
       // Create country data with default values
       const countryData = {
         slug,
@@ -263,192 +286,244 @@ export function CountriesAdmin() {
         why_choose_us_title: "Why Choose Us for Exhibition Stands in",
         why_choose_us_subtitle: `${selectedCountry}?`,
         why_choose_us_main_image_url: "",
-        why_choose_us_benefits_html: "<p>Our team of experts brings creativity and innovation to every project, ensuring your brand stands out at every exhibition.</p>",
+        why_choose_us_benefits_html:
+          "<p>Our team of experts brings creativity and innovation to every project, ensuring your brand stands out at every exhibition.</p>",
         what_we_do_title: "WHAT WE DO?",
         what_we_do_subtitle: "WE DO?",
-        what_we_do_description_html: "<p>We specialize in creating custom exhibition stands that perfectly represent your brand and attract your target audience.</p>",
+        what_we_do_description_html:
+          "<p>We specialize in creating custom exhibition stands that perfectly represent your brand and attract your target audience.</p>",
         company_info_title: `DISTINGUISHED EXHIBITION STAND BUILDER IN ${selectedCountry.toUpperCase()}`,
         company_info_content_html: `<p>As a leading exhibition stand builder in ${selectedCountry}, we combine creativity with technical expertise to deliver exceptional results.</p>`,
         best_company_title: `BEST EXHIBITION STAND DESIGN COMPANY IN ${selectedCountry.toUpperCase()} FOR`,
         best_company_subtitle: "EXCEPTIONAL EXPERIENCE",
         best_company_content_html: `<p>Our commitment to excellence has made us the preferred choice for businesses seeking top-quality exhibition stands in ${selectedCountry}.</p>`,
-        process_section_title: "The Art And Science Behind Our Exhibition Stand Design & Build Process",
+        process_section_title:
+          "The Art And Science Behind Our Exhibition Stand Design & Build Process",
         process_section_steps: [
-          {"id": "1", "icon": "💡", "title": "Brief", "description": "Understanding your specific requirements and exhibition goals through detailed briefing sessions."},
-          {"id": "2", "icon": "✏️", "title": "3D Visuals", "description": "Creating realistic 3D visualizations to help you envision your exhibition stand before construction."},
-          {"id": "3", "icon": "🏭", "title": "Production", "description": "Professional manufacturing in our state-of-the-art facilities with quality control at every step."},
-          {"id": "4", "icon": "🚚", "title": "Logistics", "description": "Seamless transportation and delivery to ensure your stand arrives on time and in perfect condition."},
-          {"id": "5", "icon": "🔧", "title": "Installation", "description": "Expert installation team ensures proper setup and functionality of all stand components."},
-          {"id": "6", "icon": "🎯", "title": "Show Support", "description": "Round-the-clock support throughout your exhibition to address any issues immediately."}
+          {
+            id: "1",
+            icon: "💡",
+            title: "Brief",
+            description:
+              "Understanding your specific requirements and exhibition goals through detailed briefing sessions.",
+          },
+          {
+            id: "2",
+            icon: "✏️",
+            title: "3D Visuals",
+            description:
+              "Creating realistic 3D visualizations to help you envision your exhibition stand before construction.",
+          },
+          {
+            id: "3",
+            icon: "🏭",
+            title: "Production",
+            description:
+              "Professional manufacturing in our state-of-the-art facilities with quality control at every step.",
+          },
+          {
+            id: "4",
+            icon: "🚚",
+            title: "Logistics",
+            description:
+              "Seamless transportation and delivery to ensure your stand arrives on time and in perfect condition.",
+          },
+          {
+            id: "5",
+            icon: "🔧",
+            title: "Installation",
+            description:
+              "Expert installation team ensures proper setup and functionality of all stand components.",
+          },
+          {
+            id: "6",
+            icon: "🎯",
+            title: "Show Support",
+            description:
+              "Round-the-clock support throughout your exhibition to address any issues immediately.",
+          },
         ],
         cities_section_title: `EXHIBITION STAND BUILDER IN CITIES OF ${selectedCountry.toUpperCase()}`,
-        cities_section_subtitle: `Explore our services in major cities across ${selectedCountry}`
-      }
+        cities_section_subtitle: `Explore our services in major cities across ${selectedCountry}`,
+      };
 
       // Create the country
-      const { error } = await CountriesService.createCountry(countryData)
-      
+      const { error } = await CountriesService.createCountry(countryData);
+
       if (error) {
-        throw new Error(error)
+        throw new Error(error);
       }
 
       // Trigger revalidation for the new country page
-      await CountriesService.triggerRevalidation(`/${slug}`)
+      await CountriesService.triggerRevalidation(`/${slug}`);
 
-      toast.success('Country page created successfully!')
-      setSelectCountryDialogOpen(false)
-      setSelectedCountry(null)
-      refetch()
+      toast.success("Country page created successfully!");
+      setSelectCountryDialogOpen(false);
+      setSelectedCountry(null);
+      refetch();
     } catch (error: any) {
-      console.error('Error creating country page:', error)
-      toast.error('Failed to create country page: ' + (error.message || 'Unknown error'))
+      console.error("Error creating country page:", error);
+      toast.error(
+        "Failed to create country page: " + (error.message || "Unknown error")
+      );
     } finally {
-      setCreatingCountryPage(false)
+      setCreatingCountryPage(false);
     }
-  }
+  };
 
   const confirmDeleteCountryFromList = (countryName: string) => {
-    setCountryToDeleteFromList(countryName)
-    setDeleteCountryDialogOpen(true)
-  }
+    setCountryToDeleteFromList(countryName);
+    setDeleteCountryDialogOpen(true);
+  };
 
   const handleDeleteCountryFromList = async () => {
     if (!countryToDeleteFromList || !globalLocations) {
-      toast.error('No country selected for deletion')
-      return
+      toast.error("No country selected for deletion");
+      return;
     }
 
     try {
       // Remove country from global locations countries array
-      const updatedCountries = globalLocations.countries.filter(country => 
-        country.toLowerCase() !== countryToDeleteFromList.toLowerCase()
-      )
-      
+      const updatedCountries = globalLocations.countries.filter(
+        (country) =>
+          country.toLowerCase() !== countryToDeleteFromList.toLowerCase()
+      );
+
       // Update the global locations with the new country list
-      const { error: updateError } = await GlobalLocationsService.updateGlobalLocations(globalLocations.id, {
-        ...globalLocations,
-        countries: updatedCountries
-      })
-      
+      const { error: updateError } =
+        await GlobalLocationsService.updateGlobalLocations(globalLocations.id, {
+          ...globalLocations,
+          countries: updatedCountries,
+        });
+
       if (updateError) {
-        throw new Error(updateError)
+        throw new Error(updateError);
       }
-      
+
       // Trigger revalidation
-      await GlobalLocationsService.triggerRevalidation('/trade-shows')
-      
-      toast.success(`Country "${countryToDeleteFromList}" removed successfully!`)
-      
+      await GlobalLocationsService.triggerRevalidation("/trade-shows");
+
+      toast.success(
+        `Country "${countryToDeleteFromList}" removed successfully!`
+      );
+
       // If this was the selected country, clear the selection
       if (selectedCountry === countryToDeleteFromList) {
-        setSelectedCountry(null)
+        setSelectedCountry(null);
       }
-      
+
       // Close the dialog and clear the country to delete
-      setDeleteCountryDialogOpen(false)
-      setCountryToDeleteFromList(null)
+      setDeleteCountryDialogOpen(false);
+      setCountryToDeleteFromList(null);
     } catch (error: any) {
-      console.error('Error removing country:', error)
-      toast.error('Failed to remove country: ' + (error.message || 'Unknown error'))
-      setDeleteCountryDialogOpen(false)
-      setCountryToDeleteFromList(null)
+      console.error("Error removing country:", error);
+      toast.error(
+        "Failed to remove country: " + (error.message || "Unknown error")
+      );
+      setDeleteCountryDialogOpen(false);
+      setCountryToDeleteFromList(null);
     }
-  }
+  };
 
   // Filter available countries for the dialog
   const availableCountries = useMemo(() => {
-    if (!globalLocations?.countries) return []
-    
+    if (!globalLocations?.countries) return [];
+
     return globalLocations.countries
-      .filter(country => !countries?.some(c => c.name.toLowerCase() === country.toLowerCase()))
-      .sort()
-  }, [globalLocations?.countries, countries])
+      .filter(
+        (country) =>
+          !countries?.some(
+            (c) => c.name.toLowerCase() === country.toLowerCase()
+          )
+      )
+      .sort();
+  }, [globalLocations?.countries, countries]);
 
   // Filter countries based on search term in dialog
   const filteredAvailableCountries = useMemo(() => {
-    if (!selectCountryDialogOpen || !availableCountries) return []
-    
-    const term = searchTerm.toLowerCase().trim()
-    return availableCountries.filter(country => 
+    if (!selectCountryDialogOpen || !availableCountries) return [];
+
+    const term = searchTerm.toLowerCase().trim();
+    return availableCountries.filter((country) =>
       country.toLowerCase().includes(term)
-    )
-  }, [availableCountries, searchTerm, selectCountryDialogOpen])
+    );
+  }, [availableCountries, searchTerm, selectCountryDialogOpen]);
 
   // Pagination functions
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
+      setCurrentPage(page);
     }
-  }
+  };
 
   const renderPaginationItems = () => {
-    const items = []
-    
+    const items = [];
+
     // Always show first page
     items.push(
       <PaginationItem key={1}>
-        <PaginationLink 
-          onClick={() => goToPage(1)} 
+        <PaginationLink
+          onClick={() => goToPage(1)}
           isActive={currentPage === 1}
         >
           1
         </PaginationLink>
       </PaginationItem>
-    )
-    
-    if (totalPages <= 1) return items
-    
+    );
+
+    if (totalPages <= 1) return items;
+
     // Show ellipsis if there are pages between first and current range
     if (currentPage > 3) {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Show pages around current page
-    const startPage = Math.max(2, currentPage - 1)
-    const endPage = Math.min(totalPages - 1, currentPage + 1)
-    
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
-          <PaginationLink 
-            onClick={() => goToPage(i)} 
+          <PaginationLink
+            onClick={() => goToPage(i)}
             isActive={currentPage === i}
           >
             {i}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Show ellipsis if there are pages between current range and last
     if (currentPage < totalPages - 2) {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Always show last page if there's more than one page
     if (totalPages > 1) {
       items.push(
         <PaginationItem key={totalPages}>
-          <PaginationLink 
-            onClick={() => goToPage(totalPages)} 
+          <PaginationLink
+            onClick={() => goToPage(totalPages)}
             isActive={currentPage === totalPages}
           >
             {totalPages}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
-    
-    return items
-  }
+
+    return items;
+  };
 
   if (loading) {
     return (
@@ -462,7 +537,7 @@ export function CountriesAdmin() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -470,27 +545,31 @@ export function CountriesAdmin() {
       <div className="p-8 text-center text-red-600">
         Error loading countries: {error}
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-6 w-full">
       {/* Add Country Dialog */}
-      <Dialog open={addCountryDialogOpen} onOpenChange={(open) => {
-        setAddCountryDialogOpen(open)
-        if (!open) {
-          setSearchTerm('')
-          setNewCountryName('')
-        }
-      }}>
+      <Dialog
+        open={addCountryDialogOpen}
+        onOpenChange={(open) => {
+          setAddCountryDialogOpen(open);
+          if (!open) {
+            setSearchTerm("");
+            setNewCountryName("");
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Add New Country</DialogTitle>
             <DialogDescription>
-              Add a new country to the global locations list. This country will be available for creating country pages.
+              Add a new country to the global locations list. This country will
+              be available for creating country pages.
             </DialogDescription>
           </DialogHeader>
-          
+
           {/* Add New Country Input */}
           <div className="grid gap-4 py-2">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -507,7 +586,7 @@ export function CountriesAdmin() {
               </div>
             </div>
           </div>
-          
+
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -518,7 +597,7 @@ export function CountriesAdmin() {
               className="pl-8"
             />
           </div>
-          
+
           {/* Existing Countries List */}
           <div className="flex-1 overflow-y-auto border rounded-md max-h-[300px] mt-2">
             <div className="p-2 bg-gray-100 text-sm font-medium border-b">
@@ -527,7 +606,7 @@ export function CountriesAdmin() {
             {filteredExistingCountries.length > 0 ? (
               <div className="divide-y">
                 {filteredExistingCountries.map((country, index) => (
-                  <div 
+                  <div
                     key={index}
                     className="p-3 cursor-pointer hover:bg-gray-50"
                   >
@@ -540,37 +619,45 @@ export function CountriesAdmin() {
               </div>
             ) : (
               <div className="p-8 text-center text-gray-500">
-                {searchTerm ? 'No countries match your search' : 'No existing countries'}
+                {searchTerm
+                  ? "No countries match your search"
+                  : "No existing countries"}
               </div>
             )}
           </div>
-          
+
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => {
-              setAddCountryDialogOpen(false)
-              setSearchTerm('')
-              setNewCountryName('')
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setAddCountryDialogOpen(false);
+                setSearchTerm("");
+                setNewCountryName("");
+              }}
+            >
               Cancel
             </Button>
-            <Button 
-              onClick={handleAddCountry} 
+            <Button
+              onClick={handleAddCountry}
               disabled={addingCountry || !newCountryName.trim()}
             >
-              {addingCountry ? 'Adding...' : 'Add Country'}
+              {addingCountry ? "Adding..." : "Add Country"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Select Country Dialog */}
-      <Dialog open={selectCountryDialogOpen} onOpenChange={(open) => {
-        setSelectCountryDialogOpen(open)
-        if (!open) {
-          setSearchTerm('')
-          setSelectedCountry(null)
-        }
-      }}>
+      <Dialog
+        open={selectCountryDialogOpen}
+        onOpenChange={(open) => {
+          setSelectCountryDialogOpen(open);
+          if (!open) {
+            setSearchTerm("");
+            setSelectedCountry(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Create Country Page</DialogTitle>
@@ -578,7 +665,7 @@ export function CountriesAdmin() {
               Select a country from the list below to create a new country page.
             </DialogDescription>
           </DialogHeader>
-          
+
           {/* Search Bar */}
           <div className="relative mb-4">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -589,30 +676,42 @@ export function CountriesAdmin() {
               className="pl-8"
             />
           </div>
-          
+
           {/* Countries List */}
           <div className="flex-1 overflow-y-auto border rounded-md max-h-[400px]">
             {filteredAvailableCountries.length > 0 ? (
               <div className="divide-y">
                 {filteredAvailableCountries.map((country) => (
-                  <div 
+                  <div
                     key={country}
                     className={`p-3 flex items-center justify-between ${
-                      selectedCountry === country ? 'bg-green-50 border-l-4 border-green-500' : 'hover:bg-gray-50'
+                      selectedCountry === country
+                        ? "bg-green-50 border-l-4 border-green-500"
+                        : "hover:bg-gray-50"
                     }`}
                   >
-                    <div 
+                    <div
                       className="flex items-center cursor-pointer flex-1"
                       onClick={() => setSelectedCountry(country)}
                     >
-                      <div className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
-                        selectedCountry === country ? 'bg-green-500 border-green-500' : 'border-gray-300'
-                      }`}>
+                      <div
+                        className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
+                          selectedCountry === country
+                            ? "bg-green-500 border-green-500"
+                            : "border-gray-300"
+                        }`}
+                      >
                         {selectedCountry === country && (
                           <div className="w-2 h-2 rounded-full bg-white"></div>
                         )}
                       </div>
-                      <span className={selectedCountry === country ? 'font-medium' : ''}>{country}</span>
+                      <span
+                        className={
+                          selectedCountry === country ? "font-medium" : ""
+                        }
+                      >
+                        {country}
+                      </span>
                     </div>
                     <Button
                       variant="ghost"
@@ -631,58 +730,64 @@ export function CountriesAdmin() {
               </div>
             ) : (
               <div className="p-8 text-center text-gray-500">
-                {searchTerm ? 'No countries match your search' : 'No available countries'}
+                {searchTerm
+                  ? "No countries match your search"
+                  : "No available countries"}
               </div>
             )}
           </div>
-          
+
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => {
-              setSelectCountryDialogOpen(false)
-              setSearchTerm('')
-              setSelectedCountry(null)
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectCountryDialogOpen(false);
+                setSearchTerm("");
+                setSelectedCountry(null);
+              }}
+            >
               Cancel
             </Button>
-            <Button 
-              onClick={handleCreateCountryPage} 
+            <Button
+              onClick={handleCreateCountryPage}
               disabled={creatingCountryPage || !selectedCountry}
             >
-              {creatingCountryPage ? 'Creating...' : 'Create Page'}
+              {creatingCountryPage ? "Creating..." : "Create Page"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Country From List Confirmation Dialog */}
-      <Dialog open={deleteCountryDialogOpen} onOpenChange={(open) => {
-        setDeleteCountryDialogOpen(open)
-        if (!open) {
-          setCountryToDeleteFromList(null)
-        }
-      }}>
+      <Dialog
+        open={deleteCountryDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteCountryDialogOpen(open);
+          if (!open) {
+            setCountryToDeleteFromList(null);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Removal</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove "{countryToDeleteFromList}" from the available countries list? 
-              This will not delete any existing country pages.
+              Are you sure you want to remove "{countryToDeleteFromList}" from
+              the available countries list? This will not delete any existing
+              country pages.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
-                setDeleteCountryDialogOpen(false)
-                setCountryToDeleteFromList(null)
+                setDeleteCountryDialogOpen(false);
+                setCountryToDeleteFromList(null);
               }}
             >
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteCountryFromList}
-            >
+            <Button variant="destructive" onClick={handleDeleteCountryFromList}>
               Remove
             </Button>
           </DialogFooter>
@@ -695,12 +800,15 @@ export function CountriesAdmin() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the country "{countryToDelete?.name}"? 
-              This action cannot be undone.
+              Are you sure you want to delete the country "
+              {countryToDelete?.name}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteCountry}>
@@ -747,11 +855,7 @@ export function CountriesAdmin() {
           )}
         </div>
         {searchTerm && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setSearchTerm('')}
-          >
+          <Button variant="outline" size="sm" onClick={() => setSearchTerm("")}>
             Clear
           </Button>
         )}
@@ -763,8 +867,13 @@ export function CountriesAdmin() {
           <h2 className="text-lg font-semibold text-gray-900">Countries</h2>
           <p className="text-sm text-gray-600 mt-1">
             {searchTerm
-              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''}${searchTerm ? ` for "${searchTerm}"` : ''}`
-              : `Showing ${Math.min(displayCountries.length, pageSize)} of ${totalCount} countries`}
+              ? `Found ${displayTotalCount} result${
+                  displayTotalCount !== 1 ? "s" : ""
+                }${searchTerm ? ` for "${searchTerm}"` : ""}`
+              : `Showing ${Math.min(
+                  displayCountries.length,
+                  pageSize
+                )} of ${totalCount} countries`}
           </p>
         </div>
 
@@ -782,20 +891,20 @@ export function CountriesAdmin() {
             {displayCountries.map((country, index) => (
               <TableRow key={country.id}>
                 <TableCell className="font-medium">
-                  {searchTerm 
-                    ? displayTotalCount - index 
-                    : totalCount - ((currentPage - 1) * pageSize) - index}
+                  {searchTerm
+                    ? displayTotalCount - index
+                    : totalCount - (currentPage - 1) * pageSize - index}
                 </TableCell>
                 <TableCell className="font-medium">{country.name}</TableCell>
                 <TableCell>{country.slug}</TableCell>
                 <TableCell>
-                  {country.updated_at 
-                    ? new Date(country.updated_at).toLocaleDateString() 
-                    : 'N/A'}
+                  {country.updated_at
+                    ? new Date(country.updated_at).toLocaleDateString()
+                    : "N/A"}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <a 
+                    <a
                       href={`${websiteUrl}/${country.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -805,10 +914,7 @@ export function CountriesAdmin() {
                     </a>
                     <a
                       href={`/admin/admin/countries/${country.id}/edit`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleEditCountry(country.id);
-                      }}
+                      target="_blank"
                       className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     >
                       <Edit className="h-4 w-4" />
@@ -816,7 +922,9 @@ export function CountriesAdmin() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => confirmDeleteCountry(country.id, country.name)}
+                      onClick={() =>
+                        confirmDeleteCountry(country.id, country.name)
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -830,7 +938,9 @@ export function CountriesAdmin() {
         {displayCountries.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
-              {searchTerm ? 'No countries found matching your search' : 'No countries found'}
+              {searchTerm
+                ? "No countries found matching your search"
+                : "No countries found"}
             </p>
             {!searchTerm && (
               <Button
@@ -851,16 +961,16 @@ export function CountriesAdmin() {
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
               />
             </PaginationItem>
-            
+
             {renderPaginationItems()}
-            
+
             <PaginationItem>
-              <PaginationNext 
+              <PaginationNext
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
               />
@@ -869,5 +979,5 @@ export function CountriesAdmin() {
         </Pagination>
       )}
     </div>
-  )
+  );
 }

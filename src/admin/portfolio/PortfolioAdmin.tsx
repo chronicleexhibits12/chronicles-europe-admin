@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Upload, Trash2, Image, Edit, Check, X } from 'lucide-react'
-import { PortfolioService } from '@/data/portfolioService'
-import type { PortfolioPage, PortfolioItem } from '@/data/portfolioTypes'
-import { TagInput } from '@/components/ui/tag-input'
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Plus, Upload, Trash2, Image, Edit, Check, X } from "lucide-react";
+import { PortfolioService } from "@/data/portfolioService";
+import type { PortfolioPage, PortfolioItem } from "@/data/portfolioTypes";
+import { TagInput } from "@/components/ui/tag-input";
 import {
   Table,
   TableBody,
@@ -16,7 +16,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   Pagination,
   PaginationContent,
@@ -25,348 +25,365 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination'
+} from "@/components/ui/pagination";
 
 export function PortfolioAdmin() {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [portfolio, setPortfolio] = useState<PortfolioPage | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [portfolio, setPortfolio] = useState<PortfolioPage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   // Form fields
-  const [heroTitle, setHeroTitle] = useState('')
-  const [heroBackgroundImageAlt, setHeroBackgroundImageAlt] = useState('')
-  const [portfolioTitle, setPortfolioTitle] = useState('')
-  const [portfolioSubtitle, setPortfolioSubtitle] = useState('')
-  const [seoTitle, setSeoTitle] = useState('')
-  const [seoDescription, setSeoDescription] = useState('')
-  const [seoKeywordsArray, setSeoKeywordsArray] = useState<string[]>([])
-  
+  const [heroTitle, setHeroTitle] = useState("");
+  const [heroBackgroundImageAlt, setHeroBackgroundImageAlt] = useState("");
+  const [portfolioTitle, setPortfolioTitle] = useState("");
+  const [portfolioSubtitle, setPortfolioSubtitle] = useState("");
+  const [seoTitle, setSeoTitle] = useState("");
+  const [seoDescription, setSeoDescription] = useState("");
+  const [seoKeywordsArray, setSeoKeywordsArray] = useState<string[]>([]);
+
   // New item form
-  const [newItemImage, setNewItemImage] = useState('')
-  const [newItemAlt, setNewItemAlt] = useState('')
-  
+  const [newItemImage, setNewItemImage] = useState("");
+  const [newItemAlt, setNewItemAlt] = useState("");
+
   // Edit item dialog
-  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
-  const [editingItemAlt, setEditingItemAlt] = useState('')
+  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
+  const [editingItemAlt, setEditingItemAlt] = useState("");
 
   // Calculate total pages for pagination
   const totalPages = useMemo(() => {
-    if (!portfolio?.items) return 0
-    return Math.ceil(portfolio.items.length / pageSize)
-  }, [portfolio?.items, pageSize])
+    if (!portfolio?.items) return 0;
+    return Math.ceil(portfolio.items.length / pageSize);
+  }, [portfolio?.items, pageSize]);
 
   // Get current page items
   const currentItems = useMemo(() => {
-    if (!portfolio?.items) return []
-    const startIndex = (currentPage - 1) * pageSize
-    const endIndex = startIndex + pageSize
-    return portfolio.items.slice(startIndex, endIndex)
-  }, [portfolio?.items, currentPage, pageSize])
+    if (!portfolio?.items) return [];
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return portfolio.items.slice(startIndex, endIndex);
+  }, [portfolio?.items, currentPage, pageSize]);
 
   // Load portfolio data
   useEffect(() => {
-    loadPortfolioData()
-  }, [])
+    loadPortfolioData();
+  }, []);
 
   const loadPortfolioData = async () => {
     try {
-      setLoading(true)
-      const { data, error } = await PortfolioService.getPortfolioPage()
-      
+      setLoading(true);
+      const { data, error } = await PortfolioService.getPortfolioPage();
+
       if (error) {
-        setError(error)
-        return
+        setError(error);
+        return;
       }
-      
+
       if (data) {
-        setPortfolio(data)
-        setHeroTitle(data.hero.title)
-        setHeroBackgroundImageAlt(data.hero.backgroundImageAlt || '')
-        setPortfolioTitle(data.portfolio.title)
-        setPortfolioSubtitle(data.portfolio.subtitle)
-        setSeoTitle(data.seo.title)
-        setSeoDescription(data.seo.description)
-        setSeoKeywordsArray(data.seo.keywords ? data.seo.keywords.split(',').map(k => k.trim()).filter(k => k) : [])
+        setPortfolio(data);
+        setHeroTitle(data.hero.title);
+        setHeroBackgroundImageAlt(data.hero.backgroundImageAlt || "");
+        setPortfolioTitle(data.portfolio.title);
+        setPortfolioSubtitle(data.portfolio.subtitle);
+        setSeoTitle(data.seo.title);
+        setSeoDescription(data.seo.description);
+        setSeoKeywordsArray(
+          data.seo.keywords
+            ? data.seo.keywords
+                .split(",")
+                .map((k) => k.trim())
+                .filter((k) => k)
+            : []
+        );
       }
     } catch (err) {
-      setError('Failed to load portfolio data')
+      setError("Failed to load portfolio data");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSave = async () => {
-    if (!portfolio) return
-    
+    if (!portfolio) return;
+
     try {
-      setSaving(true)
-      setError(null)
-      setSuccess(null)
-      
+      setSaving(true);
+      setError(null);
+      setSuccess(null);
+
       const updatedData = {
         hero: {
           title: heroTitle,
           backgroundImage: portfolio.hero.backgroundImage, // Keep existing background image
-          backgroundImageAlt: heroBackgroundImageAlt
+          backgroundImageAlt: heroBackgroundImageAlt,
         },
         portfolio: {
           title: portfolioTitle,
-          subtitle: portfolioSubtitle
+          subtitle: portfolioSubtitle,
         },
         seo: {
           title: seoTitle,
           description: seoDescription,
-          keywords: seoKeywordsArray.join(', ')
-        }
-      }
-      
-      const { error } = await PortfolioService.updatePortfolioPage(updatedData)
-      
+          keywords: seoKeywordsArray.join(", "),
+        },
+      };
+
+      const { error } = await PortfolioService.updatePortfolioPage(updatedData);
+
       if (error) {
-        setError(error)
+        setError(error);
       } else {
-        setSuccess('Portfolio updated successfully')
-        loadPortfolioData() // Reload to get updated data
+        setSuccess("Portfolio updated successfully");
+        loadPortfolioData(); // Reload to get updated data
       }
     } catch (err) {
-      setError('Failed to update portfolio')
+      setError("Failed to update portfolio");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleAddItem = async () => {
     if (!newItemImage) {
-      setError('Please provide an image')
-      return
+      setError("Please provide an image");
+      return;
     }
-    
+
     try {
-      setSaving(true)
-      setError(null)
-      setSuccess(null)
-      
+      setSaving(true);
+      setError(null);
+      setSuccess(null);
+
       // Always set featured to false since we're removing this functionality
       const newItem: PortfolioItem = {
         image: newItemImage,
-        featured: false
-      }
-      
-      const { error: addItemError } = await PortfolioService.addPortfolioItem(newItem)
-      
+        featured: false,
+      };
+
+      const { error: addItemError } = await PortfolioService.addPortfolioItem(
+        newItem
+      );
+
       if (addItemError) {
-        setError(addItemError)
-        setSaving(false)
-        return
+        setError(addItemError);
+        setSaving(false);
+        return;
       }
-      
+
       // Update alt texts to include the new alt text
-      const { data: updatedPortfolio } = await PortfolioService.getPortfolioPage()
+      const { data: updatedPortfolio } =
+        await PortfolioService.getPortfolioPage();
       if (updatedPortfolio) {
-        const currentItemsAlt = updatedPortfolio.itemsAlt || []
-        const updatedItemsAlt = [newItemAlt, ...currentItemsAlt]
-        
-        const { error: updateAltError } = await PortfolioService.updatePortfolioPage({
-          itemsAlt: updatedItemsAlt
-        })
-        
+        const currentItemsAlt = updatedPortfolio.itemsAlt || [];
+        const updatedItemsAlt = [newItemAlt, ...currentItemsAlt];
+
+        const { error: updateAltError } =
+          await PortfolioService.updatePortfolioPage({
+            itemsAlt: updatedItemsAlt,
+          });
+
         if (updateAltError) {
-          setError(updateAltError)
+          setError(updateAltError);
         } else {
-          setSuccess('Portfolio item added successfully')
-          setNewItemImage('')
-          setNewItemAlt('')
-          loadPortfolioData() // Reload to get updated data
+          setSuccess("Portfolio item added successfully");
+          setNewItemImage("");
+          setNewItemAlt("");
+          loadPortfolioData(); // Reload to get updated data
         }
       }
     } catch (err) {
-      setError('Failed to add portfolio item')
+      setError("Failed to add portfolio item");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleDeleteItem = async (index: number) => {
     try {
-      setSaving(true)
-      setError(null)
-      setSuccess(null)
-      
+      setSaving(true);
+      setError(null);
+      setSuccess(null);
+
       // Get the image URL to delete from storage
       if (portfolio?.items[index]) {
-        const imageUrl = portfolio.items[index].image
+        const imageUrl = portfolio.items[index].image;
         // Delete the image from storage
-        await PortfolioService.deleteImage(imageUrl)
+        await PortfolioService.deleteImage(imageUrl);
       }
-      
-      const { error } = await PortfolioService.deletePortfolioItem(index)
-      
+
+      const { error } = await PortfolioService.deletePortfolioItem(index);
+
       if (error) {
-        setError(error)
+        setError(error);
       } else {
-        setSuccess('Portfolio item deleted successfully')
-        loadPortfolioData() // Reload to get updated data
+        setSuccess("Portfolio item deleted successfully");
+        loadPortfolioData(); // Reload to get updated data
         // Reset to first page if we're on the last page and it becomes empty
-        if (currentPage > 1 && currentItems.length === 1 && totalPages === currentPage) {
-          setCurrentPage(currentPage - 1)
+        if (
+          currentPage > 1 &&
+          currentItems.length === 1 &&
+          totalPages === currentPage
+        ) {
+          setCurrentPage(currentPage - 1);
         }
       }
     } catch (err) {
-      setError('Failed to delete portfolio item')
+      setError("Failed to delete portfolio item");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
     try {
-      setSaving(true)
-      setError(null)
-      
-      const { data, error } = await PortfolioService.uploadImage(file)
-      
+      setSaving(true);
+      setError(null);
+
+      const { data, error } = await PortfolioService.uploadImage(file);
+
       if (error) {
-        setError(error)
+        setError(error);
       } else if (data) {
-        setNewItemImage(data)
-        setSuccess('Image uploaded successfully')
+        setNewItemImage(data);
+        setSuccess("Image uploaded successfully");
       }
     } catch (err) {
-      setError('Failed to upload image')
+      setError("Failed to upload image");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const triggerFileInput = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.click()
+      fileInputRef.current.click();
     }
-  }
+  };
 
   const handleKeywordsChange = (keywords: string[]) => {
-    setSeoKeywordsArray(keywords)
-  }
-  
+    setSeoKeywordsArray(keywords);
+  };
+
   // Handle edit item alt text
   const handleEditItemAlt = async (index: number, newAltText: string) => {
     try {
-      setSaving(true)
-      setError(null)
-      setSuccess(null)
-      
+      setSaving(true);
+      setError(null);
+      setSuccess(null);
+
       // Update the alt text for the specific item
-      const updatedItemsAlt = [...(portfolio?.itemsAlt || [])]
-      updatedItemsAlt[index] = newAltText
-      
+      const updatedItemsAlt = [...(portfolio?.itemsAlt || [])];
+      updatedItemsAlt[index] = newAltText;
+
       const { error } = await PortfolioService.updatePortfolioPage({
-        itemsAlt: updatedItemsAlt
-      })
-      
+        itemsAlt: updatedItemsAlt,
+      });
+
       if (error) {
-        setError(error)
+        setError(error);
       } else {
-        setSuccess('Alt text updated successfully')
+        setSuccess("Alt text updated successfully");
         // Update the local state to reflect the change
-        setPortfolio(prev => {
-          if (!prev) return prev
-          const newItemsAlt = [...(prev.itemsAlt || [])]
-          newItemsAlt[index] = newAltText
-          return { ...prev, itemsAlt: newItemsAlt }
-        })
+        setPortfolio((prev) => {
+          if (!prev) return prev;
+          const newItemsAlt = [...(prev.itemsAlt || [])];
+          newItemsAlt[index] = newAltText;
+          return { ...prev, itemsAlt: newItemsAlt };
+        });
       }
     } catch (err) {
-      setError('Failed to update alt text')
+      setError("Failed to update alt text");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   // Pagination functions
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
+      setCurrentPage(page);
     }
-  }
+  };
 
   const renderPaginationItems = () => {
-    const items = []
-    
+    const items = [];
+
     // Always show first page
     items.push(
       <PaginationItem key={1}>
-        <PaginationLink 
-          onClick={() => goToPage(1)} 
+        <PaginationLink
+          onClick={() => goToPage(1)}
           isActive={currentPage === 1}
         >
           1
         </PaginationLink>
       </PaginationItem>
-    )
-    
-    if (totalPages <= 1) return items
-    
+    );
+
+    if (totalPages <= 1) return items;
+
     // Show ellipsis if there are pages between first and current range
     if (currentPage > 3) {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Show pages around current page
-    const startPage = Math.max(2, currentPage - 1)
-    const endPage = Math.min(totalPages - 1, currentPage + 1)
-    
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
-          <PaginationLink 
-            onClick={() => goToPage(i)} 
+          <PaginationLink
+            onClick={() => goToPage(i)}
             isActive={currentPage === i}
           >
             {i}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Show ellipsis if there are pages between current range and last
     if (currentPage < totalPages - 2) {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Always show last page if there's more than one page
     if (totalPages > 1) {
       items.push(
         <PaginationItem key={totalPages}>
-          <PaginationLink 
-            onClick={() => goToPage(totalPages)} 
+          <PaginationLink
+            onClick={() => goToPage(totalPages)}
             isActive={currentPage === totalPages}
           >
             {totalPages}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
-    
-    return items
-  }
+
+    return items;
+  };
 
   if (loading) {
     return (
@@ -380,7 +397,7 @@ export function PortfolioAdmin() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -388,7 +405,7 @@ export function PortfolioAdmin() {
       <Alert variant="destructive">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   if (!portfolio) {
@@ -396,7 +413,7 @@ export function PortfolioAdmin() {
       <Alert>
         <AlertDescription>No portfolio data found</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   return (
@@ -404,13 +421,15 @@ export function PortfolioAdmin() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Portfolio Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            Portfolio Management
+          </h1>
           <p className="text-muted-foreground mt-2">
             Manage your portfolio page content and images
           </p>
         </div>
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
 
@@ -442,7 +461,9 @@ export function PortfolioAdmin() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="heroBackgroundImageAlt">Hero Background Image Alt Text</Label>
+            <Label htmlFor="heroBackgroundImageAlt">
+              Hero Background Image Alt Text
+            </Label>
             <Input
               id="heroBackgroundImageAlt"
               value={heroBackgroundImageAlt}
@@ -468,7 +489,7 @@ export function PortfolioAdmin() {
               placeholder="Our Portfolio"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="portfolioSubtitle">Subtitle</Label>
             <Textarea
@@ -493,8 +514,8 @@ export function PortfolioAdmin() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Image</Label>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full h-10 px-3 justify-start text-left font-normal"
                   onClick={triggerFileInput}
                 >
@@ -509,21 +530,21 @@ export function PortfolioAdmin() {
                   className="hidden"
                 />
               </div>
-              
+
               {/* Image Preview */}
               {newItemImage && (
                 <div className="mt-2">
                   <Label>Preview</Label>
                   <div className="mt-1 border rounded-md overflow-hidden">
-                    <img 
-                      src={newItemImage} 
-                      alt="New portfolio item preview" 
+                    <img
+                      src={newItemImage}
+                      alt="New portfolio item preview"
                       className="w-full h-48 object-cover"
                     />
                   </div>
                 </div>
               )}
-              
+
               {/* Alt Text for New Item */}
               <div className="space-y-2">
                 <Label htmlFor="newItemAlt">Alt Text</Label>
@@ -534,8 +555,11 @@ export function PortfolioAdmin() {
                   placeholder="Describe the portfolio item image"
                 />
               </div>
-              
-              <Button onClick={handleAddItem} disabled={saving || !newItemImage}>
+
+              <Button
+                onClick={handleAddItem}
+                disabled={saving || !newItemImage}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Item
               </Button>
@@ -555,23 +579,31 @@ export function PortfolioAdmin() {
               <TableBody>
                 {currentItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                    <TableCell
+                      colSpan={3}
+                      className="text-center py-8 text-muted-foreground"
+                    >
                       <Image className="h-12 w-12 mx-auto text-gray-400" />
                       <p className="mt-2">No portfolio items found</p>
-                      <p className="text-sm">Add your first portfolio item using the form above</p>
+                      <p className="text-sm">
+                        Add your first portfolio item using the form above
+                      </p>
                     </TableCell>
                   </TableRow>
                 ) : (
                   currentItems.map((item, index) => {
                     // Calculate the global index for the item in the entire portfolio
-                    const globalIndex = (currentPage - 1) * pageSize + index
+                    const globalIndex = (currentPage - 1) * pageSize + index;
                     return (
                       <TableRow key={globalIndex}>
                         <TableCell>
                           <div className="flex items-center justify-center">
-                            <img 
-                              src={item.image} 
-                              alt={portfolio.itemsAlt?.[globalIndex] || `Portfolio item ${globalIndex + 1}`}
+                            <img
+                              src={item.image}
+                              alt={
+                                portfolio.itemsAlt?.[globalIndex] ||
+                                `Portfolio item ${globalIndex + 1}`
+                              }
                               className="w-16 h-16 object-cover rounded-md border"
                             />
                           </div>
@@ -581,7 +613,9 @@ export function PortfolioAdmin() {
                             <div className="flex items-center space-x-2">
                               <Input
                                 value={editingItemAlt}
-                                onChange={(e) => setEditingItemAlt(e.target.value)}
+                                onChange={(e) =>
+                                  setEditingItemAlt(e.target.value)
+                                }
                                 placeholder="Enter alt text"
                                 className="flex-1"
                               />
@@ -589,8 +623,11 @@ export function PortfolioAdmin() {
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => {
-                                  handleEditItemAlt(globalIndex, editingItemAlt)
-                                  setEditingItemIndex(null)
+                                  handleEditItemAlt(
+                                    globalIndex,
+                                    editingItemAlt
+                                  );
+                                  setEditingItemIndex(null);
                                 }}
                               >
                                 <Check className="h-4 w-4" />
@@ -606,15 +643,19 @@ export function PortfolioAdmin() {
                           ) : (
                             <div className="flex items-center space-x-2">
                               <span className="max-w-xs truncate text-sm text-muted-foreground">
-                                {portfolio.itemsAlt?.[globalIndex] || 'No alt text'}
+                                {portfolio.itemsAlt?.[globalIndex] ||
+                                  "No alt text"}
                               </span>
                               <a
                                 href="#"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  setEditingItemIndex(globalIndex)
-                                  setEditingItemAlt(portfolio.itemsAlt?.[globalIndex] || '')
+                                  setEditingItemIndex(globalIndex);
+                                  setEditingItemAlt(
+                                    portfolio.itemsAlt?.[globalIndex] || ""
+                                  );
                                 }}
+                                target="_blank"
                                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                               >
                                 <Edit className="h-4 w-4" />
@@ -623,8 +664,8 @@ export function PortfolioAdmin() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="destructive"
                             onClick={() => handleDeleteItem(globalIndex)}
                             disabled={saving}
@@ -634,28 +675,28 @@ export function PortfolioAdmin() {
                           </Button>
                         </TableCell>
                       </TableRow>
-                    )
+                    );
                   })
                 )}
               </TableBody>
             </Table>
           </div>
-          
+
           {/* Pagination */}
           {totalPages > 1 && (
             <Pagination className="mt-6">
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious 
+                  <PaginationPrevious
                     onClick={() => goToPage(currentPage - 1)}
                     disabled={currentPage === 1}
                   />
                 </PaginationItem>
-                
+
                 {renderPaginationItems()}
-                
+
                 <PaginationItem>
-                  <PaginationNext 
+                  <PaginationNext
                     onClick={() => goToPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
                   />
@@ -681,7 +722,7 @@ export function PortfolioAdmin() {
               placeholder="Our Portfolio - Company Name"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="seoDescription">SEO Description</Label>
             <Textarea
@@ -691,7 +732,7 @@ export function PortfolioAdmin() {
               placeholder="Explore our portfolio of work..."
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="seoKeywords">SEO Keywords</Label>
             <TagInput
@@ -700,11 +741,12 @@ export function PortfolioAdmin() {
               placeholder="Type keywords and press Enter"
             />
             <p className="text-sm text-muted-foreground mt-1">
-              Press Enter, comma, or semicolon after typing each keyword to add it
+              Press Enter, comma, or semicolon after typing each keyword to add
+              it
             </p>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

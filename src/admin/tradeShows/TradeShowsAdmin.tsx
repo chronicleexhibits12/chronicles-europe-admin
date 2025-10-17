@@ -1,23 +1,23 @@
-import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table'
-import { 
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Pagination,
   PaginationContent,
@@ -26,200 +26,237 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination'
-import { Plus, Edit, Trash2, Eye, Download, Search, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { useTradeShows } from '@/hooks/useTradeShowsContent'
-import { TradeShowsService } from '@/data/tradeShowsService'
-import * as XLSX from 'xlsx'
+} from "@/components/ui/pagination";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Download,
+  Search,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useTradeShows } from "@/hooks/useTradeShowsContent";
+import { TradeShowsService } from "@/data/tradeShowsService";
+import * as XLSX from "xlsx";
 
 export function TradeShowsAdmin() {
-  const navigate = useNavigate()
-  const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
-  const { data: tradeShows, totalCount, loading, error, refetch } = useTradeShows(currentPage, pageSize)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [tradeShowToDelete, setTradeShowToDelete] = useState<{id: string, title: string} | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [updatingShowId, setUpdatingShowId] = useState<string | null>(null)
-  const [exportDialogOpen, setExportDialogOpen] = useState(false)
-  const [startDateFilter, setStartDateFilter] = useState('')
-  const [endDateFilter, setEndDateFilter] = useState('')
-  const [allTradeShows, setAllTradeShows] = useState<any[]>([])
-  const [searchLoading, setSearchLoading] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<'all' | 'expired' | 'upcoming'>('all')
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const {
+    data: tradeShows,
+    totalCount,
+    loading,
+    error,
+    refetch,
+  } = useTradeShows(currentPage, pageSize);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tradeShowToDelete, setTradeShowToDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [updatingShowId, setUpdatingShowId] = useState<string | null>(null);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
+  const [allTradeShows, setAllTradeShows] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "expired" | "upcoming"
+  >("all");
 
   // Calculate total pages
-  const totalPages = Math.ceil(totalCount / pageSize)
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   // Get website URL from environment variables, with fallback
-  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+  const websiteUrl =
+    import.meta.env.VITE_WEBSITE_URL || "https://chronicleseurope.vercel.app";
 
   // Helper function to determine if a trade show is expired or upcoming
   const getTradeShowStatus = (tradeShow: any) => {
-    if (!tradeShow.endDate) return 'ongoing'
-    const endDate = new Date(tradeShow.endDate)
-    const today = new Date()
-    return endDate < today ? 'expired' : 'upcoming'
-  }
+    if (!tradeShow.endDate) return "ongoing";
+    const endDate = new Date(tradeShow.endDate);
+    const today = new Date();
+    return endDate < today ? "expired" : "upcoming";
+  };
 
   // Get all trade shows for global filtering and sorting
   const getAllTradeShows = async () => {
-    setSearchLoading(true)
+    setSearchLoading(true);
     try {
-      const { data, error } = await TradeShowsService.getTradeShows()
-      if (error) throw new Error(error)
+      const { data, error } = await TradeShowsService.getTradeShows();
+      if (error) throw new Error(error);
       // Sort by created date (newest first) when searching
-      const sortedData = data?.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ) || []
-      setAllTradeShows(sortedData)
+      const sortedData =
+        data?.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ) || [];
+      setAllTradeShows(sortedData);
     } catch (error: any) {
-      console.error('Error fetching all trade shows:', error)
-      toast.error('Failed to fetch trade shows')
+      console.error("Error fetching all trade shows:", error);
+      toast.error("Failed to fetch trade shows");
     } finally {
-      setSearchLoading(false)
+      setSearchLoading(false);
     }
-  }
+  };
 
   // Effect to fetch all trade shows when search term or status filter changes
   useEffect(() => {
-    if (searchTerm || statusFilter !== 'all') {
-      getAllTradeShows()
+    if (searchTerm || statusFilter !== "all") {
+      getAllTradeShows();
     } else {
-      setAllTradeShows([])
+      setAllTradeShows([]);
     }
-  }, [searchTerm, statusFilter])
+  }, [searchTerm, statusFilter]);
 
   // Filter all trade shows based on search term and status
   const globalFilteredTradeShows = useMemo(() => {
-    if (!allTradeShows.length) return []
-    
+    if (!allTradeShows.length) return [];
+
     // First apply search filter
-    let filtered = allTradeShows
+    let filtered = allTradeShows;
     if (searchTerm) {
-      const term = searchTerm.toLowerCase()
-      filtered = allTradeShows.filter(show => 
-        show.title.toLowerCase().includes(term) ||
-        (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
-        (show.location && show.location.toLowerCase().includes(term)) ||
-        (show.city && show.city.toLowerCase().includes(term)) ||
-        (show.country && show.country.toLowerCase().includes(term))
-      )
+      const term = searchTerm.toLowerCase();
+      filtered = allTradeShows.filter(
+        (show) =>
+          show.title.toLowerCase().includes(term) ||
+          (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
+          (show.location && show.location.toLowerCase().includes(term)) ||
+          (show.city && show.city.toLowerCase().includes(term)) ||
+          (show.country && show.country.toLowerCase().includes(term))
+      );
     }
-    
+
     // Then apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(show => getTradeShowStatus(show) === statusFilter)
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(
+        (show) => getTradeShowStatus(show) === statusFilter
+      );
     }
-    
-    return filtered
-  }, [allTradeShows, searchTerm, statusFilter])
+
+    return filtered;
+  }, [allTradeShows, searchTerm, statusFilter]);
 
   // Sort trade shows by created date (newest first) for regular view
   const sortedTradeShows = useMemo(() => {
-    if (!tradeShows) return []
-    return [...tradeShows].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-  }, [tradeShows])
+    if (!tradeShows) return [];
+    return [...tradeShows].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [tradeShows]);
 
   // Filter trade shows based on search term and status
   const filteredTradeShows = useMemo(() => {
-    if (!sortedTradeShows) return sortedTradeShows || []
-    
+    if (!sortedTradeShows) return sortedTradeShows || [];
+
     // First apply search filter
-    let filtered = sortedTradeShows
+    let filtered = sortedTradeShows;
     if (searchTerm) {
-      const term = searchTerm.toLowerCase()
-      filtered = sortedTradeShows.filter(show => 
-        show.title.toLowerCase().includes(term) ||
-        (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
-        (show.location && show.location.toLowerCase().includes(term)) ||
-        (show.city && show.city.toLowerCase().includes(term)) ||
-        (show.country && show.country.toLowerCase().includes(term))
-      )
+      const term = searchTerm.toLowerCase();
+      filtered = sortedTradeShows.filter(
+        (show) =>
+          show.title.toLowerCase().includes(term) ||
+          (show.organizer && show.organizer.toLowerCase().includes(term)) || // organizer column is used for the hero section CTA
+          (show.location && show.location.toLowerCase().includes(term)) ||
+          (show.city && show.city.toLowerCase().includes(term)) ||
+          (show.country && show.country.toLowerCase().includes(term))
+      );
     }
-    
+
     // Then apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(show => getTradeShowStatus(show) === statusFilter)
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(
+        (show) => getTradeShowStatus(show) === statusFilter
+      );
     }
-    
-    return filtered
-  }, [sortedTradeShows, searchTerm, statusFilter])
+
+    return filtered;
+  }, [sortedTradeShows, searchTerm, statusFilter]);
 
   // Determine which trade shows to display
-  const displayTradeShows = searchTerm || statusFilter !== 'all' ? globalFilteredTradeShows : filteredTradeShows
-  const displayTotalCount = searchTerm || statusFilter !== 'all' ? globalFilteredTradeShows.length : filteredTradeShows.length
+  const displayTradeShows =
+    searchTerm || statusFilter !== "all"
+      ? globalFilteredTradeShows
+      : filteredTradeShows;
+  const displayTotalCount =
+    searchTerm || statusFilter !== "all"
+      ? globalFilteredTradeShows.length
+      : filteredTradeShows.length;
 
   const handleCreateTradeShow = () => {
-    navigate('/admin/trade-shows/create')
-  }
-
-  const handleEditTradeShow = (id: string) => {
-    navigate(`/admin/trade-shows/${id}/edit`)
-  }
+    navigate("/admin/trade-shows/create");
+  };
 
   const confirmDeleteTradeShow = (id: string, title: string) => {
-    setTradeShowToDelete({ id, title })
-    setDeleteDialogOpen(true)
-  }
+    setTradeShowToDelete({ id, title });
+    setDeleteDialogOpen(true);
+  };
 
   const handleDeleteTradeShow = async () => {
-    if (!tradeShowToDelete) return
+    if (!tradeShowToDelete) return;
 
     try {
-      const { error } = await TradeShowsService.deleteTradeShow(tradeShowToDelete.id)
+      const { error } = await TradeShowsService.deleteTradeShow(
+        tradeShowToDelete.id
+      );
 
-      if (error) throw new Error(error)
+      if (error) throw new Error(error);
 
-      toast.success('Trade show deleted successfully')
-      refetch()
-      setDeleteDialogOpen(false)
-      setTradeShowToDelete(null)
+      toast.success("Trade show deleted successfully");
+      refetch();
+      setDeleteDialogOpen(false);
+      setTradeShowToDelete(null);
     } catch (error: any) {
-      console.error('Error deleting trade show:', error)
-      toast.error('Failed to delete trade show')
-      setDeleteDialogOpen(false)
-      setTradeShowToDelete(null)
+      console.error("Error deleting trade show:", error);
+      toast.error("Failed to delete trade show");
+      setDeleteDialogOpen(false);
+      setTradeShowToDelete(null);
     }
-  }
+  };
 
   const toggleTradeShowStatus = async (tradeShow: any) => {
-    setUpdatingShowId(tradeShow.id)
+    setUpdatingShowId(tradeShow.id);
     try {
       // Toggle the isActive status
       const { error } = await TradeShowsService.updateTradeShow(tradeShow.id, {
         ...tradeShow,
-        isActive: !tradeShow.isActive
+        isActive: !tradeShow.isActive,
       });
-      
+
       if (error) throw new Error(error);
-      
-      toast.success(!tradeShow.isActive ? 'Trade show published successfully' : 'Trade show unpublished successfully');
+
+      toast.success(
+        !tradeShow.isActive
+          ? "Trade show published successfully"
+          : "Trade show unpublished successfully"
+      );
       refetch();
     } catch (error: any) {
-      console.error('Error updating trade show status:', error);
-      toast.error('Failed to update trade show status');
+      console.error("Error updating trade show status:", error);
+      toast.error("Failed to update trade show status");
     } finally {
-      setUpdatingShowId(null)
+      setUpdatingShowId(null);
     }
-  }
+  };
 
   const handleExportStartDateChange = (date: string) => {
     setStartDateFilter(date);
-    
+
     // If a start date is selected, automatically set end date to one day after
     if (date) {
       const nextDay = new Date(date);
       nextDay.setDate(nextDay.getDate() + 1);
       // Format as YYYY-MM-DD
-      const nextDayString = nextDay.toISOString().split('T')[0];
+      const nextDayString = nextDay.toISOString().split("T")[0];
       setEndDateFilter(nextDayString);
     } else {
       // If start date is cleared, also clear end date
-      setEndDateFilter('');
+      setEndDateFilter("");
     }
   };
 
@@ -233,151 +270,160 @@ export function TradeShowsAdmin() {
     try {
       // Show loading state
       setSearchLoading(true);
-      
+
       // Fetch all trade shows for export
-      const { data: allTradeShows, error } = await TradeShowsService.getTradeShows();
-      
+      const { data: allTradeShows, error } =
+        await TradeShowsService.getTradeShows();
+
       if (error) {
         throw new Error(error);
       }
-      
+
       // Filter trade shows based on date range if provided
       let exportData = allTradeShows || [];
-      
+
       if (startDateFilter || endDateFilter) {
-        exportData = exportData.filter(show => {
+        exportData = exportData.filter((show) => {
           // If start date filter is set, check if show's end date is after the filter start date
           if (startDateFilter && show.endDate) {
             const filterStartDate = new Date(startDateFilter);
             const showEndDate = new Date(show.endDate);
             if (showEndDate < filterStartDate) return false;
           }
-          
+
           // If end date filter is set, check if show's start date is before the filter end date
           if (endDateFilter && show.startDate) {
             const filterEndDate = new Date(endDateFilter);
             const showStartDate = new Date(show.startDate);
             if (showStartDate > filterEndDate) return false;
           }
-          
+
           return true;
         });
       }
-      
+
       // Prepare data for export
-      const exportDataFormatted = exportData.map(show => ({
+      const exportDataFormatted = exportData.map((show) => ({
         Title: show.title,
-        'Start Date': show.startDate ? new Date(show.startDate).toLocaleDateString() : '',
-        'End Date': show.endDate ? new Date(show.endDate).toLocaleDateString() : '',
-        City: show.city || '',
-        Country: show.country || ''
+        "Start Date": show.startDate
+          ? new Date(show.startDate).toLocaleDateString()
+          : "",
+        "End Date": show.endDate
+          ? new Date(show.endDate).toLocaleDateString()
+          : "",
+        City: show.city || "",
+        Country: show.country || "",
       }));
 
       // Check if there's data to export
       if (exportDataFormatted.length === 0) {
-        toast.warning('No data to export');
+        toast.warning("No data to export");
         setSearchLoading(false);
         return;
       }
 
       // Create worksheet
       const ws = XLSX.utils.json_to_sheet(exportDataFormatted);
-      
+
       // Create workbook
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Trade Shows');
-      
+      XLSX.utils.book_append_sheet(wb, ws, "Trade Shows");
+
       // Export to file
-      XLSX.writeFile(wb, 'trade-shows-export.xlsx');
-      
-      toast.success(`Excel file exported successfully (${exportDataFormatted.length} records)`);
+      XLSX.writeFile(wb, "trade-shows-export.xlsx");
+
+      toast.success(
+        `Excel file exported successfully (${exportDataFormatted.length} records)`
+      );
       setExportDialogOpen(false);
       // Reset filters after export
-      setStartDateFilter('');
-      setEndDateFilter('');
+      setStartDateFilter("");
+      setEndDateFilter("");
     } catch (error: any) {
-      console.error('Error exporting to Excel:', error);
-      toast.error('Failed to export Excel file: ' + (error.message || 'Unknown error'));
+      console.error("Error exporting to Excel:", error);
+      toast.error(
+        "Failed to export Excel file: " + (error.message || "Unknown error")
+      );
     } finally {
       setSearchLoading(false);
     }
-  }
+  };
 
   // Pagination functions
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
+      setCurrentPage(page);
     }
-  }
+  };
 
   const renderPaginationItems = () => {
-    const items = []
-    
+    const items = [];
+
     // Always show first page
     items.push(
       <PaginationItem key={1}>
-        <PaginationLink 
-          onClick={() => goToPage(1)} 
+        <PaginationLink
+          onClick={() => goToPage(1)}
           isActive={currentPage === 1}
         >
           1
         </PaginationLink>
       </PaginationItem>
-    )
-    
-    if (totalPages <= 1) return items
-    
+    );
+
+    if (totalPages <= 1) return items;
+
     // Show ellipsis if there are pages between first and current range
     if (currentPage > 3) {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Show pages around current page
-    const startPage = Math.max(2, currentPage - 1)
-    const endPage = Math.min(totalPages - 1, currentPage + 1)
-    
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
-          <PaginationLink 
-            onClick={() => goToPage(i)} 
+          <PaginationLink
+            onClick={() => goToPage(i)}
             isActive={currentPage === i}
           >
             {i}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Show ellipsis if there are pages between current range and last
     if (currentPage < totalPages - 2) {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Always show last page if there's more than one page
     if (totalPages > 1) {
       items.push(
         <PaginationItem key={totalPages}>
-          <PaginationLink 
-            onClick={() => goToPage(totalPages)} 
+          <PaginationLink
+            onClick={() => goToPage(totalPages)}
             isActive={currentPage === totalPages}
           >
             {totalPages}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
-    
-    return items
-  }
+
+    return items;
+  };
 
   if (loading) {
     return (
@@ -391,7 +437,7 @@ export function TradeShowsAdmin() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -399,7 +445,7 @@ export function TradeShowsAdmin() {
       <div className="p-8 text-center text-red-600">
         Error loading trade shows: {error}
       </div>
-    )
+    );
   }
 
   // Update the refetch function to maintain sorting
@@ -412,12 +458,15 @@ export function TradeShowsAdmin() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the trade show "{tradeShowToDelete?.title}"? 
-              This action cannot be undone.
+              Are you sure you want to delete the trade show "
+              {tradeShowToDelete?.title}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteTradeShow}>
@@ -433,12 +482,16 @@ export function TradeShowsAdmin() {
           <DialogHeader>
             <DialogTitle>Export Trade Shows</DialogTitle>
             <DialogDescription>
-              Select a start date to automatically set the end date to the next day, or select both dates manually
+              Select a start date to automatically set the end date to the next
+              day, or select both dates manually
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="startDate"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Start Date
               </label>
               <Input
@@ -449,7 +502,10 @@ export function TradeShowsAdmin() {
               />
             </div>
             <div>
-              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="endDate"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 End Date
               </label>
               <Input
@@ -461,7 +517,10 @@ export function TradeShowsAdmin() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setExportDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={exportToExcel} disabled={searchLoading}>
@@ -471,7 +530,7 @@ export function TradeShowsAdmin() {
                   Exporting...
                 </>
               ) : (
-                'Export'
+                "Export"
               )}
             </Button>
           </DialogFooter>
@@ -483,7 +542,9 @@ export function TradeShowsAdmin() {
         <DialogContent className="sm:max-w-md">
           <div className="flex flex-col items-center justify-center py-6">
             <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
-            <DialogTitle className="text-center mb-2">Updating Status</DialogTitle>
+            <DialogTitle className="text-center mb-2">
+              Updating Status
+            </DialogTitle>
             <DialogDescription className="text-center">
               Please wait while we update the trade show status...
             </DialogDescription>
@@ -500,7 +561,10 @@ export function TradeShowsAdmin() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setExportDialogOpen(true)} disabled={searchLoading}>
+          <Button
+            onClick={() => setExportDialogOpen(true)}
+            disabled={searchLoading}
+          >
             <Download className="h-4 w-4 mr-2" />
             {searchLoading ? (
               <>
@@ -508,7 +572,7 @@ export function TradeShowsAdmin() {
                 Exporting...
               </>
             ) : (
-              'Export to Excel'
+              "Export to Excel"
             )}
           </Button>
           <Button onClick={handleCreateTradeShow}>
@@ -536,36 +600,36 @@ export function TradeShowsAdmin() {
             )}
           </div>
           {searchTerm && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setSearchTerm('')}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSearchTerm("")}
             >
               Clear
             </Button>
           )}
         </div>
-        
+
         {/* Status Filter Buttons */}
         <div className="flex gap-2">
-          <Button 
-            variant={statusFilter === 'all' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setStatusFilter('all')}
+          <Button
+            variant={statusFilter === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatusFilter("all")}
           >
             All
           </Button>
-          <Button 
-            variant={statusFilter === 'upcoming' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setStatusFilter('upcoming')}
+          <Button
+            variant={statusFilter === "upcoming" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatusFilter("upcoming")}
           >
             Upcoming
           </Button>
-          <Button 
-            variant={statusFilter === 'expired' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setStatusFilter('expired')}
+          <Button
+            variant={statusFilter === "expired" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatusFilter("expired")}
           >
             Expired
           </Button>
@@ -577,9 +641,16 @@ export function TradeShowsAdmin() {
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">Trade Shows</h2>
           <p className="text-sm text-gray-600 mt-1">
-            {searchTerm || statusFilter !== 'all'
-              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''}${searchTerm ? ` for "${searchTerm}"` : ''}${statusFilter !== 'all' ? ` (${statusFilter})` : ''}`
-              : `Showing ${Math.min(displayTradeShows.length, pageSize)} of ${totalCount} trade shows`}
+            {searchTerm || statusFilter !== "all"
+              ? `Found ${displayTotalCount} result${
+                  displayTotalCount !== 1 ? "s" : ""
+                }${searchTerm ? ` for "${searchTerm}"` : ""}${
+                  statusFilter !== "all" ? ` (${statusFilter})` : ""
+                }`
+              : `Showing ${Math.min(
+                  displayTradeShows.length,
+                  pageSize
+                )} of ${totalCount} trade shows`}
           </p>
         </div>
 
@@ -597,25 +668,29 @@ export function TradeShowsAdmin() {
           </TableHeader>
           <TableBody>
             {displayTradeShows.map((tradeShow, index) => {
-              const status = getTradeShowStatus(tradeShow)
+              const status = getTradeShowStatus(tradeShow);
               return (
                 <TableRow key={tradeShow.id}>
                   <TableCell className="font-medium">
-                    {searchTerm 
-                      ? displayTotalCount - index 
-                      : totalCount - ((currentPage - 1) * pageSize) - index}
+                    {searchTerm
+                      ? displayTotalCount - index
+                      : totalCount - (currentPage - 1) * pageSize - index}
                   </TableCell>
-                  <TableCell className="font-medium">{tradeShow.title}</TableCell>
-                  <TableCell>{tradeShow.city || 'Not specified'}</TableCell>
-                  <TableCell>{tradeShow.country || 'Not specified'}</TableCell>
+                  <TableCell className="font-medium">
+                    {tradeShow.title}
+                  </TableCell>
+                  <TableCell>{tradeShow.city || "Not specified"}</TableCell>
+                  <TableCell>{tradeShow.country || "Not specified"}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      status === 'expired' 
-                        ? 'bg-red-100 text-red-800' 
-                        : status === 'upcoming' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        status === "expired"
+                          ? "bg-red-100 text-red-800"
+                          : status === "upcoming"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                   </TableCell>
@@ -624,20 +699,28 @@ export function TradeShowsAdmin() {
                       onClick={() => toggleTradeShowStatus(tradeShow)}
                       disabled={updatingShowId === tradeShow.id}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                        tradeShow.isActive ? 'bg-blue-600' : 'bg-gray-200'
-                      } ${updatingShowId === tradeShow.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        tradeShow.isActive ? "bg-blue-600" : "bg-gray-200"
+                      } ${
+                        updatingShowId === tradeShow.id
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       <span
                         className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          tradeShow.isActive ? 'translate-x-6' : 'translate-x-1'
+                          tradeShow.isActive ? "translate-x-6" : "translate-x-1"
                         }`}
                       />
                     </button>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <a 
-                        href={websiteUrl + '/top-trade-shows-in-europe/' + tradeShow.slug}
+                      <a
+                        href={
+                          websiteUrl +
+                          "/top-trade-shows-in-europe/" +
+                          tradeShow.slug
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
@@ -646,10 +729,7 @@ export function TradeShowsAdmin() {
                       </a>
                       <a
                         href={`/admin/admin/trade-shows/${tradeShow.id}/edit`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleEditTradeShow(tradeShow.id);
-                        }}
+                        target="_blank"
                         className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                       >
                         <Edit className="h-4 w-4" />
@@ -657,7 +737,9 @@ export function TradeShowsAdmin() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => confirmDeleteTradeShow(tradeShow.id, tradeShow.title)}
+                        onClick={() =>
+                          confirmDeleteTradeShow(tradeShow.id, tradeShow.title)
+                        }
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -672,9 +754,11 @@ export function TradeShowsAdmin() {
         {displayTradeShows.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
-              {searchTerm || statusFilter !== 'all' ? 'No trade shows found matching your filters' : 'No trade shows found'}
+              {searchTerm || statusFilter !== "all"
+                ? "No trade shows found matching your filters"
+                : "No trade shows found"}
             </p>
-            {!searchTerm && statusFilter === 'all' && (
+            {!searchTerm && statusFilter === "all" && (
               <Button
                 variant="default"
                 className="mt-4"
@@ -689,20 +773,20 @@ export function TradeShowsAdmin() {
       </div>
 
       {/* Pagination */}
-      {!searchTerm && statusFilter === 'all' && totalPages > 1 && (
+      {!searchTerm && statusFilter === "all" && totalPages > 1 && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
               />
             </PaginationItem>
-            
+
             {renderPaginationItems()}
-            
+
             <PaginationItem>
-              <PaginationNext 
+              <PaginationNext
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
               />
@@ -711,5 +795,5 @@ export function TradeShowsAdmin() {
         </Pagination>
       )}
     </div>
-  )
+  );
 }

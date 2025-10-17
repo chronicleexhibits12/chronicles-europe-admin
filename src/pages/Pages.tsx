@@ -1,138 +1,183 @@
-import { useState, useEffect } from 'react'
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table'
-import { useHomePage } from '@/hooks/useHomeContent'
-import { useAboutPage } from '@/hooks/useAboutContent'
-import { useCustomStandsPage } from '@/hooks/useCustomStandsContent'
-import { useTradeShowsPage } from '@/hooks/useTradeShowsContent'
-import { useBlogPage } from '@/hooks/useBlogContent'
-import { useTestimonialsPage } from '@/data/hooks/useTestimonialsContent'
-import { useContactPage } from '@/hooks/useContactContent'
-import { usePrivacyPage } from '@/hooks/usePrivacyContent'
-import { useTermsPage } from '@/hooks/useTermsContent'
-import { useMainCountriesContent } from '@/hooks/useMainCountriesContent'
-import { Edit, FileText, Eye } from 'lucide-react'
+import { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useHomePage } from "@/hooks/useHomeContent";
+import { useAboutPage } from "@/hooks/useAboutContent";
+import { useCustomStandsPage } from "@/hooks/useCustomStandsContent";
+import { useTradeShowsPage } from "@/hooks/useTradeShowsContent";
+import { useBlogPage } from "@/hooks/useBlogContent";
+import { useTestimonialsPage } from "@/data/hooks/useTestimonialsContent";
+import { useContactPage } from "@/hooks/useContactContent";
+import { usePrivacyPage } from "@/hooks/usePrivacyContent";
+import { useTermsPage } from "@/hooks/useTermsContent";
+import { useMainCountriesContent } from "@/hooks/useMainCountriesContent";
+import { Edit, FileText, Eye } from "lucide-react";
 
 interface PageInfo {
-  id: string
-  name: string
-  path: string
-  editPath: string
-  lastUpdated: string
-  description: string
+  id: string;
+  name: string;
+  path: string;
+  editPath: string;
+  lastUpdated: string;
+  description: string;
 }
 
 export function Pages() {
-  const { data: homePage, loading: homeLoading } = useHomePage()
-  const { data: aboutPage, loading: aboutLoading } = useAboutPage()
-  const { data: customStandsPage, loading: customStandsLoading } = useCustomStandsPage()
-  const { data: tradeShowsPage, loading: tradeShowsLoading } = useTradeShowsPage()
-  const { data: blogPage, loading: blogLoading } = useBlogPage()
-  const { data: testimonialsPage, loading: testimonialsLoading } = useTestimonialsPage()
-  const { data: contactPage, loading: contactLoading } = useContactPage()
-  const { data: privacyPage, loading: privacyLoading } = usePrivacyPage()
-  const { data: termsPage, loading: termsLoading } = useTermsPage()
-  const { data: mainCountriesPage, loading: mainCountriesLoading } = useMainCountriesContent()
-  const [pages, setPages] = useState<PageInfo[]>([])
+  const { data: homePage, loading: homeLoading } = useHomePage();
+  const { data: aboutPage, loading: aboutLoading } = useAboutPage();
+  const { data: customStandsPage, loading: customStandsLoading } =
+    useCustomStandsPage();
+  const { data: tradeShowsPage, loading: tradeShowsLoading } =
+    useTradeShowsPage();
+  const { data: blogPage, loading: blogLoading } = useBlogPage();
+  const { data: testimonialsPage, loading: testimonialsLoading } =
+    useTestimonialsPage();
+  const { data: contactPage, loading: contactLoading } = useContactPage();
+  const { data: privacyPage, loading: privacyLoading } = usePrivacyPage();
+  const { data: termsPage, loading: termsLoading } = useTermsPage();
+  const { data: mainCountriesPage, loading: mainCountriesLoading } =
+    useMainCountriesContent();
+  const [pages, setPages] = useState<PageInfo[]>([]);
 
   // Get website URL from environment variables, with fallback
-  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleexhibits.eu'
+  const websiteUrl =
+    import.meta.env.VITE_WEBSITE_URL || "https://chronicleexhibits.eu";
 
   useEffect(() => {
     const pagesData: PageInfo[] = [
       {
-        id: 'home',
-        name: 'Home Page',
-        path: '/',
-        editPath: '/admin/home',
-        lastUpdated: homePage?.updatedAt ? new Date(homePage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Main landing page with hero section, services, and company information'
+        id: "home",
+        name: "Home Page",
+        path: "/",
+        editPath: "/admin/home",
+        lastUpdated: homePage?.updatedAt
+          ? new Date(homePage.updatedAt).toLocaleDateString()
+          : "Never",
+        description:
+          "Main landing page with hero section, services, and company information",
       },
       {
-        id: 'about',
-        name: 'About Page',
-        path: '/about',
-        editPath: '/admin/about-us',
-        lastUpdated: aboutPage?.updatedAt ? new Date(aboutPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Company information, team details, services, and statistics'
+        id: "about",
+        name: "About Page",
+        path: "/about-us",
+        editPath: "/admin/about-us",
+        lastUpdated: aboutPage?.updatedAt
+          ? new Date(aboutPage.updatedAt).toLocaleDateString()
+          : "Never",
+        description:
+          "Company information, team details, services, and statistics",
       },
       {
-        id: 'services',
-        name: 'Services Page',
-        path: '/services',
-        editPath: '/admin/services',
-        lastUpdated: 'Never', // Services page doesn't have a single updatedAt field
-        description: 'Our services and solutions for exhibition stands'
+        id: "services",
+        name: "Services Page",
+        path: "/services",
+        editPath: "/admin/services",
+        lastUpdated: "Never", // Services page doesn't have a single updatedAt field
+        description: "Our services and solutions for exhibition stands",
       },
       {
-        id: 'trade-shows',
-        name: 'Trade Shows Page',
-        path: '/top-trade-shows-in-europe',
-        editPath: '/admin/trade-shows-page',
-        lastUpdated: tradeShowsPage?.updatedAt ? new Date(tradeShowsPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Trade shows and exhibitions landing page'
+        id: "trade-shows",
+        name: "Trade Shows Page",
+        path: "/top-trade-shows-in-europe",
+        editPath: "/admin/trade-shows-page",
+        lastUpdated: tradeShowsPage?.updatedAt
+          ? new Date(tradeShowsPage.updatedAt).toLocaleDateString()
+          : "Never",
+        description: "Trade shows and exhibitions landing page",
       },
       {
-        id: 'blog',
-        name: 'Blog Page',
-        path: '/blog',
-        editPath: '/admin/blog-page',
-        lastUpdated: blogPage?.updatedAt ? new Date(blogPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Blog landing page with all posts'
+        id: "blog",
+        name: "Blog Page",
+        path: "/blog",
+        editPath: "/admin/blog-page",
+        lastUpdated: blogPage?.updatedAt
+          ? new Date(blogPage.updatedAt).toLocaleDateString()
+          : "Never",
+        description: "Blog landing page with all posts",
       },
       {
-        id: 'testimonials',
-        name: 'Testimonials Page',
-        path: '/review',
-        editPath: '/admin/testimonials',
-        lastUpdated: testimonialsPage?.updatedAt ? new Date(testimonialsPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Client testimonials and reviews'
+        id: "testimonials",
+        name: "Testimonials Page",
+        path: "/review",
+        editPath: "/admin/testimonials",
+        lastUpdated: testimonialsPage?.updatedAt
+          ? new Date(testimonialsPage.updatedAt).toLocaleDateString()
+          : "Never",
+        description: "Client testimonials and reviews",
       },
       {
-        id: 'contact',
-        name: 'Contact Page',
-        path: '/contact',
-        editPath: '/admin/contact',
-        lastUpdated: contactPage?.updatedAt ? new Date(contactPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Contact information and inquiry form'
+        id: "contact",
+        name: "Contact Page",
+        path: "/contact",
+        editPath: "/admin/contact",
+        lastUpdated: contactPage?.updatedAt
+          ? new Date(contactPage.updatedAt).toLocaleDateString()
+          : "Never",
+        description: "Contact information and inquiry form",
       },
       {
-        id: 'privacy',
-        name: 'Privacy Policy',
-        path: '/privacy-policy',
-        editPath: '/admin/privacy',
-        lastUpdated: privacyPage?.updatedAt ? new Date(privacyPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Privacy policy and data protection information'
+        id: "privacy",
+        name: "Privacy Policy",
+        path: "/privacy-policy",
+        editPath: "/admin/privacy",
+        lastUpdated: privacyPage?.updatedAt
+          ? new Date(privacyPage.updatedAt).toLocaleDateString()
+          : "Never",
+        description: "Privacy policy and data protection information",
       },
       {
-        id: 'terms',
-        name: 'Terms & Conditions',
-        path: '/terms-and-conditions',
-        editPath: '/admin/terms',
-        lastUpdated: termsPage?.updatedAt ? new Date(termsPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Terms and conditions for using our website and services'
+        id: "terms",
+        name: "Terms & Conditions",
+        path: "/terms-and-conditions",
+        editPath: "/admin/terms",
+        lastUpdated: termsPage?.updatedAt
+          ? new Date(termsPage.updatedAt).toLocaleDateString()
+          : "Never",
+        description: "Terms and conditions for using our website and services",
       },
       {
-        id: 'main-countries',
-        name: 'Main Countries Page',
-        path: '/major-exhibiting-country',
-        editPath: '/admin/main-countries',
-        lastUpdated: mainCountriesPage?.updatedAt ? new Date(mainCountriesPage.updatedAt).toLocaleDateString() : 'Never',
-        description: 'Main countries page with exhibition stand types and portfolio showcase'
-      }
-    ]
-    setPages(pagesData)
-  }, [homePage, aboutPage, customStandsPage, tradeShowsPage, blogPage, testimonialsPage, contactPage, privacyPage, termsPage, mainCountriesPage])
+        id: "main-countries",
+        name: "Main Countries Page",
+        path: "/major-exhibiting-country",
+        editPath: "/admin/main-countries",
+        lastUpdated: mainCountriesPage?.updatedAt
+          ? new Date(mainCountriesPage.updatedAt).toLocaleDateString()
+          : "Never",
+        description:
+          "Main countries page with exhibition stand types and portfolio showcase",
+      },
+    ];
+    setPages(pagesData);
+  }, [
+    homePage,
+    aboutPage,
+    customStandsPage,
+    tradeShowsPage,
+    blogPage,
+    testimonialsPage,
+    contactPage,
+    privacyPage,
+    termsPage,
+    mainCountriesPage,
+  ]);
 
-
-
-  const loading = homeLoading || aboutLoading || customStandsLoading || tradeShowsLoading || blogLoading || testimonialsLoading || contactLoading || privacyLoading || termsLoading || mainCountriesLoading
+  const loading =
+    homeLoading ||
+    aboutLoading ||
+    customStandsLoading ||
+    tradeShowsLoading ||
+    blogLoading ||
+    testimonialsLoading ||
+    contactLoading ||
+    privacyLoading ||
+    termsLoading ||
+    mainCountriesLoading;
 
   if (loading) {
     return (
@@ -146,7 +191,7 @@ export function Pages() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -196,7 +241,7 @@ export function Pages() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <a 
+                    <a
                       href={`${websiteUrl}${page.path}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -222,5 +267,5 @@ export function Pages() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

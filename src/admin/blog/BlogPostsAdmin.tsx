@@ -1,23 +1,23 @@
-import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table'
-import { 
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Pagination,
   PaginationContent,
@@ -26,202 +26,217 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination'
-import { Plus, Edit, Trash2, Eye, Search, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { useBlogPosts } from '@/hooks/useBlogContent'
-import { BlogService } from '@/data/blogService'
+} from "@/components/ui/pagination";
+import { Plus, Edit, Trash2, Eye, Search, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useBlogPosts } from "@/hooks/useBlogContent";
+import { BlogService } from "@/data/blogService";
 
 export function BlogPostsAdmin() {
-  const navigate = useNavigate()
-  const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
-  const { data: blogPosts, totalCount, loading, error, refetch } = useBlogPosts(currentPage, pageSize)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [blogPostToDelete, setBlogPostToDelete] = useState<{id: string, title: string} | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [allBlogPosts, setAllBlogPosts] = useState<any[]>([])
-  const [searchLoading, setSearchLoading] = useState(false)
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const {
+    data: blogPosts,
+    totalCount,
+    loading,
+    error,
+    refetch,
+  } = useBlogPosts(currentPage, pageSize);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [blogPostToDelete, setBlogPostToDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [allBlogPosts, setAllBlogPosts] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   // Calculate total pages
-  const totalPages = Math.ceil(totalCount / pageSize)
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   // Get website URL from environment variables, with fallback
-  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 'https://chronicleseurope.vercel.app'
+  const websiteUrl =
+    import.meta.env.VITE_WEBSITE_URL || "https://chronicleseurope.vercel.app";
 
   // Get all blog posts for global search and sorting
   const getAllBlogPosts = async () => {
-    if (!searchTerm) return
-    setSearchLoading(true)
+    if (!searchTerm) return;
+    setSearchLoading(true);
     try {
-      const { data, error } = await BlogService.getBlogPosts()
-      if (error) throw new Error(error)
+      const { data, error } = await BlogService.getBlogPosts();
+      if (error) throw new Error(error);
       // Sort by created date (newest first) when searching
-      const sortedData = data?.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ) || []
-      setAllBlogPosts(sortedData)
+      const sortedData =
+        data?.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ) || [];
+      setAllBlogPosts(sortedData);
     } catch (error: any) {
-      console.error('Error fetching all blog posts:', error)
-      toast.error('Failed to search blog posts')
+      console.error("Error fetching all blog posts:", error);
+      toast.error("Failed to search blog posts");
     } finally {
-      setSearchLoading(false)
+      setSearchLoading(false);
     }
-  }
+  };
 
   // Effect to fetch all blog posts when search term changes
   useEffect(() => {
     if (searchTerm) {
-      getAllBlogPosts()
+      getAllBlogPosts();
     } else {
-      setAllBlogPosts([])
+      setAllBlogPosts([]);
     }
-  }, [searchTerm])
+  }, [searchTerm]);
 
   // Filter all blog posts based on search term
   const globalFilteredBlogPosts = useMemo(() => {
-    if (!allBlogPosts.length || !searchTerm) return []
-    
-    const term = searchTerm.toLowerCase()
-    return allBlogPosts.filter(post => 
-      post.title.toLowerCase().includes(term) ||
-      (post.excerpt && post.excerpt.toLowerCase().includes(term)) ||
-      (post.author && post.author.toLowerCase().includes(term))
-    )
-  }, [allBlogPosts, searchTerm])
+    if (!allBlogPosts.length || !searchTerm) return [];
+
+    const term = searchTerm.toLowerCase();
+    return allBlogPosts.filter(
+      (post) =>
+        post.title.toLowerCase().includes(term) ||
+        (post.excerpt && post.excerpt.toLowerCase().includes(term)) ||
+        (post.author && post.author.toLowerCase().includes(term))
+    );
+  }, [allBlogPosts, searchTerm]);
 
   // Sort blog posts by created date (newest first) for regular view
   const sortedBlogPosts = useMemo(() => {
-    if (!blogPosts) return []
-    return [...blogPosts].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-  }, [blogPosts])
+    if (!blogPosts) return [];
+    return [...blogPosts].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [blogPosts]);
 
   // Filter blog posts based on search term
   const filteredBlogPosts = useMemo(() => {
-    if (!sortedBlogPosts || !searchTerm) return sortedBlogPosts || []
-    
-    const term = searchTerm.toLowerCase()
-    return sortedBlogPosts.filter(post => 
-      post.title.toLowerCase().includes(term) ||
-      (post.excerpt && post.excerpt.toLowerCase().includes(term)) ||
-      (post.author && post.author.toLowerCase().includes(term))
-    )
-  }, [sortedBlogPosts, searchTerm])
+    if (!sortedBlogPosts || !searchTerm) return sortedBlogPosts || [];
+
+    const term = searchTerm.toLowerCase();
+    return sortedBlogPosts.filter(
+      (post) =>
+        post.title.toLowerCase().includes(term) ||
+        (post.excerpt && post.excerpt.toLowerCase().includes(term)) ||
+        (post.author && post.author.toLowerCase().includes(term))
+    );
+  }, [sortedBlogPosts, searchTerm]);
 
   // Determine which blog posts to display
-  const displayBlogPosts = searchTerm ? globalFilteredBlogPosts : filteredBlogPosts
-  const displayTotalCount = searchTerm ? globalFilteredBlogPosts.length : totalCount
+  const displayBlogPosts = searchTerm
+    ? globalFilteredBlogPosts
+    : filteredBlogPosts;
+  const displayTotalCount = searchTerm
+    ? globalFilteredBlogPosts.length
+    : totalCount;
 
   const handleCreateBlogPost = () => {
-    navigate('/admin/blog-posts/create')
-  }
-
-  const handleEditBlogPost = (id: string) => {
-    navigate(`/admin/blog-posts/${id}/edit`)
-  }
+    navigate("/admin/blog-posts/create");
+  };
 
   const confirmDeleteBlogPost = (id: string, title: string) => {
-    setBlogPostToDelete({ id, title })
-    setDeleteDialogOpen(true)
-  }
+    setBlogPostToDelete({ id, title });
+    setDeleteDialogOpen(true);
+  };
 
   const handleDeleteBlogPost = async () => {
-    if (!blogPostToDelete) return
+    if (!blogPostToDelete) return;
 
     try {
-      const { error } = await BlogService.deleteBlogPost(blogPostToDelete.id)
+      const { error } = await BlogService.deleteBlogPost(blogPostToDelete.id);
 
-      if (error) throw new Error(error)
+      if (error) throw new Error(error);
 
-      toast.success('Blog post deleted successfully')
-      refetch()
-      setDeleteDialogOpen(false)
-      setBlogPostToDelete(null)
+      toast.success("Blog post deleted successfully");
+      refetch();
+      setDeleteDialogOpen(false);
+      setBlogPostToDelete(null);
     } catch (error: any) {
-      console.error('Error deleting blog post:', error)
-      toast.error('Failed to delete blog post')
-      setDeleteDialogOpen(false)
-      setBlogPostToDelete(null)
+      console.error("Error deleting blog post:", error);
+      toast.error("Failed to delete blog post");
+      setDeleteDialogOpen(false);
+      setBlogPostToDelete(null);
     }
-  }
+  };
 
   // Pagination functions
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
+      setCurrentPage(page);
     }
-  }
+  };
 
   const renderPaginationItems = () => {
-    const items = []
-    
+    const items = [];
+
     // Always show first page
     items.push(
       <PaginationItem key={1}>
-        <PaginationLink 
-          onClick={() => goToPage(1)} 
+        <PaginationLink
+          onClick={() => goToPage(1)}
           isActive={currentPage === 1}
         >
           1
         </PaginationLink>
       </PaginationItem>
-    )
-    
-    if (totalPages <= 1) return items
-    
+    );
+
+    if (totalPages <= 1) return items;
+
     // Show ellipsis if there are pages between first and current range
     if (currentPage > 3) {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Show pages around current page
-    const startPage = Math.max(2, currentPage - 1)
-    const endPage = Math.min(totalPages - 1, currentPage + 1)
-    
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
-          <PaginationLink 
-            onClick={() => goToPage(i)} 
+          <PaginationLink
+            onClick={() => goToPage(i)}
             isActive={currentPage === i}
           >
             {i}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Show ellipsis if there are pages between current range and last
     if (currentPage < totalPages - 2) {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
-    
+
     // Always show last page if there's more than one page
     if (totalPages > 1) {
       items.push(
         <PaginationItem key={totalPages}>
-          <PaginationLink 
-            onClick={() => goToPage(totalPages)} 
+          <PaginationLink
+            onClick={() => goToPage(totalPages)}
             isActive={currentPage === totalPages}
           >
             {totalPages}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
-    
-    return items
-  }
+
+    return items;
+  };
 
   if (loading && !searchLoading) {
     return (
@@ -235,7 +250,7 @@ export function BlogPostsAdmin() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -243,7 +258,7 @@ export function BlogPostsAdmin() {
       <div className="p-8 text-center text-red-600">
         Error loading blog posts: {error}
       </div>
-    )
+    );
   }
 
   return (
@@ -254,12 +269,15 @@ export function BlogPostsAdmin() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the blog post "{blogPostToDelete?.title}"? 
-              This action cannot be undone.
+              Are you sure you want to delete the blog post "
+              {blogPostToDelete?.title}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteBlogPost}>
@@ -273,9 +291,7 @@ export function BlogPostsAdmin() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Blog Posts</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage blog posts
-          </p>
+          <p className="text-muted-foreground mt-2">Manage blog posts</p>
         </div>
         <Button onClick={handleCreateBlogPost}>
           <Plus className="h-4 w-4 mr-2" />
@@ -300,11 +316,7 @@ export function BlogPostsAdmin() {
           )}
         </div>
         {searchTerm && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setSearchTerm('')}
-          >
+          <Button variant="outline" size="sm" onClick={() => setSearchTerm("")}>
             Clear
           </Button>
         )}
@@ -315,9 +327,14 @@ export function BlogPostsAdmin() {
         <div className="px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">Blog Posts</h2>
           <p className="text-sm text-gray-600 mt-1">
-            {searchTerm 
-              ? `Found ${displayTotalCount} result${displayTotalCount !== 1 ? 's' : ''} for "${searchTerm}"` 
-              : `Showing ${Math.min(displayBlogPosts.length, pageSize)} of ${totalCount} blog posts`}
+            {searchTerm
+              ? `Found ${displayTotalCount} result${
+                  displayTotalCount !== 1 ? "s" : ""
+                } for "${searchTerm}"`
+              : `Showing ${Math.min(
+                  displayBlogPosts.length,
+                  pageSize
+                )} of ${totalCount} blog posts`}
           </p>
         </div>
 
@@ -335,24 +352,24 @@ export function BlogPostsAdmin() {
             {displayBlogPosts.map((blogPost, index) => (
               <TableRow key={blogPost.id}>
                 <TableCell className="font-medium">
-                  {searchTerm 
-                    ? displayTotalCount - index 
-                    : totalCount - ((currentPage - 1) * pageSize) - index}
+                  {searchTerm
+                    ? displayTotalCount - index
+                    : totalCount - (currentPage - 1) * pageSize - index}
                 </TableCell>
                 <TableCell className="font-medium">{blogPost.title}</TableCell>
                 <TableCell>
-                  {blogPost.createdAt 
+                  {blogPost.createdAt
                     ? new Date(blogPost.createdAt).toLocaleDateString()
-                    : 'N/A'}
+                    : "N/A"}
                 </TableCell>
                 <TableCell>
-                  {blogPost.updatedAt 
+                  {blogPost.updatedAt
                     ? new Date(blogPost.updatedAt).toLocaleDateString()
-                    : 'N/A'}
+                    : "N/A"}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <a 
+                    <a
                       href={`${websiteUrl}/blog/${blogPost.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -362,10 +379,7 @@ export function BlogPostsAdmin() {
                     </a>
                     <a
                       href={`/admin/admin/blog-posts/${blogPost.id}/edit`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleEditBlogPost(blogPost.id);
-                      }}
+                      target="_blank"
                       className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     >
                       <Edit className="h-4 w-4" />
@@ -373,7 +387,9 @@ export function BlogPostsAdmin() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => confirmDeleteBlogPost(blogPost.id, blogPost.title)}
+                      onClick={() =>
+                        confirmDeleteBlogPost(blogPost.id, blogPost.title)
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -387,7 +403,9 @@ export function BlogPostsAdmin() {
         {displayBlogPosts.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
-              {searchTerm ? 'No blog posts found matching your search' : 'No blog posts found'}
+              {searchTerm
+                ? "No blog posts found matching your search"
+                : "No blog posts found"}
             </p>
             {!searchTerm && (
               <Button
@@ -408,16 +426,16 @@ export function BlogPostsAdmin() {
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
               />
             </PaginationItem>
-            
+
             {renderPaginationItems()}
-            
+
             <PaginationItem>
-              <PaginationNext 
+              <PaginationNext
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
               />
@@ -426,5 +444,5 @@ export function BlogPostsAdmin() {
         </Pagination>
       )}
     </div>
-  )
+  );
 }

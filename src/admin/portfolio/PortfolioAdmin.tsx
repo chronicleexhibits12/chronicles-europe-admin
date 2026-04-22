@@ -5,10 +5,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Plus, Upload, Trash2, Image, Edit, Check, X } from "lucide-react";
+import {
+  Plus,
+  Upload,
+  Trash2,
+  Image,
+  Edit,
+  Check,
+  X,
+  ChevronDown,
+} from "lucide-react";
 import { PortfolioService } from "@/data/portfolioService";
 import type { PortfolioPage, PortfolioItem } from "@/data/portfolioTypes";
 import { TagInput } from "@/components/ui/tag-input";
+import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -26,6 +37,104 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+
+// Fixed list of pages a portfolio item can be assigned to
+const PAGE_OPTIONS: { value: string; label: string }[] = [
+  { value: "home", label: "Home" },
+  { value: "custom-booth", label: "Custom Booth Design And Build" },
+  { value: "modular-booth", label: "Modular Booth Design And Build" },
+  { value: "pavilion", label: "Pavilion Design & Build" },
+  { value: "double-decker", label: "Double Decker Exhibition Stands" },
+];
+
+type CountryOption = { slug: string; name: string };
+type CityOption = { country_slug: string; city_slug: string; name: string };
+
+// Inline multi-select dropdown for picking multiple pages
+function MultiSelectPages({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggle = (slug: string) => {
+    if (value.includes(slug)) {
+      onChange(value.filter((v) => v !== slug));
+    } else {
+      onChange([...value, slug]);
+    }
+  };
+
+  const labelText =
+    value.length === 0
+      ? "Select pages"
+      : value.length === 1
+      ? PAGE_OPTIONS.find((p) => p.value === value[0])?.label || "1 selected"
+      : `${value.length} selected`;
+
+  return (
+    <div className="relative w-full" ref={ref}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={disabled}
+        className={cn(
+          "w-full justify-between text-left font-normal h-9",
+          value.length === 0 && "text-muted-foreground"
+        )}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="truncate">{labelText}</span>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 transition-transform shrink-0 ml-2",
+            open && "rotate-180"
+          )}
+        />
+      </Button>
+      {open && (
+        <div className="absolute z-50 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-md border bg-popover text-popover-foreground shadow-md right-0">
+          <div className="max-h-60 overflow-auto py-1">
+            {PAGE_OPTIONS.map((opt) => {
+              const checked = value.includes(opt.value);
+              return (
+                <label
+                  key={opt.value}
+                  className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggle(opt.value)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function PortfolioAdmin() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +165,10 @@ export function PortfolioAdmin() {
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
   const [editingItemAlt, setEditingItemAlt] = useState("");
 
+  // Countries / cities (for per-item location selection)
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
+
   // Calculate total pages for pagination
   const totalPages = useMemo(() => {
     if (!portfolio?.items) return 0;
@@ -73,7 +186,45 @@ export function PortfolioAdmin() {
   // Load portfolio data
   useEffect(() => {
     loadPortfolioData();
+    loadLocations();
   }, []);
+
+  const loadLocations = async () => {
+    try {
+      const [countriesRes, citiesRes] = await Promise.all([
+        supabase
+          .from("countries")
+          .select("slug, name")
+          .eq("is_active", true)
+          .order("name"),
+        supabase
+          .from("cities")
+          .select("country_slug, city_slug, name")
+          .eq("is_active", true)
+          .order("name"),
+      ]);
+
+      if (!countriesRes.error && countriesRes.data) {
+        setCountries(
+          (countriesRes.data as CountryOption[]).map((c) => ({
+            slug: c.slug,
+            name: (c.name || "").trim(),
+          }))
+        );
+      }
+      if (!citiesRes.error && citiesRes.data) {
+        setCities(
+          (citiesRes.data as CityOption[]).map((c) => ({
+            country_slug: c.country_slug,
+            city_slug: c.city_slug,
+            name: (c.name || "").trim(),
+          }))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to load countries/cities", err);
+    }
+  };
 
   const loadPortfolioData = async () => {
     try {
@@ -273,6 +424,41 @@ export function PortfolioAdmin() {
 
   const handleKeywordsChange = (keywords: string[]) => {
     setSeoKeywordsArray(keywords);
+  };
+
+  // Update a single item field (country/city/pages) and persist
+  const handleUpdateItemField = async (
+    index: number,
+    updates: Partial<Pick<PortfolioItem, "country" | "city" | "pages">>
+  ) => {
+    if (!portfolio) return;
+
+    // Optimistically update local state so the UI reflects the change immediately
+    const previousItems = portfolio.items;
+    const nextItems = previousItems.map((it, i) =>
+      i === index ? { ...it, ...updates } : it
+    );
+    setPortfolio({ ...portfolio, items: nextItems });
+
+    try {
+      setSaving(true);
+      setError(null);
+      const { error } = await PortfolioService.updatePortfolioPage({
+        items: nextItems,
+      });
+      if (error) {
+        setError(error);
+        // Revert on failure
+        setPortfolio({ ...portfolio, items: previousItems });
+      } else {
+        setSuccess("Portfolio item updated");
+      }
+    } catch {
+      setError("Failed to update portfolio item");
+      setPortfolio({ ...portfolio, items: previousItems });
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Handle edit item alt text
@@ -567,20 +753,25 @@ export function PortfolioAdmin() {
           </div>
 
           {/* Portfolio Items List - Updated to Table/List View */}
-          <div className="border rounded-lg overflow-hidden">
-            <Table>
+          <div className="border rounded-lg overflow-x-auto">
+            <Table className="table-fixed w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Image</TableHead>
-                  <TableHead>Alt Text</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[96px]">Image</TableHead>
+                  <TableHead className="w-[30%] min-w-[180px]">
+                    Alt Text
+                  </TableHead>
+                  <TableHead className="w-[45%] min-w-[240px]">
+                    Assignment
+                  </TableHead>
+                  <TableHead className="w-[72px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentItems.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={3}
+                      colSpan={4}
                       className="text-center py-8 text-muted-foreground"
                     >
                       <Image className="h-12 w-12 mx-auto text-gray-400" />
@@ -594,6 +785,12 @@ export function PortfolioAdmin() {
                   currentItems.map((item, index) => {
                     // Calculate the global index for the item in the entire portfolio
                     const globalIndex = (currentPage - 1) * pageSize + index;
+                    const itemCountry = item.country || "";
+                    const itemCity = item.city || "";
+                    const itemPages = item.pages || [];
+                    const citiesForCountry = itemCountry
+                      ? cities.filter((c) => c.country_slug === itemCountry)
+                      : [];
                     return (
                       <TableRow key={globalIndex}>
                         <TableCell>
@@ -608,20 +805,21 @@ export function PortfolioAdmin() {
                             />
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="align-top">
                           {editingItemIndex === globalIndex ? (
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center gap-1 min-w-0">
                               <Input
                                 value={editingItemAlt}
                                 onChange={(e) =>
                                   setEditingItemAlt(e.target.value)
                                 }
                                 placeholder="Enter alt text"
-                                className="flex-1"
+                                className="flex-1 min-w-0"
                               />
                               <Button
                                 size="sm"
                                 variant="ghost"
+                                className="shrink-0"
                                 onClick={() => {
                                   handleEditItemAlt(
                                     globalIndex,
@@ -635,14 +833,15 @@ export function PortfolioAdmin() {
                               <Button
                                 size="sm"
                                 variant="ghost"
+                                className="shrink-0"
                                 onClick={() => setEditingItemIndex(null)}
                               >
                                 <X className="h-4 w-4" />
                               </Button>
                             </div>
                           ) : (
-                            <div className="flex items-center space-x-2">
-                              <span className="max-w-xs truncate text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="flex-1 min-w-0 truncate text-sm text-muted-foreground">
                                 {portfolio.itemsAlt?.[globalIndex] ||
                                   "No alt text"}
                               </span>
@@ -655,13 +854,73 @@ export function PortfolioAdmin() {
                                     portfolio.itemsAlt?.[globalIndex] || ""
                                   );
                                 }}
-                                target="_blank"
-                                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                className="shrink-0 inline-flex items-center rounded-md bg-white px-2 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                               >
                                 <Edit className="h-4 w-4" />
                               </a>
                             </div>
                           )}
+                        </TableCell>
+                        <TableCell className="align-top">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 min-w-0">
+                            <select
+                              value={itemCountry}
+                              disabled={saving}
+                              onChange={(e) => {
+                                const nextCountry = e.target.value;
+                                handleUpdateItemField(globalIndex, {
+                                  country: nextCountry || undefined,
+                                  // Reset city if it no longer belongs to the new country
+                                  city:
+                                    itemCity &&
+                                    cities.some(
+                                      (c) =>
+                                        c.city_slug === itemCity &&
+                                        c.country_slug === nextCountry
+                                    )
+                                      ? itemCity
+                                      : undefined,
+                                });
+                              }}
+                              className="w-full min-w-0 h-9 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                            >
+                              <option value="">Select country</option>
+                              {countries.map((c) => (
+                                <option key={c.slug} value={c.slug}>
+                                  {c.name}
+                                </option>
+                              ))}
+                            </select>
+                            <select
+                              value={itemCity}
+                              disabled={saving || !itemCountry}
+                              onChange={(e) => {
+                                const nextCity = e.target.value;
+                                handleUpdateItemField(globalIndex, {
+                                  city: nextCity || undefined,
+                                });
+                              }}
+                              className="w-full min-w-0 h-9 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                            >
+                              <option value="">
+                                {itemCountry ? "Select city" : "Select city"}
+                              </option>
+                              {citiesForCountry.map((c) => (
+                                <option key={c.city_slug} value={c.city_slug}>
+                                  {c.name}
+                                </option>
+                              ))}
+                            </select>
+                            <MultiSelectPages
+                              value={itemPages}
+                              disabled={saving}
+                              onChange={(next) =>
+                                handleUpdateItemField(globalIndex, {
+                                  pages: next.length > 0 ? next : undefined,
+                                })
+                              }
+                            />
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button

@@ -14,6 +14,7 @@ import {
   Check,
   X,
   ChevronDown,
+  Search,
 } from "lucide-react";
 import { PortfolioService } from "@/data/portfolioService";
 import type { PortfolioPage, PortfolioItem } from "@/data/portfolioTypes";
@@ -50,42 +51,60 @@ const PAGE_OPTIONS: { value: string; label: string }[] = [
 type CountryOption = { slug: string; name: string };
 type CityOption = { country_slug: string; city_slug: string; name: string };
 
-// Inline multi-select dropdown for picking multiple pages
-function MultiSelectPages({
+type SelectOption = { value: string; label: string };
+
+// Generic multi-select dropdown with optional search and "select all / clear"
+function MultiSelect({
   value,
+  options,
   onChange,
-  disabled,
+  placeholder,
+  searchable = false,
+  disabled = false,
+  emptyText = "No options",
 }: {
   value: string[];
+  options: SelectOption[];
   onChange: (next: string[]) => void;
+  placeholder: string;
+  searchable?: boolean;
   disabled?: boolean;
+  emptyText?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
+        setSearch("");
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggle = (slug: string) => {
-    if (value.includes(slug)) {
-      onChange(value.filter((v) => v !== slug));
+  const toggle = (val: string) => {
+    if (value.includes(val)) {
+      onChange(value.filter((v) => v !== val));
     } else {
-      onChange([...value, slug]);
+      onChange([...value, val]);
     }
   };
 
+  const filtered = useMemo(() => {
+    if (!search) return options;
+    const q = search.toLowerCase();
+    return options.filter((o) => o.label.toLowerCase().includes(q));
+  }, [options, search]);
+
   const labelText =
     value.length === 0
-      ? "Select pages"
+      ? placeholder
       : value.length === 1
-      ? PAGE_OPTIONS.find((p) => p.value === value[0])?.label || "1 selected"
+      ? options.find((o) => o.value === value[0])?.label || "1 selected"
       : `${value.length} selected`;
 
   return (
@@ -111,24 +130,57 @@ function MultiSelectPages({
       </Button>
       {open && (
         <div className="absolute z-50 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-md border bg-popover text-popover-foreground shadow-md right-0">
+          {searchable && (
+            <div className="p-2 border-b">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-8 h-8"
+                />
+              </div>
+            </div>
+          )}
+          {value.length > 0 && (
+            <div className="flex items-center justify-between px-3 py-1.5 border-b text-xs">
+              <span className="text-muted-foreground">
+                {value.length} selected
+              </span>
+              <button
+                type="button"
+                className="text-primary hover:underline"
+                onClick={() => onChange([])}
+              >
+                Clear
+              </button>
+            </div>
+          )}
           <div className="max-h-60 overflow-auto py-1">
-            {PAGE_OPTIONS.map((opt) => {
-              const checked = value.includes(opt.value);
-              return (
-                <label
-                  key={opt.value}
-                  className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggle(opt.value)}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                  <span>{opt.label}</span>
-                </label>
-              );
-            })}
+            {filtered.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground">
+                {emptyText}
+              </div>
+            ) : (
+              filtered.map((opt) => {
+                const checked = value.includes(opt.value);
+                return (
+                  <label
+                    key={opt.value}
+                    className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(opt.value)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    <span className="truncate">{opt.label}</span>
+                  </label>
+                );
+              })
+            )}
           </div>
         </div>
       )}
@@ -426,18 +478,25 @@ export function PortfolioAdmin() {
     setSeoKeywordsArray(keywords);
   };
 
-  // Update a single item field (country/city/pages) and persist
+  // Update a single item field (countries/cities/pages) and persist
   const handleUpdateItemField = async (
     index: number,
-    updates: Partial<Pick<PortfolioItem, "country" | "city" | "pages">>
+    updates: Partial<
+      Pick<PortfolioItem, "countries" | "cities" | "pages">
+    >
   ) => {
     if (!portfolio) return;
 
     // Optimistically update local state so the UI reflects the change immediately
     const previousItems = portfolio.items;
-    const nextItems = previousItems.map((it, i) =>
-      i === index ? { ...it, ...updates } : it
-    );
+    const nextItems = previousItems.map((it, i) => {
+      if (i !== index) return it;
+      // Strip the deprecated singular fields once we migrate to arrays
+      const { country: _country, city: _city, ...rest } = it;
+      void _country;
+      void _city;
+      return { ...rest, ...updates };
+    });
     setPortfolio({ ...portfolio, items: nextItems });
 
     try {
@@ -785,12 +844,26 @@ export function PortfolioAdmin() {
                   currentItems.map((item, index) => {
                     // Calculate the global index for the item in the entire portfolio
                     const globalIndex = (currentPage - 1) * pageSize + index;
-                    const itemCountry = item.country || "";
-                    const itemCity = item.city || "";
+                    // Normalize legacy singular country/city into the new arrays
+                    const itemCountries =
+                      item.countries && item.countries.length > 0
+                        ? item.countries
+                        : item.country
+                        ? [item.country]
+                        : [];
+                    const itemCities =
+                      item.cities && item.cities.length > 0
+                        ? item.cities
+                        : item.city
+                        ? [item.city]
+                        : [];
                     const itemPages = item.pages || [];
-                    const citiesForCountry = itemCountry
-                      ? cities.filter((c) => c.country_slug === itemCountry)
-                      : [];
+                    const citiesForCountries =
+                      itemCountries.length > 0
+                        ? cities.filter((c) =>
+                            itemCountries.includes(c.country_slug)
+                          )
+                        : [];
                     return (
                       <TableRow key={globalIndex}>
                         <TableCell>
@@ -863,57 +936,72 @@ export function PortfolioAdmin() {
                         </TableCell>
                         <TableCell className="align-top">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 min-w-0">
-                            <select
-                              value={itemCountry}
+                            <MultiSelect
+                              value={itemCountries}
                               disabled={saving}
-                              onChange={(e) => {
-                                const nextCountry = e.target.value;
-                                handleUpdateItemField(globalIndex, {
-                                  country: nextCountry || undefined,
-                                  // Reset city if it no longer belongs to the new country
-                                  city:
-                                    itemCity &&
-                                    cities.some(
-                                      (c) =>
-                                        c.city_slug === itemCity &&
-                                        c.country_slug === nextCountry
+                              placeholder="Select countries"
+                              searchable
+                              options={countries.map((c) => ({
+                                value: c.slug,
+                                label: c.name,
+                              }))}
+                              onChange={(nextCountries) => {
+                                // Drop any selected city that no longer belongs
+                                // to the remaining selected countries.
+                                const allowedCities = new Set(
+                                  cities
+                                    .filter((c) =>
+                                      nextCountries.includes(c.country_slug)
                                     )
-                                      ? itemCity
+                                    .map((c) => c.city_slug)
+                                );
+                                const prunedCities = itemCities.filter((s) =>
+                                  allowedCities.has(s)
+                                );
+                                handleUpdateItemField(globalIndex, {
+                                  countries:
+                                    nextCountries.length > 0
+                                      ? nextCountries
+                                      : undefined,
+                                  cities:
+                                    prunedCities.length > 0
+                                      ? prunedCities
                                       : undefined,
                                 });
                               }}
-                              className="w-full min-w-0 h-9 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                            >
-                              <option value="">Select country</option>
-                              {countries.map((c) => (
-                                <option key={c.slug} value={c.slug}>
-                                  {c.name}
-                                </option>
-                              ))}
-                            </select>
-                            <select
-                              value={itemCity}
-                              disabled={saving || !itemCountry}
-                              onChange={(e) => {
-                                const nextCity = e.target.value;
+                            />
+                            <MultiSelect
+                              value={itemCities}
+                              disabled={saving || itemCountries.length === 0}
+                              placeholder={
+                                itemCountries.length === 0
+                                  ? "Select countries first"
+                                  : "Select cities"
+                              }
+                              searchable
+                              emptyText={
+                                itemCountries.length === 0
+                                  ? "Pick at least one country"
+                                  : "No cities found"
+                              }
+                              options={citiesForCountries.map((c) => ({
+                                value: c.city_slug,
+                                label: c.name,
+                              }))}
+                              onChange={(nextCities) =>
                                 handleUpdateItemField(globalIndex, {
-                                  city: nextCity || undefined,
-                                });
-                              }}
-                              className="w-full min-w-0 h-9 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-                            >
-                              <option value="">
-                                {itemCountry ? "Select city" : "Select city"}
-                              </option>
-                              {citiesForCountry.map((c) => (
-                                <option key={c.city_slug} value={c.city_slug}>
-                                  {c.name}
-                                </option>
-                              ))}
-                            </select>
-                            <MultiSelectPages
+                                  cities:
+                                    nextCities.length > 0
+                                      ? nextCities
+                                      : undefined,
+                                })
+                              }
+                            />
+                            <MultiSelect
                               value={itemPages}
                               disabled={saving}
+                              placeholder="Select pages"
+                              options={PAGE_OPTIONS}
                               onChange={(next) =>
                                 handleUpdateItemField(globalIndex, {
                                   pages: next.length > 0 ? next : undefined,

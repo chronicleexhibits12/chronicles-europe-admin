@@ -1,8 +1,12 @@
 export interface PortfolioItem {
   image: string
   featured?: boolean // Make featured optional for backward compatibility
-  country?: string // country slug
-  city?: string // city slug
+  /** @deprecated use `countries` instead. Kept for backward compatibility. */
+  country?: string
+  /** @deprecated use `cities` instead. Kept for backward compatibility. */
+  city?: string
+  countries?: string[] // country slugs this portfolio item belongs to
+  cities?: string[] // city slugs this portfolio item belongs to
   pages?: string[] // page slugs where this portfolio item should appear
 }
 
